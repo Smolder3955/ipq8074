@@ -1,0 +1,23 @@
+; Copyright (c) 2013, 2018 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+;***********************************************************
+;**           AK_DAP_UBI32_1.CMM                          **
+;***********************************************************
+
+; select CPU and options
+SYStem.Reset
+
+SYStem.CPU IPQ8064-CORE1
+
+SYStem.JTAGCLOCK RTCK
+
+autostore , history
+
+SYStem.STATE
+
+wait 1s
+SYStem.Attach
+
+ENDDO

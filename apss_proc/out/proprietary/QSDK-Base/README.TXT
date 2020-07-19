@@ -1,0 +1,3 @@
+9eec:==5cb90179c3d8/qsdk/dl/qca
+BIN-EIP197.HK:==2.5.4
+AU REVISION:==10.0.3440.3836

@@ -1,0 +1,79 @@
+diff --git a/bt_host/Build/Linux/btpsvend/BTPSVEND.c b/bt_host/Build/Linux/btpsvend/BTPSVEND.c
+index b375847..35a14f1 100755
+--- a/bt_host/Build/Linux/btpsvend/BTPSVEND.c
++++ b/bt_host/Build/Linux/btpsvend/BTPSVEND.c
+@@ -31,8 +31,6 @@
+ #define CSR_CONTROLLER                                   0x000A
+ #define CSR_8X11_A08_ID                                  0x2031
+ #define CSR_8X11_A12_ID                                  0x2918
+-#define BT_CORE_SPEC_4_1                                 0x07	/* spec 4.1 */
+-#define BT_CORE_SPEC_4_2                                 0x08	/* spec 4.2 (patches (PSKEY cmds) are loaded) */
+ 
+ #define PSKEY_DATA_SEQ_NUM_OFFSET                             5
+ #define PSKEY_DATA_START_OFFSET                              17
+@@ -48,6 +46,7 @@
+ #define PATCH_DATA_UART_CONFIG                                8
+ #define PATCH_DATA_FTRIM                                      9
+ 
++#define VEND_USB_RE_ENUMERATION_DELAY 2000
+    /* The following MACRO is used to convert an ASCII-Hex Character to  */
+    /* its integer value.                                                */
+ #define IsHex(_x)                   ((((_x) >= '0') && ((_x) <= '9')) || (((_x) >= 'A') && ((_x) <= 'Z')) || (((_x) >= 'a') && ((_x) <= 'z')))
+@@ -101,7 +100,6 @@ static PSKEY_BD_ADDR_t              PSKey_BD_ADDR;
+ static HCI_COMMDriverInformation_t  COMMDriverInformation;
+ static char                        *Variable;
+ static unsigned long               *BaudRatePtr;
+-static Boolean_t pskUSB;		/* 0:IGNORE, 1:LOAD PSKEY */
+ 
+    /* The following are the Commands that are used to patch the ROM of  */
+    /* the CSR chip.                                                     */
+@@ -740,11 +738,6 @@ Boolean_t BTPSAPI HCI_VS_InitializeBeforeHCIReset(unsigned int HCIDriverID, unsi
+                /* Check to see if this is the A12 device.               */
+                if(READ_UNALIGNED_WORD_LITTLE_ENDIAN(&Buffer[2]) == CSR_8X11_A12_ID)
+                   A12Device = TRUE;
+-			   /* need to load pskey because current LMP version is 4.1 */
+-               if(READ_UNALIGNED_WORD_LITTLE_ENDIAN(&Buffer[4]) == BT_CORE_SPEC_4_1)
+-                  pskUSB = TRUE;		
+-			   else
+-				  pskUSB = FALSE; 
+             }
+             else
+             {
+@@ -754,9 +747,6 @@ Boolean_t BTPSAPI HCI_VS_InitializeBeforeHCIReset(unsigned int HCIDriverID, unsi
+             }
+          }
+ 
+-		if (pskUSB)
+-		{
+-		 printf("Loading PSKEY commands\r\n");
+          while(Index < NUM_PSKEY_ENTRIES)
+          {
+             Length       = (Byte_t)((PSKeyStr[Index].BCCMDData[3] << 1)+1);
+@@ -997,17 +987,23 @@ Boolean_t BTPSAPI HCI_VS_InitializeBeforeHCIReset(unsigned int HCIDriverID, unsi
+           ret_val = HCI_Send_Raw_Command(BluetoothStackID, HCI_COMMAND_CODE_VENDOR_SPECIFIC_DEBUG_OGF, 0, Length, Buffer, &Status, NULL, NULL, FALSE);
+           SeqNum++;
+        }
+-	   }
+ 	  }
+-	  if (pskUSB)
+ 		printf("Completed downloading custom PSKEYS!! \n");
+-	  else
+-		printf("Ignore downloading custom PSKEYS!! \n");  
+ 
+ 	  /* Delay after the warm reset to allow the chip time to start  */
+ 	  /* up.                                                         */
+ 	  BTPS_Delay(40);
+ 
++      if((!ret_val) && (hDriverType == hdtUSB))
++      {
++         /* Delay to allow for re-enumeration.                          */
++         BTPS_Delay(VEND_USB_RE_ENUMERATION_DELAY);
++
++         /* Signal the HCI Driver to re-load since we re-enumerated.    */
++         DriverReconfigureData.ReconfigureCommand = HCI_DRIVER_RECONFIGURE_DATA_RECONFIGURE_COMMAND_RE_OPEN_DRIVER;
++         HCI_ReconfigureDriver(HCIDriverID, TRUE, &DriverReconfigureData);
++      }
++
+       /* If we were succesful, we might need to re-synchronize with the */
+       /* controller after the reset.                                    */
+       if((!ret_val) && (hDriverType == hdtCOMM))

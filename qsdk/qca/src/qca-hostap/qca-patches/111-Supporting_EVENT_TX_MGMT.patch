@@ -1,0 +1,107 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index a88345f..1a9e72b 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -77,7 +77,9 @@ struct atheros_driver_data {
+ 	struct wpabuf *wpa_ie;
+ 	struct wpabuf *wps_beacon_ie;
+ 	struct wpabuf *wps_probe_resp_ie;
++	struct wpa_driver_capa capa;
+ 	u8	own_addr[ETH_ALEN];
++	int has_capability;
+ };
+ 
+ static int atheros_sta_deauth(void *priv, const u8 *own_addr, const u8 *addr,
+@@ -1380,6 +1382,37 @@ atheros_wireless_event_atheros_custom(struct atheros_driver_data *drv,
+ 		wpa_printf(MSG_DEBUG, "WEXT: EV_RX_MGMT");
+ 		fetch_pending_big_events(drv);
+ 		break;
++        case IEEE80211_EV_TX_MGMT:
++                {
++                union wpa_event_data event;
++                const struct ieee80211_mgmt *mgmt;
++                u16 fc, stype,data_len;
++
++                if (len < sizeof(int) + 24) {
++                        wpa_printf(MSG_DEBUG, "athr: frame too short");
++                        break;
++                }
++                mgmt = (void *) &buf[sizeof(int)];
++                data_len = len - sizeof(int);
++                fc = le_to_host16(mgmt->frame_control);
++                stype = WLAN_FC_GET_STYPE(fc);
++
++                wpa_printf(MSG_DEBUG, "athr: EV_TX_MGMT stype=%u "
++                                "len=%u", stype, (int) data_len);
++
++                if (stype == WLAN_FC_STYPE_DISASSOC) {
++                    os_memset(&event, 0, sizeof(event));
++                    event.tx_status.type = WLAN_FC_GET_TYPE(fc);
++                    event.tx_status.stype = stype;
++                    event.tx_status.dst = mgmt->da;
++                    event.tx_status.data = (const u8 *) mgmt;
++                    event.tx_status.data_len = data_len;
++                    event.tx_status.ack = *(int*)buf;
++                    wpa_supplicant_event(drv->hapd, EVENT_TX_STATUS,
++                                                     &event);
++               }
++               }
++               break;
+ 	default:
+ 		break;
+ 	}
+@@ -1524,6 +1557,30 @@ atheros_get_we_version(struct atheros_driver_data *drv)
+ 			   range->we_version_source,
+ 			   range->enc_capa);
+ 		drv->we_version = range->we_version_compiled;
++		drv->has_capability = 1;
++		if (range->enc_capa & IW_ENC_CAPA_WPA) {
++			drv->capa.key_mgmt |= WPA_DRIVER_CAPA_KEY_MGMT_WPA |
++				WPA_DRIVER_CAPA_KEY_MGMT_WPA_PSK;
++		}
++		if (range->enc_capa & IW_ENC_CAPA_WPA2) {
++			drv->capa.key_mgmt |= WPA_DRIVER_CAPA_KEY_MGMT_WPA2 |
++				WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK;
++		}
++		drv->capa.enc |= WPA_DRIVER_CAPA_ENC_WEP40 |
++			WPA_DRIVER_CAPA_ENC_WEP104;
++		if (range->enc_capa & IW_ENC_CAPA_CIPHER_TKIP)
++			drv->capa.enc |= WPA_DRIVER_CAPA_ENC_TKIP;
++		if (range->enc_capa & IW_ENC_CAPA_CIPHER_CCMP)
++			drv->capa.enc |= WPA_DRIVER_CAPA_ENC_CCMP;
++		if (range->enc_capa & IW_ENC_CAPA_4WAY_HANDSHAKE)
++			drv->capa.flags |= WPA_DRIVER_FLAGS_4WAY_HANDSHAKE;
++		drv->capa.auth = WPA_DRIVER_AUTH_OPEN |
++			WPA_DRIVER_AUTH_SHARED |
++			WPA_DRIVER_AUTH_LEAP;
++
++		wpa_printf(MSG_DEBUG, "  capabilities: key_mgmt 0x%x enc 0x%x "
++			"flags 0x%llx",
++			drv->capa.key_mgmt, drv->capa.enc, drv->capa.flags);
+ 	}
+ 
+ 	os_free(range);
+@@ -2134,6 +2191,17 @@ static int atheros_wnm_oper(void *priv, enum wnm_oper oper, const u8 *peer,
+ }
+ #endif /* CONFIG_WNM && IEEE80211_APPIE_FRAME_WNM */
+ 
++int atheros_get_capa(void *priv, struct wpa_driver_capa *capa)
++{
++        struct atheros_driver_data *drv = priv;
++
++        if (!(drv && drv->has_capability))
++                return -1;
++
++        drv->capa.flags |= WPA_DRIVER_FLAGS_DEAUTH_TX_STATUS;
++        os_memcpy(capa, &drv->capa, sizeof(*capa));
++        return 0;
++}
+ 
+ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.name			= "atheros",
+@@ -2172,4 +2240,5 @@ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.wnm_oper		= atheros_wnm_oper,
+ #endif /* CONFIG_WNM && IEEE80211_APPIE_FRAME_WNM */
+ 	.set_qos_map		= atheros_set_qos_map,
++	.get_capa               = atheros_get_capa,
+ };

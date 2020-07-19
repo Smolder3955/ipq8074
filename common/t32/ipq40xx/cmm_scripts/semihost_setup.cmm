@@ -1,0 +1,38 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+;****************************************************************
+;
+; ---           Semi-hosting Setup               ---
+;
+;****************************************************************
+
+print "Loading Semihosting Setup"
+
+
+
+term.heapinfo 0x30000 0x8000 0x40000 0x8000
+
+tronchip.set swi on
+
+tronchip.SET FIQ OFF
+tronchip.SET IRQ OFF
+tronchip.SET DABORT OFF
+tronchip.SET PABORT OFF
+tronchip.SET UNDEF off
+tronchip.SET SWI OFF
+tronchip.SET RESET OFF
+
+term.method armswi
+
+term.scroll on
+
+term.mode string
+
+term.size 80. 1000.
+
+
+enddo
+

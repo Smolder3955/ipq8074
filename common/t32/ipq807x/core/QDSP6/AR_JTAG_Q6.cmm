@@ -1,0 +1,32 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+; select CPU and options
+SYStem.Reset
+;SYStem.CPU FSM90xx
+SYStem.CPU HEXAGONV56 
+;SYStem.JTAGCLOCK CTCK 1MHz
+SYStem.JTAGCLOCK 10MHz
+SYStem.CONFIG SLAVE ON
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG JTAGACCESSPORT 8.
+SYStem.CONFIG COREJTAGPORT 0.
+
+;SYStem.CONFIG DAPIRPOST 0.
+;SYStem.CONFIG DAPDRPOST 0.
+;SYStem.CONFIG DAPIRPOST 11.
+;SYStem.CONFIG DAPDRPOST 1.
+
+SYStem.CONFIG DAPIRPRE 0.
+SYStem.CONFIG DAPDRPRE 0.
+SYStem.CONFIG DAPIRPOST 16.
+SYStem.CONFIG DAPDRPOST 2.
+
+
+sys.mode attach
+
+;cd.do C:\workspace\sankars\E6R1\t32_qurt_soc.cmm

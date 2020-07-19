@@ -1,0 +1,26 @@
+diff --git a/src/crypto/tls_openssl.c b/src/crypto/tls_openssl.c
+index 4d8683c..863f316 100644
+--- a/src/crypto/tls_openssl.c
++++ b/src/crypto/tls_openssl.c
+@@ -3526,6 +3526,9 @@ openssl_handshake(struct tls_connection *conn, const struct wpabuf *in_data,
+ {
+ 	int res;
+ 	struct wpabuf *out_data;
++#ifdef CONFIG_SUITEB
++	const char *name;
++#endif /* CONFIG_SUITEB */
+ 
+ 	/*
+ 	 * Give TLS handshake data from the server (if available) to OpenSSL
+@@ -3559,8 +3562,9 @@ openssl_handshake(struct tls_connection *conn, const struct wpabuf *in_data,
+ 	}
+ 
+ #ifdef CONFIG_SUITEB
+-	if ((conn->flags & TLS_CONN_SUITEB) && !server &&
+-	    os_strncmp(SSL_get_cipher(conn->ssl), "DHE-", 4) == 0 &&
++	name = SSL_get_cipher(conn->ssl);
++	if ((conn->flags & TLS_CONN_SUITEB) && !server && name &&
++	    os_strncmp(name, "DHE-", 4) == 0 &&
+ 	    conn->server_dh_prime_len < 3072) {
+ 		struct tls_context *context = conn->context;
+ 

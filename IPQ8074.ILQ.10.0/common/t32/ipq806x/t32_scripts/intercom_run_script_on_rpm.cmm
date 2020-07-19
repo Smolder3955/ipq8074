@@ -1,0 +1,88 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+;**           intercom_run_script_on_rpm.cmm                                **
+;*****************************************************************************
+
+;________________________________________________________________
+;
+; Set up the variable names used in this script.
+;________________________________________________________________
+local &script_path &script_name &par1 &par2 &par3 &par4 &par5 &my_starting_path
+entry &script_path &script_name &par1 &par2 &par3 &par4 &par5
+
+&PROC_HOST="localhost:1000" ; this is rpm intercomm port num
+&INTERCOMM_PROC="INTERCOM.execute &PROC_HOST"
+
+
+;________________________________________________________________
+;
+; Check to make sure the user passed a script and a script path
+; to be called on the RPM side. If not, then end the script.
+;________________________________________________________________
+if "&script_name"==""
+ (
+   print "ERROR, no script name given"
+   enddo
+ )
+if "&script_path"==""
+ (
+   print "ERROR, no script path given"
+   enddo
+ )
+
+;________________________________________________________________
+;
+; I've found that passing relative paths over intercomm sometimes
+; poses problems. So this little section just makes any possible
+; RELATIVE paths into ABSOLUTE paths.
+;________________________________________________________________
+&my_starting_path=os.pwd()
+cd &script_path
+&script_path=os.pwd()
+cd &my_starting_path
+
+
+;________________________________________________________________
+;
+; Make sure that we can ping other t32 instance where the commands
+; need to be executed. Otherwise, kill execution of this script.
+;________________________________________________________________
+if !INTERCOM.ping(&PROC_HOST)
+(
+        print "NO INTERCOM PING &PROC_HOST FOUND"
+        enddo
+)
+
+;________________________________________________________________
+;
+; Get the path that the other instance of T32 is at. We'll use this
+; so that we can change back to this directory, at the end of this
+; script.
+;________________________________________________________________
+INTERCOM.EVALUATE &PROC_HOST OS.PWD()
+&rpm_starting_path=EVAL.STRING()
+
+;________________________________________________________________
+;
+; This section changes the directory on the other instance of T32
+; to the desired folder. It then executes the script to be run on
+; that instance.
+;
+; When it's done, it changes the folder back to the starting folder
+; so as to not affect anything.
+;________________________________________________________________
+&INTERCOMM_PROC cd &script_path
+&INTERCOMM_PROC do &script_name &par1 &par2 &par3 &par4 &par5
+print "Executing Intercom Command:"
+print "&INTERCOMM_PROC do &script_name &par1 &par2 &par3 &par4 &par5"
+INTERCOM.WAIT &PROC_HOST
+print "Wait until complete"
+&INTERCOMM_PROC cd &rpm_starting_path
+enddo
+

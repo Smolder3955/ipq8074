@@ -1,0 +1,11 @@
+This is a modified version of standard Linux kconfig tool to enable NSS software configuration.
+These modifications might render the tool unusable with standard Linux.
+
+Follow these steps to compile the needed binaries:
+
+	1) Do a 'make'. This will populate the bin directory with three binaries
+	    - nss_mconf, nss_conf and nss_lxdialog.
+	2) Add the bin directory to your path or copy all three binaries into a
+	    directory that is in your path.
+	3) Now cd to the NSS source directory and execute 'make menuconfig'.
+	4) This should bring up the GUI interface which you can use to configure the NSS software.

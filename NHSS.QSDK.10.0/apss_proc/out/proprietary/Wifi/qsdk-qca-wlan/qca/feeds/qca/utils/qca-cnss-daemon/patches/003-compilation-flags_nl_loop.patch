@@ -1,0 +1,158 @@
+diff --git a/nl_loop.c b/nl_loop.c
+index 7675ef2..2a585d5 100644
+--- a/nl_loop.c
++++ b/nl_loop.c
+@@ -14,7 +14,9 @@
+ #include <sys/socket.h>
+ #include <linux/netlink.h>
+ #include <linux/rtnetlink.h>
++#ifndef DISABLE_CLD80211_LIB
+ #include <netinet/ether.h>
++#endif
+ #include <arpa/inet.h>
+ #include <arpa/inet.h>
+ #include <poll.h>
+@@ -23,9 +25,10 @@
+ 
+ #include "debug.h"
+ #include "nl_loop.h"
+-#include "cnss_qmi_client.h"
+ #include "cnss_gw_update.h"
++#ifndef DISABLE_CLD80211_LIB
+ #include "cld80211_lib.h"
++#endif
+ #include "cnss_user.h"
+ #include "cnss_genl.h"
+ 
+@@ -48,7 +51,9 @@ struct nl_loop {
+ 	int nlmsg_err;
+ };
+ 
++#ifndef DISABLE_CLD80211_LIB
+ static int nl_loop_process_msg_svc(struct wlan_hdr *ani_hdr);
++#endif
+ struct nl_loop nl_loop;
+ 
+ static inline char *nl_loop_ind_to_str(int ind)
+@@ -86,6 +91,7 @@ static struct nl_loop_ind_table *nl_loop_find_ind_table(int ind)
+ 	return i < NL_LOOP_MAX_IND ? ind_table : NULL;
+ }
+ 
++#ifndef DISABLE_CLD80211_LIB
+ static int cld80211_process_msg(int cmd, struct wlan_hdr *ani_hdr)
+ {
+ 	wsvc_printf_dbg("cmd: %u, type: %s", cmd, nl_loop_type_to_str(cmd));
+@@ -230,6 +236,7 @@ static void deinitialize_cld80211lib()
+ 	cld80211_deinit(nl_loop.cldctx);
+ 	nl_loop.cldctx = NULL;
+ }
++#endif
+ 
+ int nl_loop_init(void)
+ {
+@@ -242,6 +249,7 @@ int nl_loop_init(void)
+ 		return -1;
+ 	}
+ 
++#ifndef DISABLE_CLD80211_LIB
+ 	ret = initialize_cld80211lib();
+ 	if (ret == 0) {
+ 		nl_loop.nl_fd = nl_socket_get_fd(nl_loop.cldctx->sock);
+@@ -251,7 +259,7 @@ int nl_loop_init(void)
+ 
+ 	wsvc_printf_info("Failed to initialize cld80211 family, proceed "
+ 			"with legacy USERSOCK reception\n");
+-
++#endif
+ 	fd = socket(AF_NETLINK, SOCK_RAW, WLAN_MSG_FAMILY);
+ 	if (fd < 0) {
+ 		wsvc_perror("socket");
+@@ -285,11 +293,14 @@ int nl_loop_deinit(void)
+ 		wsvc_printf_err("%s: nl loop not initialized", __func__);
+ 		return -1;
+ 	}
++
++#ifndef DISABLE_CLD80211_LIB
+ 	if (nl_loop.is_cld80211_lib)
+ 		deinitialize_cld80211lib();
+ 	else
+-		close(nl_loop.nl_fd);
+-
++#else
++	close(nl_loop.nl_fd);
++#endif
+ 	memset(&nl_loop, 0, sizeof(nl_loop));
+ 
+ 	return 0;
+@@ -379,6 +390,7 @@ int nl_loop_terminate(void)
+ 	return 0;
+ }
+ 
++#ifndef DISABLE_CLD80211_LIB
+ static int nl_loop_process_msg_svc(struct wlan_hdr *ani_hdr)
+ {
+ 	struct nl_loop_ind_table *ind_table = NULL;
+@@ -440,6 +452,7 @@ static int nl_loop_process_msg(struct nlmsghdr *nlh, int len)
+ 
+ 	return 0;
+ }
++#endif
+ 
+ int nl_loop_run(void)
+ {
+@@ -469,6 +482,7 @@ int nl_loop_run(void)
+ 	pfd[3].fd = cnss_genl_get_fd();
+ 	pfd[3].events = POLLIN;
+ 
++#ifndef DISABLE_CLD80211_LIB
+ 	if (!nl_loop.is_cld80211_lib) {
+ 		nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(
+ 							WLAN_MSG_MAX_PAYLOAD));
+@@ -496,7 +510,7 @@ int nl_loop_run(void)
+ 		msg.msg_iov = &iov;
+ 		msg.msg_iovlen = 1;
+ 	}
+-
++#endif
+ 	while (!nl_loop.terminate) {
+ 		int result = 0;
+ 
+@@ -512,9 +526,11 @@ int nl_loop_run(void)
+ 		}
+ 
+ 		if (pfd[0].revents & (POLLIN | POLLHUP | POLLERR)) {
++#ifndef DISABLE_CLD80211_LIB
+ 			if (nl_loop.is_cld80211_lib)
+ 				ret = cld80211_nl_recvmsgs();
+ 			else
++#endif
+ 				ret = recvmsg(pfd[0].fd, &msg, 0);
+ 			if (ret < 0 && errno == EINTR) {
+ 				wsvc_printf_info("Loop terminating: EINTR");
+@@ -526,11 +542,13 @@ int nl_loop_run(void)
+ 				wsvc_perror("recvmsg");
+ 				continue;
+ 			}
++#ifndef DISABLE_CLD80211_LIB
+ 			if (!nl_loop.is_cld80211_lib) {
+ 				wsvc_hexdump("recvmsg", (uint8_t *)nlh,
+ 				             ret);
+ 				nl_loop_process_msg(nlh, ret);
+ 			}
++#endif
+ 		}
+ 
+ 		if (pfd[1].revents & (POLLIN | POLLHUP | POLLERR)) {
+@@ -550,9 +568,10 @@ int nl_loop_run(void)
+ 		}
+ 	}
+ 
++#ifndef DISABLE_CLD80211_LIB
+ 	if (!nl_loop.is_cld80211_lib)
+ 		free(nlh);
+-
++#endif
+ end:
+ 	return ret;
+ }
+

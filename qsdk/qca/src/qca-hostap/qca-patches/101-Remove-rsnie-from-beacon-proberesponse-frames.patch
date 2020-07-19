@@ -1,0 +1,59 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index d2b355c..b588906 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -389,6 +389,45 @@ atheros_configure_wpa(struct atheros_driver_data *drv,
+ 	return 0;
+ }
+ 
++/*
++   Remove all app_ie's of Beacon & Probe Response frames which contains
++   identifiers of HOSTAPD_IE & HOSTAPD_WPS_IE
++*/
++
++void atheros_remove_ie(struct atheros_driver_data *drv)
++{
++	struct ieee80211req_getset_appiebuf app_ie[512];
++
++	app_ie->app_buflen = 0;
++	app_ie->identifier = HOSTAPD_IE;
++        app_ie->app_frmtype = IEEE80211_APPIE_FRAME_BEACON;
++
++        wpa_printf(MSG_INFO, "Remove all app_ie's of Beacon & Probe Response "
++                              "frames: '%s'", __func__);
++        set80211priv(drv, IEEE80211_IOCTL_SET_APPIEBUF, app_ie,
++                     sizeof(struct ieee80211req_getset_appiebuf) +
++                     app_ie->app_buflen);
++
++	app_ie->app_frmtype = IEEE80211_APPIE_FRAME_PROBE_RESP;
++
++        set80211priv(drv, IEEE80211_IOCTL_SET_APPIEBUF, app_ie,
++                     sizeof(struct ieee80211req_getset_appiebuf) +
++                     app_ie->app_buflen);
++
++	app_ie->identifier = HOSTAPD_WPS_IE;
++
++        set80211priv(drv, IEEE80211_IOCTL_SET_APPIEBUF, app_ie,
++                     sizeof(struct ieee80211req_getset_appiebuf) +
++                     app_ie->app_buflen);
++
++	app_ie->app_frmtype = IEEE80211_APPIE_FRAME_BEACON;
++
++        set80211priv(drv, IEEE80211_IOCTL_SET_APPIEBUF, app_ie,
++                     sizeof(struct ieee80211req_getset_appiebuf) +
++                     app_ie->app_buflen);
++
++}
++
+ static int
+ atheros_set_ieee8021x(void *priv, struct wpa_bss_params *params)
+ {
+@@ -398,6 +437,8 @@ atheros_set_ieee8021x(void *priv, struct wpa_bss_params *params)
+ 
+ 	if (!params->enabled) {
+ 		/* XXX restore state */
++		atheros_remove_ie(drv);
++
+ 		if (set80211param(priv, IEEE80211_PARAM_AUTHMODE,
+ 				  IEEE80211_AUTH_AUTO) < 0)
+ 			return -1;

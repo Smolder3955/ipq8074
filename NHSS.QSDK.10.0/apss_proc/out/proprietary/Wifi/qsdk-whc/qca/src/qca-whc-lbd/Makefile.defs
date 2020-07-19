@@ -1,0 +1,66 @@
+
+GWTOP = $(TOPDIR)/apps/gateway
+LBTOP ?= $(TOPDIR)/apps/gateway/services/lb/lbd
+ATHDIR ?= $(TOPDIR)/drivers/wlan
+
+-include $(GWTOP)/gatewayconfig/$(BOARD_TYPE)$(BUILD_CONFIG).defs
+
+GW_INSTALL_ROOT := $(GWTOP)/install
+LB_INSTALL_ROOT := $(LBTOP)/install
+
+# gateway: Where to install include files
+GWINCLUDE ?= $(GW_INSTALL_ROOT)/include
+vpath %.h . $(GWINCLUDE)
+vpath %.makefun . $(GWINCLUDE)
+
+MAKEFUN = $(LBTOP)/tools/makefun
+
+# lbd: Where to install include files
+LBINCLUDE ?= $(LB_INSTALL_ROOT)/include
+vpath %.h . $(LBINCLUDE)
+
+# Where to install dynamic libraries
+GWLIB ?= $(INSTALL_ROOT)/lib
+vpath %.so . $(GWLIB)
+
+GWLIB_STATIC ?= $(GWLIB)
+vpath %.a . $(GWLIB_STATIC)
+
+LBLIB ?= $(LB_INSTALL_ROOT)/lib
+vpath %.so . $(LBLIB)
+
+LBLIB_STATIC ?= $(LBLIB)
+vpath %.a . $(LBLIB_STATIC)
+
+SONEVENTINCLUDE ?= $(GWINCLUDE)
+
+CFLAGS += -L$(LBLIB_STATIC) -L$(GWLIB)
+CFLAGS += -I . -I $(GWINCLUDE) -I $(LBINCLUDE) -I $(LBTOP)/include \
+          -I $(ATHDIR) -I $(ATHDIR)/include -I $(ATHDIR)/include/sys \
+          -I $(ATHDIR)/os/linux/include -I $(ATHDIR)/lmac/ath_dev \
+          -I $(KERNELPATH)/include \
+          -I $(LBTOP)/src
+
+# Generate dependencies
+CFLAGS += -MMD
+-include $(wildcard *.d)
+
+# Generate each function and global in a separate section
+# This allows the linker to remove unused functions.
+CFLAGS += -ffunction-sections -fdata-sections
+
+ifeq ($(LBD_MODULE_SONEVENT),y)
+CFLAGS +=-I $(SONEVENTINCLUDE)
+endif
+
+ifneq ($(STAGING_DIR),)
+LIBS += -lhyficommon
+
+LIBS += -lwifisoncfg
+
+ifeq ($(LBD_SUPPORT_CFG80211),y)
+LIBS += -lqca_nl80211_wrapper -lnl-3 -lnl-genl-3 -lxml2
+endif
+else
+LIBS += -lath -lcares
+endif

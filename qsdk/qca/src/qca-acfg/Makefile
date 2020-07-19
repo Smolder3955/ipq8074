@@ -1,0 +1,858 @@
+ifndef CC
+CC=gcc
+endif
+
+CFLAGS += -MMD -O2 -Wall -g -Werror
+
+export LIBDIR ?= /usr/local/lib/
+export BINDIR ?= /usr/local/sbin/
+
+WPA_PATH = ../athr-hostap
+CFLAGS += -I$(WPA_PATH)/src
+CFLAGS += -I$(WPA_PATH)/src/utils
+CFLAGS += -fpie
+LDFLAGS += -pie
+
+ALL=acfg_cli
+
+all: $(ALL)
+
+install: all
+	mkdir -p $(DESTDIR)$(BINDIR)
+	for i in $(ALL); do cp $$i $(DESTDIR)$(BINDIR)/$$i; done
+
+OBJS_c = acfg_cli.o acfg_api.o $(WPA_PATH)/src/common/wpa_ctrl.o
+
+-include $(WPA_PATH)/wpa_supplicant/.config
+
+ifndef CONFIG_OS
+CONFIG_OS=unix
+endif
+
+ifeq ($(CONFIG_OS), internal)
+CFLAGS += -DOS_NO_C_LIB_DEFINES
+endif
+
+OBJS_c += $(WPA_PATH)/src/utils/os_$(CONFIG_OS).o
+
+ifdef CONFIG_WPA_TRACE
+CFLAGS += -DWPA_TRACE
+OBJS_c += $(WPA_PATH)/src/utils/trace.o
+OBJS_c += $(WPA_PATH)/src/utils/wpa_debug.o
+LDFLAGS += -rdynamic
+CFLAGS += -funwind-tables
+ifdef CONFIG_WPA_TRACE_BFD
+CFLAGS += -DWPA_TRACE_BFD
+LIBS_c += -lbfd
+endif
+endif
+
+ifdef CONFIG_NO_CONFIG_WRITE
+CFLAGS += -DCONFIG_NO_CONFIG_WRITE
+endif
+
+ifdef CONFIG_NO_CONFIG_BLOBS
+CFLAGS += -DCONFIG_NO_CONFIG_BLOBS
+endif
+
+ifdef CONFIG_NO_SCAN_PROCESSING
+CFLAGS += -DCONFIG_NO_SCAN_PROCESSING
+endif
+
+ifdef CONFIG_IEEE80211W
+CFLAGS += -DCONFIG_IEEE80211W
+NEED_SHA256=y
+NEED_AES_OMAC1=y
+endif
+
+ifdef CONFIG_IEEE80211R
+CFLAGS += -DCONFIG_IEEE80211R
+NEED_80211_COMMON=y
+NEED_SHA256=y
+NEED_AES_OMAC1=y
+endif
+
+ifdef CONFIG_PEERKEY
+CFLAGS += -DCONFIG_PEERKEY
+endif
+
+ifndef CONFIG_NO_WPA
+NEED_AES=y
+NEED_SHA1=y
+NEED_MD5=y
+NEED_RC4=y
+else
+CFLAGS += -DCONFIG_NO_WPA -DCONFIG_NO_WPA2
+endif
+
+ifdef CONFIG_IBSS_RSN
+NEED_RSN_AUTHENTICATOR=y
+CFLAGS += -DCONFIG_IBSS_RSN
+endif
+
+ifdef CONFIG_P2P
+CFLAGS += -DCONFIG_P2P
+NEED_80211_COMMON=y
+endif
+
+ifdef CONFIG_NO_WPA2
+CFLAGS += -DCONFIG_NO_WPA2
+endif
+
+ifndef CONFIG_L2_PACKET
+CONFIG_L2_PACKET=linux
+endif
+
+ifeq ($(CONFIG_L2_PACKET), pcap)
+ifdef CONFIG_WINPCAP
+CFLAGS += -DCONFIG_WINPCAP
+else
+endif
+endif
+
+ifeq ($(CONFIG_L2_PACKET), winpcap)
+endif
+
+ifeq ($(CONFIG_L2_PACKET), freebsd)
+endif
+
+ifdef CONFIG_EAP_TLS
+# EAP-TLS
+ifeq ($(CONFIG_EAP_TLS), dyn)
+CFLAGS += -DEAP_TLS_DYNAMIC
+else
+CFLAGS += -DEAP_TLS
+endif
+TLS_FUNCS=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_PEAP
+# EAP-PEAP
+ifeq ($(CONFIG_EAP_PEAP), dyn)
+CFLAGS += -DEAP_PEAP_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_peap.so
+else
+CFLAGS += -DEAP_PEAP
+endif
+TLS_FUNCS=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_TTLS
+# EAP-TTLS
+ifeq ($(CONFIG_EAP_TTLS), dyn)
+CFLAGS += -DEAP_TTLS_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_ttls.so
+else
+CFLAGS += -DEAP_TTLS
+endif
+MS_FUNCS=y
+TLS_FUNCS=y
+CHAP=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_MD5
+# EAP-MD5
+ifeq ($(CONFIG_EAP_MD5), dyn)
+CFLAGS += -DEAP_MD5_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_md5.so
+else
+CFLAGS += -DEAP_MD5
+endif
+CHAP=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+# backwards compatibility for old spelling
+ifdef CONFIG_MSCHAPV2
+ifndef CONFIG_EAP_MSCHAPV2
+CONFIG_EAP_MSCHAPV2=y
+endif
+endif
+
+ifdef CONFIG_EAP_MSCHAPV2
+# EAP-MSCHAPv2
+ifeq ($(CONFIG_EAP_MSCHAPV2), dyn)
+CFLAGS += -DEAP_MSCHAPv2_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_mschapv2.so
+EAPDYN += ../src/eap_peer/mschapv2.so
+else
+CFLAGS += -DEAP_MSCHAPv2
+endif
+MS_FUNCS=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_GTC
+# EAP-GTC
+ifeq ($(CONFIG_EAP_GTC), dyn)
+CFLAGS += -DEAP_GTC_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_gtc.so
+else
+CFLAGS += -DEAP_GTC
+endif
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_OTP
+# EAP-OTP
+ifeq ($(CONFIG_EAP_OTP), dyn)
+CFLAGS += -DEAP_OTP_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_otp.so
+else
+CFLAGS += -DEAP_OTP
+endif
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_SIM
+# EAP-SIM
+ifeq ($(CONFIG_EAP_SIM), dyn)
+CFLAGS += -DEAP_SIM_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_sim.so
+else
+CFLAGS += -DEAP_SIM
+endif
+CONFIG_IEEE8021X_EAPOL=y
+CONFIG_EAP_SIM_COMMON=y
+NEED_AES_CBC=y
+endif
+
+ifdef CONFIG_EAP_LEAP
+# EAP-LEAP
+ifeq ($(CONFIG_EAP_LEAP), dyn)
+CFLAGS += -DEAP_LEAP_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_leap.so
+else
+CFLAGS += -DEAP_LEAP
+endif
+MS_FUNCS=y
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_PSK
+# EAP-PSK
+ifeq ($(CONFIG_EAP_PSK), dyn)
+CFLAGS += -DEAP_PSK_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_psk.so
+else
+CFLAGS += -DEAP_PSK
+endif
+CONFIG_IEEE8021X_EAPOL=y
+NEED_AES=y
+NEED_AES_OMAC1=y
+NEED_AES_ENCBLOCK=y
+NEED_AES_EAX=y
+endif
+
+ifdef CONFIG_EAP_AKA
+# EAP-AKA
+ifeq ($(CONFIG_EAP_AKA), dyn)
+CFLAGS += -DEAP_AKA_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_aka.so
+else
+CFLAGS += -DEAP_AKA
+endif
+CONFIG_IEEE8021X_EAPOL=y
+CONFIG_EAP_SIM_COMMON=y
+NEED_AES_CBC=y
+endif
+
+ifdef CONFIG_EAP_AKA_PRIME
+# EAP-AKA'
+ifeq ($(CONFIG_EAP_AKA_PRIME), dyn)
+CFLAGS += -DEAP_AKA_PRIME_DYNAMIC
+else
+CFLAGS += -DEAP_AKA_PRIME
+endif
+NEED_SHA256=y
+endif
+
+ifdef CONFIG_EAP_SIM_COMMON
+NEED_AES=y
+NEED_FIPS186_2_PRF=y
+endif
+
+ifdef CONFIG_EAP_FAST
+# EAP-FAST
+ifeq ($(CONFIG_EAP_FAST), dyn)
+CFLAGS += -DEAP_FAST_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_fast.so
+EAPDYN += ../src/eap_common/eap_fast_common.o
+else
+CFLAGS += -DEAP_FAST
+endif
+TLS_FUNCS=y
+CONFIG_IEEE8021X_EAPOL=y
+NEED_T_PRF=y
+endif
+
+ifdef CONFIG_EAP_PAX
+# EAP-PAX
+ifeq ($(CONFIG_EAP_PAX), dyn)
+CFLAGS += -DEAP_PAX_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_pax.so
+else
+CFLAGS += -DEAP_PAX
+endif
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_SAKE
+# EAP-SAKE
+ifeq ($(CONFIG_EAP_SAKE), dyn)
+CFLAGS += -DEAP_SAKE_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_sake.so
+else
+CFLAGS += -DEAP_SAKE
+endif
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_GPSK
+# EAP-GPSK
+ifeq ($(CONFIG_EAP_GPSK), dyn)
+CFLAGS += -DEAP_GPSK_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_gpsk.so
+else
+CFLAGS += -DEAP_GPSK
+endif
+CONFIG_IEEE8021X_EAPOL=y
+ifdef CONFIG_EAP_GPSK_SHA256
+CFLAGS += -DEAP_GPSK_SHA256
+endif
+NEED_SHA256=y
+NEED_AES_OMAC1=y
+endif
+
+ifdef CONFIG_WPS
+# EAP-WSC
+CFLAGS += -DCONFIG_WPS -DEAP_WSC
+CONFIG_IEEE8021X_EAPOL=y
+NEED_DH_GROUPS=y
+NEED_SHA256=y
+NEED_BASE64=y
+NEED_80211_COMMON=y
+NEED_AES_CBC=y
+NEED_MODEXP=y
+
+ifdef CONFIG_WPS_UFD
+CFLAGS += -DCONFIG_WPS_UFD
+NEED_WPS_OOB=y
+endif
+
+ifdef CONFIG_WPS_NFC
+CFLAGS += -DCONFIG_WPS_NFC
+NEED_WPS_OOB=y
+ifdef CONFIG_WPS_NFC_PN531
+PN531_PATH ?= /usr/local/src/nfc
+CFLAGS += -DCONFIG_WPS_NFC_PN531
+CFLAGS += -I${PN531_PATH}/inc
+endif
+endif
+
+ifdef NEED_WPS_OOB
+CFLAGS += -DCONFIG_WPS_OOB
+endif
+
+ifdef CONFIG_WPS_ER
+CONFIG_WPS_UPNP=y
+CFLAGS += -DCONFIG_WPS_ER
+endif
+
+ifdef CONFIG_WPS_UPNP
+CFLAGS += -DCONFIG_WPS_UPNP
+endif
+
+endif
+
+ifdef CONFIG_EAP_IKEV2
+# EAP-IKEv2
+ifeq ($(CONFIG_EAP_IKEV2), dyn)
+CFLAGS += -DEAP_IKEV2_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_ikev2.so ../src/eap_peer/ikev2.o
+EAPDYN += ../src/eap_common/eap_ikev2_common.o ../src/eap_common/ikev2_common.o
+else
+CFLAGS += -DEAP_IKEV2
+endif
+CONFIG_IEEE8021X_EAPOL=y
+NEED_DH_GROUPS=y
+NEED_DH_GROUPS_ALL=y
+NEED_MODEXP=y
+NEED_CIPHER=y
+endif
+
+ifdef CONFIG_EAP_VENDOR_TEST
+ifeq ($(CONFIG_EAP_VENDOR_TEST), dyn)
+CFLAGS += -DEAP_VENDOR_TEST_DYNAMIC
+EAPDYN += ../src/eap_peer/eap_vendor_test.so
+else
+CFLAGS += -DEAP_VENDOR_TEST
+endif
+CONFIG_IEEE8021X_EAPOL=y
+endif
+
+ifdef CONFIG_EAP_TNC
+# EAP-TNC
+CFLAGS += -DEAP_TNC
+NEED_BASE64=y
+ifndef CONFIG_NATIVE_WINDOWS
+ifndef CONFIG_DRIVER_BSD
+endif
+endif
+endif
+
+ifdef CONFIG_IEEE8021X_EAPOL
+# IEEE 802.1X/EAPOL state machines (e.g., for RADIUS authentication)
+CFLAGS += -DIEEE8021X_EAPOL
+ifdef CONFIG_DYNAMIC_EAP_METHODS
+CFLAGS += -DCONFIG_DYNAMIC_EAP_METHODS
+endif
+endif
+
+ifdef CONFIG_AP
+NEED_RSN_AUTHENTICATOR=y
+CFLAGS += -DCONFIG_AP
+CFLAGS += -DCONFIG_NO_RADIUS
+CFLAGS += -DCONFIG_NO_ACCOUNTING
+CFLAGS += -DCONFIG_NO_VLAN
+
+CFLAGS += -DEAP_SERVER -DEAP_SERVER_IDENTITY
+
+ifdef CONFIG_IEEE80211N
+CFLAGS += -DCONFIG_IEEE80211N
+endif
+
+ifdef NEED_AP_MLME
+ifdef CONFIG_IEEE80211N
+endif
+CFLAGS += -DNEED_AP_MLME
+endif
+ifdef CONFIG_WPS
+CFLAGS += -DEAP_SERVER_WSC
+endif
+endif
+
+ifdef NEED_RSN_AUTHENTICATOR
+CFLAGS += -DCONFIG_NO_RADIUS
+NEED_AES_WRAP=y
+ifdef CONFIG_IEEE80211R
+endif
+ifdef CONFIG_PEERKEY
+endif
+endif
+
+ifdef CONFIG_EAP_SERVER
+CFLAGS += -DEAP_SERVER
+endif
+
+ifdef CONFIG_RADIUS_CLIENT
+endif
+
+ifdef CONFIG_AUTHENTICATOR
+endif
+
+ifdef CONFIG_WPA_AUTHENTICATOR
+ifdef CONFIG_IEEE80211R
+endif
+ifdef CONFIG_PEERKEY
+endif
+endif
+
+ifdef CONFIG_PCSC
+# PC/SC interface for smartcards (USIM, GSM SIM)
+CFLAGS += -DPCSC_FUNCS -I/usr/include/PCSC
+# -lpthread may not be needed depending on how pcsc-lite was configured
+endif
+
+ifdef CONFIG_SIM_SIMULATOR
+CFLAGS += -DCONFIG_SIM_SIMULATOR
+NEED_MILENAGE=y
+endif
+
+ifdef CONFIG_USIM_SIMULATOR
+CFLAGS += -DCONFIG_USIM_SIMULATOR
+NEED_MILENAGE=y
+endif
+
+ifdef NEED_MILENAGE
+endif
+
+ifdef CONFIG_PKCS12
+CFLAGS += -DPKCS12_FUNCS
+endif
+
+ifdef CONFIG_SMARTCARD
+CFLAGS += -DCONFIG_SMARTCARD
+endif
+
+ifdef MS_FUNCS
+NEED_DES=y
+NEED_MD4=y
+endif
+
+ifdef CHAP
+endif
+
+ifdef TLS_FUNCS
+NEED_DES=y
+NEED_TLS_PRF=y
+endif
+
+ifndef CONFIG_TLS
+CONFIG_TLS=openssl
+endif
+
+ifeq ($(CONFIG_TLS), openssl)
+ifdef TLS_FUNCS
+CFLAGS += -DEAP_TLS_OPENSSL
+endif
+ifdef NEED_FIPS186_2_PRF
+endif
+endif
+
+ifeq ($(CONFIG_TLS), gnutls)
+ifdef TLS_FUNCS
+ifdef CONFIG_GNUTLS_EXTRA
+CFLAGS += -DCONFIG_GNUTLS_EXTRA
+endif
+endif
+ifdef NEED_FIPS186_2_PRF
+endif
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+CONFIG_INTERNAL_DH_GROUP5=y
+endif
+
+ifeq ($(CONFIG_TLS), schannel)
+ifdef TLS_FUNCS
+endif
+ifdef NEED_FIPS186_2_PRF
+endif
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+CONFIG_INTERNAL_DH_GROUP5=y
+endif
+
+ifeq ($(CONFIG_TLS), nss)
+ifdef TLS_FUNCS
+endif
+ifdef NEED_FIPS186_2_PRF
+endif
+CONFIG_INTERNAL_MD4=y
+CONFIG_INTERNAL_DH_GROUP5=y
+endif
+
+ifeq ($(CONFIG_TLS), internal)
+ifndef CONFIG_CRYPTO
+CONFIG_CRYPTO=internal
+endif
+ifdef TLS_FUNCS
+NEED_SHA256=y
+NEED_BASE64=y
+NEED_TLS_PRF=y
+NEED_MODEXP=y
+NEED_CIPHER=y
+CFLAGS += -DCONFIG_TLS_INTERNAL_CLIENT
+endif
+ifdef NEED_CIPHER
+NEED_DES=y
+endif
+ifdef NEED_MODEXP
+endif
+ifeq ($(CONFIG_CRYPTO), libtomcrypt)
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+CONFIG_INTERNAL_DH_GROUP5=y
+endif
+ifeq ($(CONFIG_CRYPTO), internal)
+NEED_AES_ENC=y
+CFLAGS += -DCONFIG_CRYPTO_INTERNAL
+ifdef CONFIG_INTERNAL_LIBTOMMATH
+CFLAGS += -DCONFIG_INTERNAL_LIBTOMMATH
+ifdef CONFIG_INTERNAL_LIBTOMMATH_FAST
+CFLAGS += -DLTM_FAST
+endif
+else
+endif
+CONFIG_INTERNAL_AES=y
+CONFIG_INTERNAL_DES=y
+CONFIG_INTERNAL_SHA1=y
+CONFIG_INTERNAL_MD4=y
+CONFIG_INTERNAL_MD5=y
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+CONFIG_INTERNAL_DH_GROUP5=y
+endif
+ifeq ($(CONFIG_CRYPTO), cryptoapi)
+CFLAGS += -DCONFIG_CRYPTO_CRYPTOAPI
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+endif
+endif
+
+ifeq ($(CONFIG_TLS), none)
+ifdef TLS_FUNCS
+CFLAGS += -DEAP_TLS_NONE
+CONFIG_INTERNAL_AES=y
+CONFIG_INTERNAL_SHA1=y
+CONFIG_INTERNAL_MD5=y
+endif
+CONFIG_INTERNAL_SHA256=y
+CONFIG_INTERNAL_RC4=y
+endif
+
+ifdef TLS_FUNCS
+ifdef CONFIG_SMARTCARD
+ifndef CONFIG_NATIVE_WINDOWS
+ifneq ($(CONFIG_L2_PACKET), freebsd)
+endif
+endif
+endif
+endif
+
+ifndef TLS_FUNCS
+ifeq ($(CONFIG_TLS), internal)
+CONFIG_INTERNAL_AES=y
+CONFIG_INTERNAL_SHA1=y
+CONFIG_INTERNAL_MD5=y
+CONFIG_INTERNAL_RC4=y
+endif
+endif
+
+ifdef CONFIG_INTERNAL_AES
+endif
+
+ifdef NEED_AES_EAX
+NEED_AES_CTR=y
+endif
+ifdef NEED_AES_CTR
+endif
+ifdef NEED_AES_ENCBLOCK
+endif
+ifdef NEED_AES_OMAC1
+NEED_AES_ENC=y
+endif
+ifdef NEED_AES_WRAP
+NEED_AES_ENC=y
+endif
+ifdef NEED_AES_CBC
+NEED_AES_ENC=y
+endif
+ifdef NEED_AES_ENC
+ifdef CONFIG_INTERNAL_AES
+endif
+endif
+ifdef NEED_AES
+endif
+
+ifdef NEED_SHA1
+ifdef CONFIG_INTERNAL_SHA1
+ifdef NEED_FIPS186_2_PRF
+endif
+endif
+ifndef CONFIG_NO_WPA_PASSPHRASE
+endif
+ifdef NEED_T_PRF
+endif
+ifdef NEED_TLS_PRF
+endif
+endif
+
+ifdef NEED_MD5
+ifdef CONFIG_INTERNAL_MD5
+endif
+ifdef CONFIG_FIPS
+endif
+endif
+
+ifdef NEED_MD4
+ifdef CONFIG_INTERNAL_MD4
+endif
+endif
+
+ifdef NEED_DES
+ifdef CONFIG_INTERNAL_DES
+endif
+endif
+
+ifdef NEED_RC4
+ifdef CONFIG_INTERNAL_RC4
+endif
+endif
+
+ifdef NEED_SHA256
+CFLAGS += -DCONFIG_SHA256
+ifdef CONFIG_INTERNAL_SHA256
+endif
+endif
+
+ifdef NEED_DH_GROUPS
+endif
+ifdef NEED_DH_GROUPS_ALL
+CFLAGS += -DALL_DH_GROUPS
+endif
+ifdef CONFIG_INTERNAL_DH_GROUP5
+ifdef NEED_DH_GROUPS
+endif
+endif
+
+ifdef CONFIG_CTRL_IFACE
+ifeq ($(CONFIG_CTRL_IFACE), y)
+ifdef CONFIG_NATIVE_WINDOWS
+CONFIG_CTRL_IFACE=named_pipe
+else
+CONFIG_CTRL_IFACE=unix
+endif
+endif
+CFLAGS += -DCONFIG_CTRL_IFACE
+ifeq ($(CONFIG_CTRL_IFACE), unix)
+CFLAGS += -DCONFIG_CTRL_IFACE_UNIX
+endif
+ifeq ($(CONFIG_CTRL_IFACE), udp)
+CFLAGS += -DCONFIG_CTRL_IFACE_UDP
+endif
+ifeq ($(CONFIG_CTRL_IFACE), named_pipe)
+CFLAGS += -DCONFIG_CTRL_IFACE_NAMED_PIPE
+endif
+endif
+
+ifdef CONFIG_CTRL_IFACE_DBUS
+DBUS=y
+DBUS_CFLAGS += -DCONFIG_CTRL_IFACE_DBUS -DDBUS_API_SUBJECT_TO_CHANGE
+ifndef DBUS_INCLUDE
+DBUS_INCLUDE := $(shell pkg-config --cflags dbus-1)
+endif
+dbus_version=$(subst ., ,$(shell pkg-config --modversion dbus-1))
+DBUS_VERSION_MAJOR=$(word 1,$(dbus_version))
+DBUS_VERSION_MINOR=$(word 2,$(dbus_version))
+ifeq ($(DBUS_VERSION_MAJOR),)
+DBUS_VERSION_MAJOR=0
+endif
+ifeq ($(DBUS_VERSION_MINOR),)
+DBUS_VERSION_MINOR=0
+endif
+DBUS_INCLUDE += -DDBUS_VERSION_MAJOR=$(DBUS_VERSION_MAJOR)
+DBUS_INCLUDE += -DDBUS_VERSION_MINOR=$(DBUS_VERSION_MINOR)
+DBUS_CFLAGS += $(DBUS_INCLUDE)
+endif
+
+ifdef CONFIG_CTRL_IFACE_DBUS_NEW
+DBUS=y
+DBUS_CFLAGS += -DCONFIG_CTRL_IFACE_DBUS_NEW
+ifndef DBUS_INCLUDE
+DBUS_INCLUDE := $(shell pkg-config --cflags dbus-1)
+endif
+ifdef CONFIG_CTRL_IFACE_DBUS_INTRO
+DBUS_CFLAGS += -DCONFIG_CTRL_IFACE_DBUS_INTRO
+endif
+DBUS_CFLAGS += $(DBUS_INCLUDE)
+endif
+
+ifdef DBUS
+DBUS_CFLAGS += -DCONFIG_DBUS
+endif
+
+CFLAGS += $(DBUS_CFLAGS)
+
+ifdef CONFIG_READLINE
+CFLAGS += -DCONFIG_READLINE
+LIBS_c += -lncurses -lreadline
+endif
+
+ifdef CONFIG_NO_STDOUT_DEBUG
+CFLAGS += -DCONFIG_NO_STDOUT_DEBUG
+ifndef CONFIG_CTRL_IFACE
+CFLAGS += -DCONFIG_NO_WPA_MSG
+endif
+endif
+
+ifdef CONFIG_IPV6
+# for eapol_test only
+CFLAGS += -DCONFIG_IPV6
+endif
+
+ifdef NEED_BASE64
+endif
+
+ifdef NEED_SME
+CFLAGS += -DCONFIG_SME
+endif
+
+ifdef CONFIG_CLIENT_MLME
+CFLAGS += -DCONFIG_CLIENT_MLME
+NEED_80211_COMMON=y
+endif
+
+ifdef NEED_80211_COMMON
+endif
+
+ifndef CONFIG_MAIN
+CONFIG_MAIN=main
+endif
+
+ifdef CONFIG_DEBUG_SYSLOG
+CFLAGS += -DCONFIG_DEBUG_SYSLOG
+endif
+
+ifdef CONFIG_DEBUG_FILE
+CFLAGS += -DCONFIG_DEBUG_FILE
+endif
+
+ifdef CONFIG_DELAYED_MIC_ERROR_REPORT
+CFLAGS += -DCONFIG_DELAYED_MIC_ERROR_REPORT
+endif
+
+ifdef CONFIG_FIPS
+CFLAGS += -DCONFIG_FIPS
+endif
+
+ifdef CONFIG_BGSCAN_SIMPLE
+CFLAGS += -DCONFIG_BGSCAN_SIMPLE
+NEED_BGSCAN=y
+endif
+
+ifdef NEED_BGSCAN
+CFLAGS += -DCONFIG_BGSCAN
+endif
+
+ifdef CONFIG_AUTHENTICATOR
+endif
+
+ifndef LDO
+LDO=$(CC)
+endif
+
+../src/drivers/build.wpa_supplicant:
+	@if [ -e ../src/drivers/build.hostapd ]; then \
+		$(MAKE) -C ../src/drivers clean; \
+	fi
+	@touch ../src/drivers/build.wpa_supplicant
+
+BCHECK=../src/drivers/build.wpa_supplicant
+
+acfg_cli: $(OBJS_c)
+	$(LDO) $(LDFLAGS) -o acfg_cli $(OBJS_c) $(LIBS_c)
+
+Q=@
+E=echo
+ifeq ($(V), 1)
+Q=
+E=true
+endif
+
+%.o: %.c
+	$(Q)$(CC) -c -o $@ $(CFLAGS) $<
+	@$(E) "  CC " $<
+
+doc:
+	doxygen
+	make -C latex
+
+clean:
+	rm -f core *~ *.o *.d eap_*.so $(ALL)
+	rm -rf latex html
+
+-include $(OBJS:%.o=%.d)

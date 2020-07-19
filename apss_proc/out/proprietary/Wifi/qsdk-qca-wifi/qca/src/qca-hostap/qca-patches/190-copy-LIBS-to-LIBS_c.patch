@@ -1,0 +1,13 @@
+diff --git a/wpa_supplicant/Makefile b/wpa_supplicant/Makefile
+index b258f7a..9313c30 100644
+--- a/wpa_supplicant/Makefile
++++ b/wpa_supplicant/Makefile
+@@ -6,6 +6,8 @@ ifndef CFLAGS
+ CFLAGS = -MMD -O2 -Wall -g
+ endif
+ 
++LIBS_c += -pie -znow -zrelro
++
+ export LIBDIR ?= /usr/local/lib/
+ export INCDIR ?= /usr/local/include/
+ export BINDIR ?= /usr/local/sbin/

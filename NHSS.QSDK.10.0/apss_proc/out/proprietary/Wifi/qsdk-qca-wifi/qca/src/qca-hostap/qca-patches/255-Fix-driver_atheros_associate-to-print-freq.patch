@@ -1,0 +1,13 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index fdcbb75..16c8ab6 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -2666,7 +2666,7 @@ driver_atheros_associate(void *priv,
+ 	int ret = 0, privacy = 1;
+ 
+ 	wpa_printf(MSG_DEBUG, "athr: Associate: mode=%d p2p=%d freq=%d",
+-		   params->mode, params->p2p, params->freq);
++		   params->mode, params->p2p, params->freq.freq);
+ 
+ 	drv->last_assoc_mode = params->mode;
+ 	drv->assoc_event_sent = 0;

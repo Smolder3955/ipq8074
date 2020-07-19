@@ -1,0 +1,38 @@
+diff --git a/src/ap/wpa_auth_ie.c b/src/ap/wpa_auth_ie.c
+index b326369..037c622 100644
+--- a/src/ap/wpa_auth_ie.c
++++ b/src/ap/wpa_auth_ie.c
+@@ -1040,21 +1040,23 @@ u8 * wpa_auth_write_assoc_resp_owe(struct wpa_state_machine *sm,
+ 				   const u8 *req_ies, size_t req_ies_len)
+ {
+ 	int res;
+-	struct wpa_auth_config *conf;
+ 
+ 	if (!sm)
+ 		return pos;
+-	conf = &sm->wpa_auth->conf;
+ 
+ #ifdef CONFIG_TESTING_OPTIONS
+-	if (conf->own_ie_override_len) {
+-		if (max_len < conf->own_ie_override_len)
+-			return pos;
+-		wpa_hexdump(MSG_DEBUG, "WPA: Forced own IE(s) for testing",
+-			    conf->own_ie_override, conf->own_ie_override_len);
+-		os_memcpy(pos, conf->own_ie_override,
+-			  conf->own_ie_override_len);
+-		return pos + conf->own_ie_override_len;
++	{
++		struct wpa_auth_config *conf;
++		conf = &sm->wpa_auth->conf;
++		if (conf->own_ie_override_len) {
++			if (max_len < conf->own_ie_override_len)
++				return pos;
++			wpa_hexdump(MSG_DEBUG, "WPA: Forced own IE(s) for testing",
++				    conf->own_ie_override, conf->own_ie_override_len);
++			os_memcpy(pos, conf->own_ie_override,
++				  conf->own_ie_override_len);
++			return pos + conf->own_ie_override_len;
++		}
+ 	}
+ #endif /* CONFIG_TESTING_OPTIONS */
+ 

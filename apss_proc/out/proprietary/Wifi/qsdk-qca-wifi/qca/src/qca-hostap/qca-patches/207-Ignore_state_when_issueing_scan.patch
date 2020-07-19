@@ -1,0 +1,23 @@
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 8906732..e5f1c86 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -116,8 +116,17 @@ void wpas_network_reenabled(void *eloop_ctx, void *timeout_ctx)
+ {
+ 	struct wpa_supplicant *wpa_s = eloop_ctx;
+ 
+-	if (wpa_s->disconnected || wpa_s->wpa_state != WPA_SCANNING)
++	if (wpa_s->disconnected) {
++		wpa_dbg(wpa_s, MSG_DEBUG,
++			"Return here as wpa_s->disconnected is set");
+ 		return;
++        }
++
++	if (wpa_s->wpa_state != WPA_SCANNING) {
++		wpa_dbg(wpa_s, MSG_DEBUG,
++			"Ignore Disconnect event and set state to scanning");
++		wpa_supplicant_set_state(wpa_s, WPA_SCANNING);
++	}
+ 
+ 	wpa_dbg(wpa_s, MSG_DEBUG,
+ 		"Try to associate due to network getting re-enabled");

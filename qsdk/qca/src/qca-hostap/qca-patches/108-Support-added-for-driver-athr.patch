@@ -1,0 +1,51 @@
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 38bc168..885d5ae 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -5436,6 +5436,9 @@ extern const struct wpa_driver_ops wpa_driver_roboswitch_ops;
+ /* driver_atheros.c */
+ extern const struct wpa_driver_ops wpa_driver_atheros_ops;
+ #endif /* CONFIG_DRIVER_ATHEROS */
++#ifdef CONFIG_DRIVER_ATHR
++extern const struct wpa_driver_ops wpa_driver_athr_ops; /* driver_athr.c */
++#endif /* CONFIG_DRIVER_ATHR */
+ #ifdef CONFIG_DRIVER_NONE
+ extern const struct wpa_driver_ops wpa_driver_none_ops; /* driver_none.c */
+ #endif /* CONFIG_DRIVER_NONE */
+diff --git a/src/drivers/drivers.c b/src/drivers/drivers.c
+index e95df6d..6da847f 100644
+--- a/src/drivers/drivers.c
++++ b/src/drivers/drivers.c
+@@ -46,6 +46,9 @@ const struct wpa_driver_ops *const wpa_drivers[] =
+ #ifdef CONFIG_DRIVER_ATHEROS
+ 	&wpa_driver_atheros_ops,
+ #endif /* CONFIG_DRIVER_ATHEROS */
++#ifdef CONFIG_DRIVER_ATHR
++        &wpa_driver_athr_ops, /* driver_athr.c */
++#endif /* CONFIG_DRIVER_ATHR */
+ #ifdef CONFIG_DRIVER_NONE
+ 	&wpa_driver_none_ops,
+ #endif /* CONFIG_DRIVER_NONE */
+diff --git a/src/drivers/drivers.mak b/src/drivers/drivers.mak
+index 1496b47..c2b63ac 100644
+--- a/src/drivers/drivers.mak
++++ b/src/drivers/drivers.mak
+@@ -84,6 +84,18 @@ else
+ endif
+ endif
+ 
++ifdef CONFIG_DRIVER_ATHR
++DRV_WPA_CFLAGS += -DCONFIG_DRIVER_ATHR
++DRV_WPA_OBJS += ../src/drivers/driver_athr.o
++CONFIG_L2_PACKET=linux
++CONFIG_WIRELESS_EXTENSION=y
++NEED_LINUX_IOCTL=y
++NEED_NETLINK=y
++ifdef ATH_GCM_SUPPORT
++CFLAGS += -DATH_GCM_SUPPORT
++endif
++endif
++
+ ifdef CONFIG_DRIVER_BSD
+ ifndef CONFIG_L2_PACKET
+ CONFIG_L2_PACKET=freebsd

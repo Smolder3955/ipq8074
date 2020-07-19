@@ -1,0 +1,66 @@
+	Copyright (c) 2017 Qualcomm Technologies, Inc.
+	All Rights Reserved.
+	Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+
+		mdump	System memory space dump utility
+
+1) Usage
+mdump program is used to dump system memory content for debugging
+NSS firmware (FW) after system crashed.
+
+By default, it will dump 16 MB NSS FW DDR content start from address
+0x4000_0000. The 16 MB is the minimum DDR information required for
+debugging NSS FW crash. The more the memory content can be dumpped,
+the better chance for engineer to caugh the issue. However, the maximum
+output file size is 512MB. If the system memory is bigger then 512 MB,
+then dump 512 MB at a time.
+
+If only one DDR file is dumpped, name it NSSDDR.BIN.
+If more then one DDR files are created, name them as
+EBICS0.BIN
+EBICS1.BIN
+EBICS2.BIN, etc.
+
+mdump has two options: -a #### and -b #### and
+"####" can be either hex or digital number.
+The "-b bytes" option is for changing the dump size, and
+the "-a address" option is for change the dumping start address in DDR.
+
+Besides to dump DDR, NSS also has a TCM memory needs to be dumpped for debug.
+The TCM (tight-couple memory) starting address may vary from chip to chip.
+For IPQ806x chip (Akronite), the TCM starting address is at 0x3900_0000.
+For IPQ807x chip (Hawkeye), the TCM starting address is at 0x3800_0000.
+For Remora chip (Femto), the TCM starting address is at 0xE400_0000.
+etc.  The TCM size is 128KB (may be 256KB) and command for dumping Akronite
+TCM is like below:
+
+	mdump -a 0x39000000 -b 131072 > /usb/NSSTCM.BIN
+
+and command for dumping Hawkeye IMEM is:
+
+	mdump -a 0x38000000 -b 393216 > /usb/NSSIMEM.BIN
+
+Therefore, at least two memory regions need to be dumpped for NSS FW debug.
+
+
+2) How to collect crash dump
+When each sub system crashes, the sub system will generate crash dump in DDR,
+then trigger system panic for reboot. To prevent panic happening during NSS FW
+crash in order to collect crash dump (core dump), following commands need to be
+issued after system boot up:
+
+	echo -1 > /proc/sys/dev/nss/general/coredump
+	echo 0 > /proc/sys/kernel/panic
+
+This tells NSS sub system do not panic after generate core dump, and do not reboot
+if system does panic.
+Instead, NSS core dump process will print following message to the console:
+
+
+	NSS core 0 signal COREDUMP COMPLETE
+	NSS core 1 signal COREDUMP COMPLETE
+	NSS core dump completed and please use mdump to collect dump data
+
+After seeing this message, mount a USB drive and use mdump to get dump data
+described in section 1, then send them to NSS engineer for analysis.

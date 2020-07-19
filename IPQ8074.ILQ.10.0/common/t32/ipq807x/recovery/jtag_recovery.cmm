@@ -1,0 +1,219 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+local &ELFfilename       ; Return value of GetELFfile function
+local &Binfilename       ; Return value of GetBinfile function
+local &cwd
+local &BootBuildPath
+local &Cdtbin
+local &BoardType
+
+entry &BootBuildPath &BoardType
+
+&cwd=os.pwd()
+
+winclear
+area.reset
+gosub SetupMainWindow
+
+sys.d
+sys.u
+
+;OCIMEM Clock
+d.s ZSD:0x0180E008 %LE %LONG 0x20008001
+
+; Enable L2 TCM
+D.S ZSD:0xB110010 %LE %Long 0x08000001
+
+;NSS CLOCK
+d.s ZSD:0x1868178 %LE %LONG 0x80004FF1
+d.s ZSD:0x1868168 %LE %LONG 0x80000001
+d.s ZSD:0x1868188 %LE %LONG 0x20008001
+
+; Qtimer - Init
+D.S ZSD:0x4A1000 %LE %Long 0x00000001
+D.S ZSD:0xB120000 %LE %Long 0x124F800
+D.S ZSD:0xB120040 %LE %Long 0x0000003F 
+D.S ZSD:0xB120044 %LE %Long 0x0000003F
+D.S ZSD:0xB12102C %LE %Long 0x00000002
+D.S ZSD:0xB12302C %LE %Long 0x00000002
+
+
+print "Choose the Image folder in dialog box."
+
+if (("&BootBuildPath"=="")||("&BoardType"==""))
+(
+    DIALOG.view
+    (
+             NAME "BootImage"
+             HEADER "Select the Boot loader image folder"
+             POS 1. 1. 43. 1.
+
+             POS 1. 0. 38. 1.
+             TEXT "Select Image Path"
+    Browse:  EDIT "" ""
+             POS 40. 1. 3. 1.
+             BUTTON "..."
+             (
+                 DIALOG.SetDIR Browse c:\t32\demo\*
+             )
+
+             POS 1. 3. 27. 1.
+             TEXT "Select the board"
+
+    BOARD.SEL:  DEFCOMBOBOX "AP.HK01-C1,AP.HK01-C2,AP.HK01-C3,AP.HK01-C4,AP.HK02,AP.HK05,AP.HK06,AP.HK07,AP.HK08,AP.HK09,AP.HK10,AP.AC01,AP.AC02,AP.AC03,AP.AC04,AP.OAK02,AP.OAK03,DB.HK01,DB.HK02" ""
+
+             POS 30. 4. 5. 1.
+             DEFBUTTON "OK" "CONTinue"
+    )
+
+    ;set default selections
+    if ("&BootBuildPath"!="")
+    (
+        DIALOG.set Browse "&BootBuildPath"
+    )
+
+    DIALOG.SET BOARD.SEL "AP.HK01-C1"
+
+    WinRESIZE 45. 7. BootImage
+    STOP
+
+    &BootBuildPath=DIALOG.STRing(Browse)
+    ;get the string from the EDIT box
+
+    &BoardType=DIALOG.STRing(BOARD.SEL)
+
+    DIALOG.END
+    ;and then close the dialog
+)
+
+print "Loading SBL elf....."
+
+cd &BootBuildPath
+d.load.elf SBL1_flashless.elf
+
+if "&BoardType"=="AP.HK01-C1"
+(
+    &Cdtbin="cdt-AP-HK01-C1_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.HK01-C2"
+(
+    &Cdtbin="cdt-AP-HK01-C2_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.HK01-C3"
+(
+    &Cdtbin="cdt-AP-HK01-C3_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.HK01-C4"
+(
+   &Cdtbin="cdt-AP-HK01-C4_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.HK02"
+(
+    &Cdtbin="cdt-AP-HK02_512M32_DDR4.bin"
+)
+if "&BoardType"=="AP.HK05"
+(
+    &Cdtbin="cdt-AP-HK05_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.HK06"
+(
+    &Cdtbin="cdt-AP-HK06_512M32_DDR4.bin"
+)
+if "&BoardType"=="AP.HK07"
+(
+    &Cdtbin="cdt-AP-HK07_256M16_DDR3.bin"
+)
+if "&BoardType"=="AP.HK08"
+(
+    &Cdtbin="cdt-AP-HK08_512M32_DDR4.bin"
+)
+if "&BoardType"=="AP.HK09"
+(
+    &Cdtbin="cdt-AP-HK09_512M16_DDR4.bin"
+)
+if "&BoardType"=="AP.HK10"
+(
+    &Cdtbin="cdt-AP-HK10_256M16_DDR3.bin"
+)
+if "&BoardType"=="AP.AC01"
+(
+    &Cdtbin="cdt-AP-AC01_512M16_DDR4.bin"
+)
+if "&BoardType"=="AP.AC02"
+(
+    &Cdtbin="cdt-AP-AC02_512M16_DDR4.bin"
+)
+if "&BoardType"=="AP.AC03"
+(
+    &Cdtbin="cdt-AP-AC03_256M16_DDR3.bin"
+)
+if "&BoardType"=="AP.AC04"
+(
+    &Cdtbin="cdt-AP-AC04_256M16_DDR3.bin"
+)
+if "&BoardType"=="AP.OAK02"
+(
+    &Cdtbin="cdt-AP-OAK02_256M32_DDR3.bin"
+)
+if "&BoardType"=="AP.OAK03"
+(
+    &Cdtbin="cdt-AP-OAK03_256M32_DDR3.bin"
+)
+if "&BoardType"=="DB.HK01"
+(
+    &Cdtbin="cdt-DB-HK01_256M32_DDR3.bin"
+)
+if "&BoardType"=="DB.HK02"
+(
+    &Cdtbin="cdt-DB-HK02_1024M32_DDR4.bin"
+)
+
+print "Successfully Loaded SBL elf....."
+
+go sbl1_main_ctl
+
+V jtag_recovery = 1
+
+; CDT loading
+
+go boot_update_config_data_table /o
+
+wait !STATE.RUN()
+
+print "Loading CDT binary..."
+d.load.Binary &Cdtbin var.value(cdt_info_ptr->cdt_ptr) /noclear
+print "Successfully loaded CDT binary..."
+go boot_apt_test /o
+
+wait !STATE.RUN()
+
+;Disabling cache and MMU before loading u-boot
+PER.Set.simple C15:0x1 %Long 0xC51838
+
+print "Loading U-boot elf....."
+
+d.load.elf openwrt-ipq807x-u-boot.elf
+
+print "Successfully Loaded U-boot elf....."
+print "Stop at the u-boot prompt."
+
+go
+
+enddo
+
+;****************************************************************************
+; Setup main window
+;****************************************************************************
+SetupMainWindow:
+  WINPOS 0% 50% 68% 50% 0. 0. W001
+  Area.create MAIN
+  Area.view MAIN
+  Area.select MAIN
+  return ;SetupMainWindow
+
+
+

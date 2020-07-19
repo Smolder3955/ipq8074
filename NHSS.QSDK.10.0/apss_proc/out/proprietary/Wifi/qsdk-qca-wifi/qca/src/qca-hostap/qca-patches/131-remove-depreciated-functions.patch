@@ -1,0 +1,21 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index c80a5ea..295e7e2 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -1953,6 +1953,16 @@ static int atheros_set_ap(void *priv, struct wpa_driver_ap_params *params)
+ 	wpa_hexdump_buf(MSG_DEBUG, "atheros: assocresp_ies",
+ 			params->assocresp_ies);
+ 
++	atheros_set_wps_ie(priv, params->assocresp_ies ? wpabuf_head(params->assocresp_ies) : NULL,
++		params->assocresp_ies ? wpabuf_len(params->assocresp_ies) : 0,
++		IEEE80211_APPIE_FRAME_ASSOC_RESP);
++	atheros_set_wps_ie(priv, params->beacon_ies ? wpabuf_head(params->beacon_ies) : NULL,
++		params->beacon_ies ? wpabuf_len(params->beacon_ies) : 0,
++		IEEE80211_APPIE_FRAME_BEACON);
++	atheros_set_wps_ie(priv, params->proberesp_ies ? wpabuf_head(params->proberesp_ies) : NULL,
++		params->proberesp_ies ? wpabuf_len(params->proberesp_ies): 0,
++		IEEE80211_APPIE_FRAME_PROBE_RESP);
++
+ #if defined(CONFIG_HS20) && (defined(IEEE80211_PARAM_OSEN) || defined(CONFIG_ATHEROS_OSEN))
+ 	if (params->osen) {
+ 		struct wpa_bss_params bss_params;

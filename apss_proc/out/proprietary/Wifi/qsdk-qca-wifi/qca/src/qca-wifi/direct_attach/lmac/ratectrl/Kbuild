@@ -1,0 +1,83 @@
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ../../..
+
+# Chip Support
+AH_SUPPORT_AR5212?=0		# 5212 support
+AH_SUPPORT_AR5416?=1		# 5416 support
+AH_SUPPORT_AR9300?=1        # 9300 support
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+INCS += -I$(HAL) -I$(HAL)/$(OS) -I$(ATH) -I$(ATH_RATE) -I$(ATH_PKTLOG)
+INCS += -I$(WLAN_TOP)/direct_attach/os/$(OS)/ath_hal -I$(obj)/$(DEPTH)/umac/include -I$(obj)/$(DEPTH)/umac/if_lmac
+INCS += -I$(obj)/$(DEPTH)/direct_attach/umac/include
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/inc -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/obj_mgr/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/scan/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/cmn_defs/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/global_umac_dispatcher/lmac_if/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/scheduler/inc
+INCS += -I$(obj)/$(DEPTH)/umac/scan
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/mgmt_txrx/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/spectral/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/regulatory/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/green_ap/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/umac/son/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_objmgr/dispatcher/inc
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/crypto/inc
+INCS += -I$(obj)/$(DEPTH)/component_dev/crypto/inc
+endif
+
+ifeq ($(strip $(AH_SUPPORT_AR5212)),1)
+ath_rate_objs += ar5212Phy.o
+endif
+
+ifeq ($(strip $(AH_SUPPORT_AR5416)),1)
+ath_rate_objs += ar5416Phy.o
+endif
+
+ifeq ($(strip $(AH_SUPPORT_AR9300)),1)
+ath_rate_objs += ar9300Phy.o
+endif
+
+ifeq ($(strip ${QCA_DFS_COMPONENT_ENABLE}),1)
+EXTRA_CFLAGS+= -DDFS_COMPONENT_ENABLE
+endif
+
+obj-m += ath_rate_atheros.o
+
+#Need to add -DATH_SUPPORT_WIFIPOS=1 in EXTRA_CFLAGS, if wifipos needs to be complied.
+EXTRA_CFLAGS+= $(INCS) $(COPTS)  
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+MOD_CFLAGS = -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(ath_rate_atheros.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(ath_rate_atheros)" 
+endif
+
+ath_rate_atheros-objs := ratectrl.o ratectrl_11n.o ratectrl_11nViVo.o if_athrate.o $(ath_rate_objs)
+
+clean-files := modules.order
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: ath_rate_atheros.ko
+
+ath_rate_atheros.mod.o: ath_rate_atheros.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+ath_rate_atheros.o: ${ath_rate_atheros-objs}
+	$(LD) -m elf32btsmip -r -o ath_rate_atheros.o $(ath_rate_atheros-objs)
+	$(KERNELPATH)/scripts/mod/modpost ath_rate_atheros.o
+
+ath_rate_atheros.ko: ath_rate_atheros.o ath_rate_atheros.mod.o
+	$(LD) $(LDOPTS) -o ath_rate_atheros.ko ath_rate_atheros.o ath_rate_atheros.mod.o
+
+%.o: %.c 
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif

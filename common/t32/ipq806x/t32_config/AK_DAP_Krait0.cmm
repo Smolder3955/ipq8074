@@ -1,0 +1,70 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+;*****************************************************************************
+;**           AK_DAP_Krait0.CMM                                             **
+;*****************************************************************************
+
+; select CPU and options
+
+SYStem.Reset
+SYStem.CPU KRAIT
+SYStem.JTAGCLOCK RTCK
+SYStem.OPTION ENRESET OFF
+SYStem.OPTION RESBREAK ON
+SYStem.CONFIG SLAVE ON
+SYStem.CONFIG COREBASE      0x80010000
+SYStem.CONFIG CTIBASE          0x80002000
+SYStem.CONFIG ETMBASE          0x8001C000
+SYStem.CONFIG FUNNELBASE       0x80004000
+SYStem.CONFIG ETMFUNNELPORT    0.
+SYStem.CONFIG STMFUNNELPORT    2.
+SYStem.CONFIG TPIUBASE         0x80003000
+SYStem.CONFIG ETBBASE          0x80001000
+SYStem.CONFIG ITMBASE          0x80005000
+SYStem.CONFIG STMBASE          0x80006000
+SYStem.CONFIG CTICONFIG        CORTEXV1
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG DAPIRPOST 0.
+SYStem.CONFIG DAPDRPOST 0.
+SYStem.CONFIG DAPIRPOST 11.
+SYStem.CONFIG DAPDRPOST 1.
+SYStem.CONFIG MULTITAP NONE
+SYStem.OPTION DCDIRTY ON
+SYStem.OPTION CFLUSH ON
+
+SYStem.MEMACCESS DAP
+
+BREAK.SEL PROGRAM onchip
+
+TRONCHIP.SET FIQ OFF
+TRONCHIP.SET IRQ OFF
+TRONCHIP.SET DABORT OFF
+TRONCHIP.SET PABORT OFF
+TRONCHIP.SET UNDEF OFF
+TRONCHIP.SET SWI OFF
+TRONCHIP.SET RESET OFF
+
+RADIX HEX
+SETUP.VAR %HEX.ON
+MODE.HLL
+
+ETM.OFF
+SYStem.M.Attach
+
+; Enable QDSS MUX for connecting to Ubi32 debugger.
+; If Ubi32 debugger window is closed, before restarting it, either
+; this ARM window needs to be restared, or following command needs
+; to be issued from Linux console to reestablish this connection:
+; # devmem 0x3000004 w 0x60
+data.set easd:0x3000004 %LE %Long 0x60
+
+autostore , history
+
+SYStem.STATE
+
+ENDDO

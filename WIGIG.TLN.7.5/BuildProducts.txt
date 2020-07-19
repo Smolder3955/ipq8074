@@ -1,0 +1,4 @@
+.\wigig_proc\wigig\release\TALYN_M_B0\wil6210.fw 
+.\wigig_proc\wigig\release\TALYN_M_B0\wil6210.brd 
+.\wigig_proc\wigig\release\TALYN_M_B0_WMI_ONLY\wil6210.fw 
+.\wigig_proc\wigig\release\TALYN_M_B0_WMI_ONLY\wil6210.brd 

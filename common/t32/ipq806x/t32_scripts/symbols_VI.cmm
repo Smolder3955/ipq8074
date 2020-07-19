@@ -1,0 +1,40 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+;********************************************************************
+;	 	symbols_VI.cmm					   **
+;********************************************************************
+
+ local &force
+
+ entry &force
+
+ if ("&force"!="")
+   goto LOAD_VI_SYMBOL
+
+ if (Y.EXIST(AKRONITE))
+ (
+    enddo
+ )
+
+LOAD_VI_SYMBOL:
+
+ print " Loading register symbols ..."
+
+ ; Y.CREATE.L shortened version of sYmbol.CREATE.Label
+
+ sYmbol.CREATE.Label AKRONITE					0x00000014  ;dummy
+
+ Y.CREATE.L   RPM_2X3_SFPB_M2VMT_M2VMR0				0x00069000
+ Y.CREATE.L   SFPB_MUTEX_MUTEX_REG12				0x01200634
+ Y.CREATE.L   SFPB_MUTEX_MUTEX_REG13				0x01200638
+ Y.CREATE.L   APCS_CPU_PWR_CTL                                  0x02008004
+ Y.CREATE.L   APCS_START_ADDR					0x02010004
+ Y.CREATE.L   APCS_L2_PWR_CTL					0x02011014
+
+ Y.CREATE.DONE
+
+ ENDDO

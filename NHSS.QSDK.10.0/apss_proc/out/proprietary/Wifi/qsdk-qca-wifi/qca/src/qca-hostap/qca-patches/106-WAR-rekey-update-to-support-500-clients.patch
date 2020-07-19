@@ -1,0 +1,13 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index c80a5ea..83b6113 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -1690,6 +1690,8 @@ atheros_send_eapol(void *priv, const u8 *addr, const u8 *data, size_t data_len,
+ 
+ 	wpa_hexdump(MSG_MSGDUMP, "TX EAPOL", bp, len);
+ 
++        /* Delay added as workaround for handling 500 clients group rekeying */
++	os_sleep(0, 10000);
+ 	status = l2_packet_send(drv->sock_xmit, addr, ETH_P_EAPOL, bp, len);
+ 
+ 	if (bp != buf)

@@ -1,0 +1,95 @@
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 556b8a0..978c299 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -5272,6 +5272,7 @@ union wpa_event_data {
+ 		enum chan_width chan_width;
+ 		int cf1;
+ 		int cf2;
++        int timeout;
+ 	} dfs_event;
+ 
+ 	/**
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..05e92e4 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -568,6 +568,7 @@ driver_atheros_event_wireless_custom(struct driver_atheros_data *drv,
+ 			os_strstr(custom, " unicast ") != NULL;
+ 		/* TODO: parse parameters(?) */
+ 		wpa_supplicant_event(ctx, EVENT_MICHAEL_MIC_FAILURE, &data);
++
+ 	} else if (os_strncmp(custom, "ASSOCINFO(ReqIEs=", 17) == 0) {
+ 		char *spos;
+ 		int bytes;
+@@ -662,7 +663,21 @@ driver_atheros_event_wireless_custom(struct driver_atheros_data *drv,
+ 
+ 		wpa_supplicant_event(ctx, EVENT_WNM, &data);
+ #endif /* CONFIG_IEEE80211V */
+-	}
++	} else if (os_strncmp(custom, "CAC.started", 11) ==
++           0) {
++		char *cac;
++		cac = os_strstr(custom, "freq=");
++        if (cac) {
++            data.dfs_event.freq = atoi(cac+5);                
++        }
++
++        cac = os_strstr(custom, "timeout=");
++        if (cac) {
++            data.dfs_event.timeout = atoi(cac+8);                
++        }
++
++        wpa_supplicant_event(ctx, EVENT_DFS_CAC_STARTED, &data);
++    }
+ }
+ 
+ 
+diff --git a/src/drivers/driver_nl80211_event.c b/src/drivers/driver_nl80211_event.c
+index 66a3667..e4ad6b7 100644
+--- a/src/drivers/driver_nl80211_event.c
++++ b/src/drivers/driver_nl80211_event.c
+@@ -1835,6 +1835,9 @@ static void qca_nl80211_dfs_offload_radar_event(
+ 	if (tb[NL80211_ATTR_CENTER_FREQ2])
+ 		data.dfs_event.cf2 = nla_get_u32(tb[NL80211_ATTR_CENTER_FREQ2]);
+ 
++	if (tb[QCA_WLAN_VENDOR_ATTR_CONFIG_GENERIC_DATA])
++		data.dfs_event.timeout = nla_get_u32(tb[QCA_WLAN_VENDOR_ATTR_CONFIG_GENERIC_DATA]);
++
+ 	wpa_printf(MSG_DEBUG, "nl80211: DFS event on freq %d MHz, ht: %d, "
+ 		    "offset: %d, width: %d, cf1: %dMHz, cf2: %dMHz",
+ 		    data.dfs_event.freq, data.dfs_event.ht_enabled,
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index 8906732..a00917f 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -2563,6 +2563,13 @@ static void wpas_fst_update_mb_assoc(struct wpa_supplicant *wpa_s,
+ }
+ 
+ 
++static void wpa_supplicant_event_dfs_start(struct wpa_supplicant *wpa_s,
++                       struct dfs_event *radar)
++{
++	wpa_printf(MSG_DEBUG, "DFS CAC started on  %d MHz timout %d",radar->freq,radar->timeout+10);	
++	wpa_supplicant_req_auth_timeout(wpa_s, (radar->timeout+10), 0);
++}
++
+ static void wpa_supplicant_event_assoc(struct wpa_supplicant *wpa_s,
+ 				       union wpa_event_data *data)
+ {
+@@ -4190,8 +4197,13 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
+ 			wpas_event_dfs_radar_detected(wpa_s, &data->dfs_event);
+ 		break;
+ 	case EVENT_DFS_CAC_STARTED:
+-		if (data)
+-			wpas_event_dfs_cac_started(wpa_s, &data->dfs_event);
++		if (data){
++            if (wpa_s->ap_iface && wpa_s->ap_iface->bss[0])
++			    wpas_event_dfs_cac_started(wpa_s, &data->dfs_event);
++            else
++                wpa_supplicant_event_dfs_start(wpa_s, &data->dfs_event);
++        }            
++        wpa_msg(wpa_s, MSG_DEBUG, "EVENT_DFS_CAC_STARTED");
+ 		break;
+ 	case EVENT_DFS_CAC_FINISHED:
+ 		if (data)

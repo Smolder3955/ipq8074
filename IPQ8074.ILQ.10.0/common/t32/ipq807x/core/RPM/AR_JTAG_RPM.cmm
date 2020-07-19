@@ -1,0 +1,76 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+local &cmm_dir &cur_dir &work_dir
+
+global &t32_intercom_port_base
+global &t32_intercom_port
+&t32_intercom_port_base=20000.
+&t32_intercom_port=&t32_intercom_port_base+0.
+
+&cur_dir=os.ppd()    ; directory where this script is running from
+&cmm_dir=".\..\..\cmm"
+&work_dir=".\..\..\RUMI"
+;------------------------------------------------------------------------------
+; perform daisychain specific overrides
+;------------------------------------------------------------------------------
+; select CPU and options
+
+SYStem.Reset
+SYStem.CPU CortexM3
+SYStem.JTAGCLOCK 1MHz
+
+SYStem.OPTION WAITRESET OFF
+SYStem.OPTION ENRESET OFF
+SYStem.OPTION RESBREAK OFF
+
+SYStem.CONFIG SLAVE ON
+
+
+
+SYStem.CONFIG COREBASE	E:0xE000E000
+SYStem.CONFIG ITMBASE	E:0xE0000000
+SYStem.CONFIG DWTBASE	E:0xE0010000
+SYStem.CONFIG ETMBASE	E:0xE0041000
+
+;SYStem.CONFIG.ETB.BASE DAP:0x80025000
+;SYStem.CONFIG TPIUBASE	DAP:0x80020000
+
+
+SYStem.CONFIG MEMORYACCESSPORT 3.
+SYStem.CONFIG AXIACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+;SYSTEM.CONFIG APBACCESSPORT 1.
+
+
+SYStem.CONFIG DAPIRPOST 16.
+SYStem.CONFIG DAPDRPOST 2.
+
+
+
+SYStem.MEMACCESS DAP
+
+SYStem.Option softlong on
+System.Option softword off
+
+
+B.SEL PROGRAM AUTO
+
+RADIX HEX
+SETUP.VAR %HEX.ON
+MODE.HLL
+
+
+;cd &work_dir
+autostore , history
+
+SYS
+;SYStem.attach
+
+
+
+ENDDO
+

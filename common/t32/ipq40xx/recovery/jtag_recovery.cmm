@@ -1,0 +1,169 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+local &cwd
+local &BootBuildPath
+local &Sblbin
+local &BoardType
+
+entry &BootBuildPath &BoardType
+
+&cwd=os.pwd()
+
+winclear
+area.reset
+gosub SetupMainWindow
+
+sys.d
+sys.u
+cd.do gcc_init.cmm
+cd.do ddr_init_16bit.cmm
+
+print "Choose the Image folder in dialog box."
+
+if (("&BootBuildPath"=="")||("&BoardType"==""))
+(
+    DIALOG.view
+    (
+             NAME "BootImage"
+             HEADER "Select the Boot loader image folder"
+             POS 1. 1. 43. 1.
+
+             POS 1. 0. 38. 1.
+             TEXT "Select Image Path"
+    Browse:  EDIT "" ""
+             POS 40. 1. 3. 1.
+             BUTTON "..."
+             (
+                 DIALOG.SetDIR Browse c:\t32\demo\*
+             )
+
+             POS 1. 3. 27. 1.
+             TEXT "Select the board"
+
+    BOARD.SEL:  DEFCOMBOBOX "AP.DK01-C1,AP.DK01-C2,AP.DK01-S1,AP.DK04-C1,AP.DK04-C2,AP.DK04-C3,AP.DK04-C4,AP.DK04-C5,DB.DK01-C1,DB.DK02-C1,AP.DK06-C1,AP.DK07-C1,AP.DK07-C2,AP.DK07-C3,AP.DK07-C4,AP.DK05-C1" ""
+
+             POS 30. 4. 5. 1.
+             DEFBUTTON "OK" "CONTinue"
+    )
+
+    ;set default selections
+    if ("&BootBuildPath"!="")
+    (
+        DIALOG.set Browse "&BootBuildPath"
+    )
+
+    DIALOG.SET BOARD.SEL "AP.DK01-C1"
+
+    WinRESIZE 45. 7. BootImage
+    STOP
+
+    &BootBuildPath=DIALOG.STRing(Browse)
+    ;get the string from the EDIT box
+
+    &BoardType=DIALOG.STRing(BOARD.SEL)
+
+    DIALOG.END
+    ;and then close the dialog
+)
+
+print "Loading SBL elf....."
+
+cd &BootBuildPath
+
+if "&BoardType"=="AP.DK01-C1"
+(
+    &Sblbin="smem-AP.DK01.1-C1.bin"
+)
+if "&BoardType"=="AP.DK01-C2"
+(
+    &Sblbin="smem-AP.DK01.1-C2.bin"
+)
+
+if "&BoardType"=="AP.DK01-S1"
+(
+    &Sblbin="smem-AP.DK01.1-S1.bin"
+)
+if "&BoardType"=="AP.DK04-C1"
+(
+    &Sblbin="smem-AP.DK04.1-C1.bin"
+)
+if "&BoardType"=="AP.DK04-C2"
+(
+    &Sblbin="smem-AP.DK04.1-C2.bin"
+)
+if "&BoardType"=="AP.DK04-C3"
+(
+    &Sblbin="smem-AP.DK04.1-C3.bin"
+)
+if "&BoardType"=="AP.DK04-C4"
+(
+    &Sblbin="smem-AP.DK04.1-C4.bin"
+)
+if "&BoardType"=="AP.DK04-C5"
+(
+    &Sblbin="smem-AP.DK04.1-C5.bin"
+)
+if "&BoardType"=="DB.DK01-C1"
+(
+    &Sblbin="smem-DB.DK01.1-C1.bin"
+)
+if "&BoardType"=="DB.DK02-C1"
+(
+    &Sblbin="smem-DB.DK02.1-C1.bin"
+)
+if "&BoardType"=="AP.DK06-C1"
+(
+    &Sblbin="smem-AP.DK06.1-C1.bin"
+)
+if "&BoardType"=="AP.DK07-C1"
+(
+    &Sblbin="smem-AP.DK07.1-C1.bin"
+)
+if "&BoardType"=="AP.DK07-C2"
+(
+    &Sblbin="smem-AP.DK07.1-C2.bin"
+)
+if "&BoardType"=="AP.DK07-C3"
+(
+    &Sblbin="smem-AP.DK07.1-C3.bin"
+)
+if "&BoardType"=="AP.DK07-C4"
+(
+    &Sblbin="smem-AP.DK07.1-C4.bin"
+)
+if "&BoardType"=="AP.DK05-C1"
+(
+    &Sblbin="smem-AP.DK05.1-C1.bin"
+)
+
+data.load.binary &Sblbin 0x87e00000
+wait !STATE.RUN()
+print "Successfully Loaded SBL elf....."
+
+print "Loading U-boot elf....."
+
+d.load.elf openwrt-ipq40xx-u-boot.elf
+
+print "Successfully Loaded U-boot elf....."
+print "Stop at the u-boot prompt."
+
+go
+
+enddo
+
+;****************************************************************************
+; Setup main window
+;****************************************************************************
+SetupMainWindow:
+  WINPOS 0% 50% 68% 50% 0. 0. W001
+  Area.create MAIN
+  Area.view MAIN
+  Area.select MAIN
+  return ;SetupMainWindow
+
+
+

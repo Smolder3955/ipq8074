@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config desc="AP148 NOR IPQ806x"
+    flash_size="32M"
+    sector_size="64K"
+    flash_type="nor"
+    partition_layout="nor-partition.xml">
+    <partition name="SBL1" file="nor_sbl1.mbn" boot="1"/>
+    <partition name="MIBIB" file="nor-system-partition.bin" boot="1"/>
+    <partition name="SBL2" file="nor_sbl2.mbn" boot="1"/>
+    <partition name="DDR" file="ddr.mbn" boot="1"/>
+    <partition name="DDRCONFIG" file="AP148-cdt.mbn" boot="1"/>
+    <partition name="SSD" file="ssd.mbn" boot="1"/>
+    <partition name="TZ" file="tz.mbn" boot="1"/>
+    <partition name="RPM" file="rpm.mbn" boot="1"/>
+    <partition name="APPSBL" file="openwrt-ipq806x_standard-u-boot-2016.mbn"/>
+    <partition name="HLOS" file="openwrt-ipq-ipq806x-qcom-ipq8064-ap148-fit-uImage.itb"/>
+    <partition name="rootfs" file="openwrt-ipq-ipq806x-squashfs-root.img"/>
+</config>

@@ -1,0 +1,47 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index fdcbb75..519bac7 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -2091,7 +2091,7 @@ static int driver_atheros_get_range(void *priv)
+ 		drv->capa.max_remain_on_chan = 1000;
+ 
+ 		wpa_printf(MSG_DEBUG, "  capabilities: key_mgmt 0x%x enc 0x%x "
+-			   "flags 0x%x",
++			   "flags %llx",
+ 			   drv->capa.key_mgmt, drv->capa.enc, drv->capa.flags);
+ 	} else {
+ 		wpa_printf(MSG_DEBUG, "SIOCGIWRANGE: too old (short) data - "
+@@ -2927,7 +2927,7 @@ static struct hostapd_hw_modes * athr_add_11b(struct hostapd_hw_modes *modes,
+ 
+ static struct hostapd_hw_modes * athr_get_hw_feature_data(void *priv,
+ 							  u16 *num_modes,
+-							  u16 *flags)
++							  u16 *flags, u8 *dfs)
+ {
+ 	struct driver_atheros_data *drv = priv;
+ 	struct iwreq iwr;
+@@ -2941,6 +2941,7 @@ static struct hostapd_hw_modes * athr_get_hw_feature_data(void *priv,
+ 	int bw_div = 1;
+ 	*num_modes = 0;
+ 	*flags = 0;
++	dfs=dfs; /*to avoid warning*/
+ 
+ 	os_memset(&chans, 0, sizeof(chans));
+ 	os_memset(&iwr, 0, sizeof(iwr));
+@@ -3668,7 +3669,7 @@ static int athr_set_intra_bss(void *priv, int enabled)
+ 	return set80211param(drv, IEEE80211_PARAM_APBRIDGE, enabled, 1);
+ }
+ 
+-
++#if 0
+ static int athr_driver_acl(struct driver_atheros_data *drv, const char *cmd,
+ 			   char *buf, size_t buf_len)
+ {
+@@ -3739,6 +3740,7 @@ static int athr_driver_acl(struct driver_atheros_data *drv, const char *cmd,
+ 
+ 	return ret;
+ }
++#endif
+ 
+ #ifdef ANDROID
+ /**

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+===============================================================================
+
+  Copyright (c) 2013-2017 Qualcomm Technologies, Inc.
+  All Rights Reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+===============================================================================
+-->
+
+<tns:fuseblower xmlns:tns="http://www.qualcomm.com/fuseblower"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.qualcomm.com/fuseblower ../xsd/fuseblower_user.xsd">
+
+    <metadata>
+        <chipset>6290</chipset>
+        <version>1.0</version>
+    </metadata>
+
+    <secdat>
+        <file_info>default dat file</file_info>
+        <file_version>1</file_version>
+        <fuse_version>1</fuse_version>
+    </secdat>
+
+    <module id="QFPROM_RAW_FUSE_MAP_BASE_CORE">
+        <entry ignore="false">
+            <description>contains the OEM public key hash as set by OEM</description>
+            <name>root_cert_hash</name>
+            <value>0000000000000000000000000000000000000000000000000000000000000000</value>
+        </entry>
+        <entry ignore="true">
+            <description>SHA256 signed root cert to generate root hash</description>
+            <name>root_cert_file</name>
+            <value>./../../resources/testpki/qpsa_rootca.cer</value>
+        </entry>
+        <entry ignore="false">
+            <description>Use Serial Num for secure boot authentication (0: Use OEM ID (Default), 1: Use Serial Num)</description>
+            <name>SECURE_BOOT0_use_serial_num</name>
+            <value>false</value>
+        </entry>
+        <entry ignore="false">
+            <description>The OEM hardware ID</description>
+            <name>oem_hw_id</name>
+            <value>0x0000</value>
+        </entry>
+        <entry ignore="false">
+            <description>The OEM Model ID</description>
+            <name>oem_product_id</name>
+            <value>0x0000</value>
+        </entry>
+        <entry ignore="false">
+            <description>used to configure the number of root certificates hashed into OEM_PK_HASH (max: 4)</description>
+            <name>total_rot_num</name>
+            <value>0</value>
+        </entry>
+        <entry ignore="false">
+            <description>index of the Root Certificate to activate (possible values: 0-3)</description>
+            <name>rot_activation</name>
+            <value>0</value>
+        </entry>
+        <entry ignore="true">
+            <description>index of Root Certificate to be revoked (possible values: 0-3)</description>
+            <name>rot_revocation</name>
+            <value>0</value>
+        </entry>
+        <entry ignore="false">
+            <description>prevents the Watch Dog from being disabled by the GPIO, true: ignore GPIO, false: use GPIO</description>
+            <name>watchdog_enable</name>
+            <value>true</value>
+        </entry>
+    </module>
+</tns:fuseblower>

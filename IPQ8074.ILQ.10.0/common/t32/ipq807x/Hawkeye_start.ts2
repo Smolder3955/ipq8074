@@ -1,0 +1,6920 @@
+"Configuration Container V2.2"
+"Root"
+"Configuration Tree"
+[
+"BuildNumber"
+"BuildNumber"
+"~"
+value "4"
+]
+[
+"Configuration Container"
+"ConfVersion2"
+"Please upgrade to T32Start version >= 2.4.2 to load this .ts2 file!"
+]
+[
+"SubContainer"
+"Settings"
+"~"
+[
+"SubContainer"
+"GlobalSettings"
+"Global Settings"
+[
+"Boolean"
+"FastStart"
+"Fast start"
+value "yes"
+]
+[
+"Int"
+"Delay between start of multiple instances [sec]"
+"~"
+value "10"
+]
+[
+"ListBasedCombo"
+"Replace empty paths"
+"~"
+value "BN"
+]
+[
+"SubContainer"
+"Saving Location"
+"~"
+[
+"ListBasedCombo"
+"Target Type"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\Hawkeye_start.ts2"
+]
+]
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Default Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%WORKINGDIR%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "C:\T32"
+]
+[
+"String"
+"TempPath"
+"~"
+value "C:\Temp"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "C:\T32\pdf"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value ""
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30000"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+]
+[
+"Configuration V2.2"
+"Configuration2"
+"Emulation"
+[
+"Podbus Device Chain"
+"Podbus Device Chain"
+"DAP"
+[
+"Power Trace Ethernet"
+"Power Trace Ethernet"
+"Core Init"
+[
+"ListBasedCombo"
+"ConnectionType"
+"~"
+value "USB"
+]
+[
+"USBSettings"
+"USBSettings"
+"USB Settings"
+[
+"USBNodeName"
+"USBNodeName"
+"Device Name"
+value ""
+]
+]
+[
+"CitrixSettings"
+"CitrixSettings"
+"Citrix Settings"
+[
+"CitrixNodeName"
+"Node Name"
+"~"
+value ""
+]
+]
+[
+"USBProxySettings"
+"USBProxySettings"
+"USB Proxy Settings"
+[
+"USBProxyDeviceName"
+"Device Name"
+"~"
+value ""
+]
+[
+"USBProxyNodeName"
+"Node Name"
+"~"
+value ""
+]
+[
+"USBProxyPort"
+"Port"
+"~"
+value "0"
+]
+]
+[
+"Parallel Port Settings"
+"Parallel Port Settings"
+"~"
+[
+"ParallelPortNumber"
+"Port"
+"~"
+value "1"
+]
+[
+"ParallelAccesMode"
+"Access Mode"
+"~"
+value "PARPORT"
+]
+[
+"ParallelConnectionMode"
+"Connection Mode"
+"~"
+value "Standard"
+]
+]
+[
+"Ethernet Settings"
+"Ethernet Settings"
+"~"
+[
+"EthernetNodeName"
+"EthernetNodeName"
+"Node Name / IP Address"
+value "san-s4b-22357"
+]
+[
+"EthPort"
+"EthPort"
+"Port"
+value "20000"
+]
+[
+"EthHostPort"
+"EthHostPort"
+"Host Port"
+value "0"
+]
+[
+"ETHINCRPORT"
+"ETHINCRPORT"
+"Increment Ports"
+value "no"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+[
+"SMALLBLOCKS"
+"SMALLBLOCKS"
+"Packet Burst Limitation"
+value "no"
+]
+[
+"ETHCOMPRESSION"
+"ETHCOMPRESSION"
+"Compression"
+value "no"
+]
+[
+"ETHDELAY"
+"ETHDELAY"
+"Delay [ms]"
+value "0"
+]
+[
+"EthConnM"
+"EthConnM"
+"Connect Mode"
+value "N"
+]
+[
+"EthContrBased"
+"EthContrBased"
+"Controller Based"
+value "no"
+]
+]
+[
+"Core"
+"Core"
+"A53_Core0"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30000"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 0"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core0.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000006"
+]
+]
+[
+"Core"
+"Core4"
+"A53_Core1"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20001"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10001"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30001"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 1"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core1.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000014"
+]
+]
+[
+"Core"
+"Core5"
+"A53_Core2"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20002"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10002"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30002"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 2"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core2.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000020"
+]
+]
+[
+"Core"
+"Core6"
+"A53_Core3"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20003"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10003"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30003"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 3"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core3.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000026"
+]
+]
+[
+"Core"
+"Core7"
+"A53_Allcores"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30000"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "A53 All cores"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Cluster0_quadcore.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000030"
+]
+]
+[
+"Core"
+"Core8"
+"RPM"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20004"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10004"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30004"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000032"
+]
+]
+[
+"Core"
+"Core2"
+"Q6"
+[
+"T32Executable"
+"Target"
+"~"
+value "QDSP6"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20005"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10005"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30005"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "C:\offload\emulationbringup\xhou\Q6_cmm\soc\AR_JTAG_Q6.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000039"
+]
+]
+]
+[
+"Power Trace Ethernet"
+"Power Trace Ethernet2"
+"No Init"
+[
+"ListBasedCombo"
+"ConnectionType"
+"~"
+value "PodBus"
+]
+[
+"USBSettings"
+"USBSettings"
+"USB Settings"
+[
+"USBNodeName"
+"USBNodeName"
+"Device Name"
+value ""
+]
+]
+[
+"CitrixSettings"
+"CitrixSettings"
+"Citrix Settings"
+[
+"CitrixNodeName"
+"Node Name"
+"~"
+value ""
+]
+]
+[
+"USBProxySettings"
+"USBProxySettings"
+"USB Proxy Settings"
+[
+"USBProxyDeviceName"
+"Device Name"
+"~"
+value ""
+]
+[
+"USBProxyNodeName"
+"Node Name"
+"~"
+value ""
+]
+[
+"USBProxyPort"
+"Port"
+"~"
+value "0"
+]
+]
+[
+"Parallel Port Settings"
+"Parallel Port Settings"
+"~"
+[
+"ParallelPortNumber"
+"Port"
+"~"
+value "1"
+]
+[
+"ParallelAccesMode"
+"Access Mode"
+"~"
+value "PARPORT"
+]
+[
+"ParallelConnectionMode"
+"Connection Mode"
+"~"
+value "Standard"
+]
+]
+[
+"Ethernet Settings"
+"Ethernet Settings"
+"~"
+[
+"EthernetNodeName"
+"EthernetNodeName"
+"Node Name / IP Address"
+value ""
+]
+[
+"EthPort"
+"EthPort"
+"Port"
+value "20000"
+]
+[
+"EthHostPort"
+"EthHostPort"
+"Host Port"
+value "0"
+]
+[
+"ETHINCRPORT"
+"ETHINCRPORT"
+"Increment Ports"
+value "no"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+[
+"SMALLBLOCKS"
+"SMALLBLOCKS"
+"Packet Burst Limitation"
+value "no"
+]
+[
+"ETHCOMPRESSION"
+"ETHCOMPRESSION"
+"Compression"
+value "no"
+]
+[
+"ETHDELAY"
+"ETHDELAY"
+"Delay [ms]"
+value "0"
+]
+[
+"EthConnM"
+"EthConnM"
+"Connect Mode"
+value "N"
+]
+[
+"EthContrBased"
+"EthContrBased"
+"Controller Based"
+value "no"
+]
+]
+[
+"Core"
+"Core"
+"A53_Core0"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20006"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10006"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30006"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 0"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000045"
+]
+]
+[
+"Core"
+"Core4"
+"A53_Core1"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20007"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10007"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30007"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 1"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000052"
+]
+]
+[
+"Core"
+"Core5"
+"A53_Core2"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20008"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10008"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30008"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 2"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000058"
+]
+]
+[
+"Core"
+"Core6"
+"A53_Core3"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20009"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10009"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30009"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "ARM Core 3"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000064"
+]
+]
+[
+"Core"
+"Core7"
+"RPM"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20010"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10010"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30010"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value ""
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000070"
+]
+]
+]
+]
+]
+[
+"Configuration V2.2"
+"Configuration"
+"Silicon"
+[
+"Podbus Device Chain"
+"Podbus Device Chain"
+"Debugger"
+[
+"Power Debug II"
+"Power Debug II"
+"~"
+[
+"ListBasedCombo"
+"ConnectionType"
+"~"
+value "USB"
+]
+[
+"USBSettings"
+"USBSettings"
+"USB Settings"
+[
+"USBNodeName"
+"USBNodeName"
+"Device Name"
+value ""
+]
+]
+[
+"CitrixSettings"
+"CitrixSettings"
+"Citrix Settings"
+[
+"CitrixNodeName"
+"Node Name"
+"~"
+value ""
+]
+]
+[
+"USBProxySettings"
+"USBProxySettings"
+"USB Proxy Settings"
+[
+"USBProxyDeviceName"
+"Device Name"
+"~"
+value ""
+]
+[
+"USBProxyNodeName"
+"Node Name"
+"~"
+value ""
+]
+[
+"USBProxyPort"
+"Port"
+"~"
+value "0"
+]
+]
+[
+"Parallel Port Settings"
+"Parallel Port Settings"
+"~"
+[
+"ParallelPortNumber"
+"Port"
+"~"
+value "1"
+]
+[
+"ParallelAccesMode"
+"Access Mode"
+"~"
+value "PARPORT"
+]
+[
+"ParallelConnectionMode"
+"Connection Mode"
+"~"
+value "Standard"
+]
+]
+[
+"Ethernet Settings"
+"Ethernet Settings"
+"~"
+[
+"EthernetNodeName"
+"EthernetNodeName"
+"Node Name / IP Address"
+value ""
+]
+[
+"EthPort"
+"EthPort"
+"Port"
+value "20000"
+]
+[
+"EthHostPort"
+"EthHostPort"
+"Host Port"
+value "0"
+]
+[
+"ETHINCRPORT"
+"ETHINCRPORT"
+"Increment Ports"
+value "no"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+[
+"SMALLBLOCKS"
+"SMALLBLOCKS"
+"Packet Burst Limitation"
+value "no"
+]
+[
+"ETHCOMPRESSION"
+"ETHCOMPRESSION"
+"Compression"
+value "no"
+]
+[
+"ETHDELAY"
+"ETHDELAY"
+"Delay [ms]"
+value "0"
+]
+[
+"EthConnM"
+"EthConnM"
+"Connect Mode"
+value "N"
+]
+[
+"EthContrBased"
+"EthContrBased"
+"Controller Based"
+value "no"
+]
+]
+[
+"Core"
+"Core"
+"A53 Core_0"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10000"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30000"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "A53 Core0"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core0.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000016"
+]
+]
+[
+"Core"
+"Core2"
+"A53 Core_1"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20001"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10001"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30001"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "A53 Core1"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\A53\Hawkeye_AR_DAP_CortexA53_Core1.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000022"
+]
+]
+[
+"Core"
+"Core3"
+"A53 Core_2"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20002"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10002"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30002"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "A53 Core2"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "C:\hk_t32_scripts-master\SILICON\core_cmm\Hawkeye_AR_DAP_CortexA53_Core2.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000028"
+]
+]
+[
+"Core"
+"Core4"
+"A53 Core_3"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM64"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20003"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10003"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30003"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "A53 Core3"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "C:\hk_t32_scripts-master\SILICON\core_cmm\Hawkeye_AR_DAP_CortexA53_Core3.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000034"
+]
+]
+[
+"Core"
+"Core7"
+"RPM"
+[
+"T32Executable"
+"Target"
+"~"
+value "ARM"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20004"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10004"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30004"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "RPM Cortex-M3"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\RPM\AR_JTAG_RPM.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000035"
+]
+]
+[
+"Core"
+"Core6"
+"QDSP6"
+[
+"T32Executable"
+"Target"
+"~"
+value "QDSP6"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20005"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10005"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30005"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "QDSP6"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\QDSP6\AR_JTAG_Q6.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value ""
+]
+]
+[
+"Core"
+"Core5"
+"UBI32 Core_0"
+[
+"T32Executable"
+"Target"
+"~"
+value "UBICOM32"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20006"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10006"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30006"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\UBI32\IPQ807X_UBI32_0.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000010"
+]
+]
+[
+"Core"
+"Core8"
+"UBI32 Core_1"
+[
+"T32Executable"
+"Target"
+"~"
+value "UBICOM32"
+]
+[
+"CoreAdvancedOptions"
+"CoreAdvancedOptions"
+"Advanced Settings"
+[
+"DirectorySettings"
+"Directories"
+"Paths"
+[
+"String"
+"WorkingPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/WorkingPath%"
+]
+[
+"String"
+"SystemPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/SystemPath%"
+]
+[
+"String"
+"TempPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/TempPath%"
+]
+[
+"String"
+"HelpPath"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/HelpPath%"
+]
+[
+"String"
+"LicenseFile"
+"~"
+value "%//Settings/CoreAdvancedOptions/Directories/LicenseFile%"
+]
+[
+"Boolean"
+"Force32"
+"Use only 32-bit executable"
+value "no"
+]
+]
+"InterfaceSettings"
+"Interfaces"
+"~"
+[
+"Port"
+"APIPort"
+"API Port"
+[
+"Boolean"
+"APIPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"APIPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"APIPort.PortStartValue"
+"Port Start Value"
+value "20000"
+]
+[
+"Int"
+"APIPort.PortValue"
+"Port Value"
+value "20007"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"IntercomPort"
+"Intercom Port"
+[
+"Boolean"
+"IntercomPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"IntercomPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"IntercomPort.PortStartValue"
+"Port Start Value"
+value "10000"
+]
+[
+"Int"
+"IntercomPort.PortValue"
+"Port Value"
+value "10007"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"Port"
+"GDBPort"
+"GDB Port"
+[
+"Boolean"
+"GDBPort.UsePort"
+"Use Port"
+value "no"
+]
+[
+"Boolean"
+"GDBPort.AutoIncrementPort"
+"Use Auto Increment Port"
+value "yes"
+]
+[
+"Int"
+"GDBPort.PortStartValue"
+"Port Start Value"
+value "30000"
+]
+[
+"Int"
+"GDBPort.PortValue"
+"Port Value"
+value "30007"
+]
+[
+"Protocol"
+"Protocol"
+"~"
+value "UDP"
+]
+[
+"PACKLEN"
+"PACKLEN"
+"Max UDP Packet Size"
+value "1024"
+]
+]
+[
+"DisplaySettings"
+"Display"
+"~"
+[
+"String"
+"Title"
+"~"
+value "TRACE32 PowerView for %T %O [%D @ %N]"
+]
+[
+"FontSize"
+"FontSize"
+"~"
+value "SMALL"
+]
+[
+"Boolean"
+"FullScreen"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Iconic"
+"~"
+value "no"
+]
+[
+"WindowMode"
+"WindowMode"
+"~"
+value "MDI"
+]
+[
+"Language"
+"Language"
+"~"
+value "EN"
+]
+]
+[
+"InternalSettings"
+"InternalSettings"
+"Internal"
+[
+"Boolean"
+"Debug"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Attach"
+"~"
+value "no"
+]
+[
+"Boolean"
+"MultiCore"
+"~"
+value "no"
+]
+[
+"Boolean"
+"NoSelfTest"
+"~"
+value "no"
+]
+[
+"Boolean"
+"Passive"
+"~"
+value "no"
+]
+[
+"String"
+"T32Executable"
+"~"
+value ""
+]
+[
+"String"
+"SysFCC"
+"~"
+value ""
+]
+[
+"String"
+"SysFCCCPU"
+"~"
+value ""
+]
+[
+"Boolean"
+"Win"
+"WineUseWindowsExecutable"
+value "no"
+]
+]
+[
+"StartupScript"
+"StartupScript"
+"~"
+[
+"ListBasedCombo"
+"Source"
+"~"
+value "File"
+]
+[
+"String"
+"File"
+"~"
+value "%WORKINGDIR%\core\UBI32\IPQ807X_UBI32_1.cmm"
+]
+[
+"BuiltinScript"
+"BuiltinScript"
+"Built-in Script"
+value ""
+]
+[
+"String"
+"Parameters"
+"~"
+value ""
+]
+]
+]
+[
+"String"
+"T32ID"
+"~"
+value "T32_1000012"
+]
+]
+]
+]
+]

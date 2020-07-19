@@ -1,0 +1,171 @@
+NETLINK Configuration Utility
+=============================
+The tool is used for configuring the NSS using the NETLINK channel. But, it
+can be ported to any other communication channel between user and kernel
+
+The use case for using the utility is to statically program rules in NSS such
+that it accelerates them inside the NSS. Typically, this would be done by the
+ECM (Enhanced Connection Manager) for use cases where acceleration is required
+automatically. For certain use cases where the flows are known and programming
+them is through a secure and controlled interface such an arrangement will make
+sense.
+
+The programming of the configuration is typically done for the following
+components as of now
+1). IPv4
+2). IPv6
+
+1) General organization
+======================
+The organization of the commands are categorized into a family, command & sub
+parameters.
+
+1.1)family
+==========
+The parameter "family=" selects the command family type e.g., IPv4,
+IPv6 etc. To dump the available families type "usr/sbin/nlcfg".
+
+Example type the following to get the dump of the supported families
+
+$usr/sbin/nlcfg
+[OPT_1]'family=ipv4'
+[OPT_2]'family=ipv6'
+
+type this to select the family
+$usr/sbin/nlcfg family=ipv4
+
+1.2)Commands
+============
+The parameter "cmd=" selects the command inside the family. Each family
+will have a set of base commands that it supports
+
+example type the following to get the dump of the supported commands inside a
+family
+
+$usr/sbin/nlcfg family=ipv4
+[OPT_1]'cmd=flow_add'
+[OPT_2]'cmd=flow_del'
+
+type this to select the command
+$usr/sbin/nlcfg family=ipv4 cmd=flow_add
+
+1.3)Sub parameters
+==================
+There are several sub parameters that are required for each command. Also, this
+varies between families and also between its commands.
+
+2. IPv4
+=======
+This is used for programming the IPv4 routing rules to the NSS. This involves programming of
+*) Ingress and egress interface name
+*) IP address, protocol and port number corresponding to the packet to be routed in
+fast path
+
+2.1 Commands Available
+======================
+The commands that are available can be found typing
+"usr/sbin/nlcfg family=ipv4"
+
+For example typing the above command gives the following output.
+[OPT_1]'cmd=flow_add'
+[OPT_2]'cmd=flow_del'
+
+where the commands are
+*) flow add will add the IPv4 fast path routing rule
+*) flow del will remove the IPv4 fast path routing rule
+
+2.2 Flow Add
+============
+The flow add will add rule to the NSS routing module, so that an incoming packet
+can route through the fast path or slow path.
+
+2.2.1 Routing Options
+=====================
+The routing options are
+*) "sel_sip:" Source IP address of the packet which is to be routed
+
+*) "sel_dip:" Destination IP address of the packet which is to be routed
+
+*) "sel_proto" Protocol of the packet which has to be routed
+	"sel_proto=udp" for clear text UDP packet
+	"sel_proto=tcp" for clear text TCP packet
+	"sel_proto=esp" for clear text ESP packet
+
+*) "sel_sport" Source port number in L4 header of the packet to be routed.
+
+*) "sel_dport" Destination port number in L4 header of the packet to be routed.
+
+*) "ifname_in" Ingress interface name
+	"ifname_in=eth0" if eth0 is the ingress interface
+	"ifname_in=ipsectun0" if ipsec tunnel is the ingress interface
+
+
+*) "ifname_out" Egress interface name
+	"ifname_out=eth0" if eth0 is the egress interface
+	"ifname_out=ipsectun0" if ipsec tunnel is the egress interface.
+
+*) "iftype_in" Ingress interface type
+	"iftype_in=0" for non tunnel interfaces
+	"iftype_in=<enum_num>" for tunnel ingress interfaces. <enum_num> is based on the corresponding tunnel defined in the message structure
+
+*) "iftype_out" Egress interface type
+	"iftype_out=0" for non tunnel interfaces
+	"iftype_out=<enum_num>" for tunnel egress interfaces. <enum_num> is based on the corresponding tunnel defined in the message structure
+
+3. IPv6
+=======
+This is used for programming the IPv6 routing rules to the NSS. This involves programming of
+*) Ingress and egress interface name
+*) IP address, protocol and port number corresponding to the packet to be routed in
+fast path
+
+3.1 Commands Available
+======================
+The commands that are available can be found typing
+"usr/sbin/nlcfg family=ipv6"
+
+For example typing the above command gives the following output.
+[OPT_1]'cmd=flow_add'
+[OPT_2]'cmd=flow_del'
+
+where the commands are
+*) flow add will add the IPv6 fast path routing rule
+*) flow del will remove the IPv6 fast path routing rule
+
+3.2 Flow Add
+============
+The flow add will add rule to the NSS routing module, so that an incoming packet
+can route through the fast path or slow path.
+
+3.2.1 Routing Options
+=====================
+The routing options are
+*) "sel_sip:" Source IP address of the packet which is to be routed
+
+*) "sel_dip:" Destination IP address of the packet which is to be routed
+
+*) "sel_proto" Protocol of the packet which has to be routed
+	"sel_proto=udp" for clear text UDP packet
+	"sel_proto=tcp" for clear text TCP packet
+	"sel_proto=esp" for clear text ESP packet
+
+*) "sel_sport" Source port number in L4 header of the packet to be routed.
+
+*) "sel_dport" Destination port number in L4 header of the packet to be routed.
+
+*) "ifname_in" Ingress interface name
+	"ifname_in=eth0" if eth0 is the ingress interface
+	"ifname_in=ipsectun0" if ipsec tunnel is the ingress interface
+
+
+*) "ifname_out" Egress interface name
+	"ifname_out=eth0" if eth0 is the egress interface
+	"ifname_out=ipsectun0" if ipsec tunnel is the egress interface.
+
+*) "iftype_in" Ingress interface type
+	"iftype_in=0" for non tunnel interfaces
+	"iftype_in=<enum_num>" for tunnel ingress interfaces. <enum_num> is based on the corresponding tunnel defined in the message structure
+
+*) "iftype_out" Egress interface type
+	"iftype_out=0" for non tunnel interfaces
+	"iftype_out=<enum_num>" for tunnel egress interfaces. <enum_num> is based on the corresponding tunnel defined in the message structure

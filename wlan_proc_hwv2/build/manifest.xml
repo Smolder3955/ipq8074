@@ -1,0 +1,10 @@
+<config>
+  <image_tree>
+    <name>WLAN.HK.2.0</name>
+    <build_id>WLAN.HK.2.0-01576-QCAHKSWPL_SILICONZ-1</build_id>
+    <branch_point_revision/>
+    <revision>01576</revision>
+    <spin>1</spin>
+    <client>QCAHKSWPL_SILICONZ</client>
+  </image_tree>
+</config>

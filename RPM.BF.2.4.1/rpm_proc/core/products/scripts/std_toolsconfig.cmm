@@ -1,0 +1,34 @@
+//============================================================================
+//  Name:                                                                     
+//    std_toolsconfig.cmm 
+//
+//  Description:                                                              
+//    None 
+//                                                                            
+// Copyright (c) 2019 by QUALCOMM, Incorporated.  All Rights Reserved.        
+//============================================================================
+//                                                                            
+// *** AUTO GENERATED FILE - DO NOT EDIT                                      
+//                                                                            
+// GENERATED: Fri May 31 08:11:19 2019 
+//============================================================================
+
+
+GLOBAL &RPM_ABS_BUILD_ROOT
+GLOBAL &RPM_BUILD_ROOT
+GLOBAL &RPM_CBSP_ROOT
+GLOBAL &CHIPSET
+GLOBAL &RPM_SCRIPTSDIR
+GLOBAL &RPM_BUILDMSDIR
+
+
+
+&RPM_ABS_BUILD_ROOT="/local/mnt/workspace/CRMBuilds/RPM.BF.2.4.1-00060-IPQ8074AAAAANAZR-1_20190531_080735/b/rpm_proc"
+&RPM_BUILD_ROOT=os.ppd()+"/../../.."
+&RPM_CBSP_ROOT=os.ppd()+"/../.."
+&CHIPSET="8074"
+&RPM_SCRIPTSDIR=os.ppd()+"/../../products"
+&RPM_BUILDMSDIR=os.ppd()+"/../../../rpm/build/ms"
+
+
+ENDDO

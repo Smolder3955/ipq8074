@@ -1,0 +1,39 @@
+/*
+ * Copyright (c) 2019 Qualcomm Technologies, Inc.
+ * All Rights Reserved.
+ * Confidential and Proprietary - Qualcomm Technologies, Inc.
+ */
+
+#ifndef __CNSS_GENL_MSG__
+#define __CNSS_GENL_MSG__
+
+#define CNSS_GENL_FAMILY_NAME "cnss-genl"
+#define CNSS_GENL_MCAST_GROUP_NAME "cnss-genl-grp"
+#define CNSS_GENL_BUF_SIZE (256 * 1024)
+
+enum {
+	CNSS_GENL_ATTR_MSG_UNSPEC,
+	CNSS_GENL_ATTR_MSG_TYPE,
+	CNSS_GENL_ATTR_MSG_FILE_NAME,
+	CNSS_GENL_ATTR_MSG_TOTAL_SIZE,
+	CNSS_GENL_ATTR_MSG_SEG_ID,
+	CNSS_GENL_ATTR_MSG_END,
+	CNSS_GENL_ATTR_MSG_DATA_LEN,
+	CNSS_GENL_ATTR_MSG_DATA,
+	__CNSS_GENL_ATTR_MAX,
+};
+#define CNSS_GENL_ATTR_MAX (__CNSS_GENL_ATTR_MAX - 1)
+
+enum {
+	CNSS_GENL_CMD_UNSPEC,
+	CNSS_GENL_CMD_MSG,
+	__CNSS_GENL_CMD_MAX,
+};
+#define CNSS_GENL_CMD_MAX (__CNSS_GENL_CMD_MAX - 1)
+
+enum {
+	CNSS_GENL_MSG_TYPE_UNSPEC,
+	CNSS_GENL_MSG_TYPE_QDSS,
+};
+
+#endif

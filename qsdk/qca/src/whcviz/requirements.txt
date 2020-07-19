@@ -1,0 +1,5 @@
+whcmvc>=3.0.0
+Twisted==15.2.1
+txaio==1.0.0
+autobahn==0.10.4
+enum34==1.0

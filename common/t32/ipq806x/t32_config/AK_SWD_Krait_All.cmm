@@ -1,0 +1,68 @@
+;###################################################
+//
+// Copyright (C) 2018 Qualcomm Technologies, Inc.
+//
+// All rights reserved.
+// Confidential and Proprietary - Qualcomm Technologies, Inc.
+//
+;###################################################
+
+;*****************************************************************************
+;**           AK_DAP_Krait_All.CMM                                             **
+;*****************************************************************************
+
+; select CPU and options
+
+SYStem.Reset
+SYStem.CPU KRAIT
+SYStem.JTAGCLOCK CTCK 5.0MHz
+SYStem.OPTION ENRESET OFF
+SYStem.OPTION RESBREAK ON
+SYStem.CONFIG	corenumber	2
+
+core.assign 1 2
+
+core.select 0
+
+SYStem.CONFIG SLAVE ON
+SYStem.CONFIG COREBASE      0x80010000	0x80012000
+SYStem.CONFIG CTIBASE          0x80002000 0x80002000 ;CTI base is wrong needs to be fixed
+SYStem.CONFIG ETMBASE          0x8001C000 0x8001D000
+SYStem.CONFIG CTICONFIG        CORTEXV1
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG DAPIRPOST 0.
+SYStem.CONFIG DAPDRPOST 0.
+SYStem.CONFIG DAPIRPOST 11.
+SYStem.CONFIG DAPDRPOST 1.
+SYStem.CONFIG SWDP ON
+SYStem.CONFIG DEBUGPORTTYPE SWD
+SYStem.CONFIG MULTITAP NONE
+SYStem.CONFIG CTI RESET
+SYStem.OPTION DCDIRTY ON
+SYStem.OPTION CFLUSH ON
+
+
+SYStem.MEMACCESS DAP
+
+BREAK.SEL PROGRAM onchip
+
+TRONCHIP.SET FIQ OFF
+TRONCHIP.SET IRQ OFF
+TRONCHIP.SET DABORT OFF
+TRONCHIP.SET PABORT OFF
+TRONCHIP.SET UNDEF OFF
+TRONCHIP.SET SWI OFF
+TRONCHIP.SET RESET OFF
+
+RADIX HEX
+SETUP.VAR %HEX.ON
+MODE.HLL
+
+ETM.OFF
+
+autostore , history
+
+SYStem.STATE
+
+ENDDO

@@ -1,0 +1,50 @@
+From 41390ef64b4eae818ba9f746080ca083b7f7670f Mon Sep 17 00:00:00 2001
+From: Subrat Mishra <subratm@qti.qualcomm.com>
+Date: Wed, 5 Sep 2018 16:59:20 +0530
+Subject: [PATCH] qca-hostap: Add FILS cfg80211 HLP support
+
+In FILS connection include HLP data in Assoc response frame
+while driver is running with cfg80211 interface.
+
+Change-Id: I8672a50e51fecbbad6f629b91d46ff9e4b325c56
+Signed-off-by: Subrat Mishra <subratm@qti.qualcomm.com>
+
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index c685385..b00308a 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -3341,6 +3341,12 @@ static void handle_assoc(struct hostapd_data *hapd,
+ 	    sta->auth_alg == WLAN_AUTH_FILS_PK) {
+ 		int res;
+ 
++		tmp = os_memdup(pos, left);
++		if (!tmp) {
++			resp = WLAN_STATUS_UNSPECIFIED_FAILURE;
++			goto fail;
++		}
++
+ 		if (hostapd_drv_fils_crypto_capable(hapd)) {
+ 			const u8* ses;
+ 
+@@ -3362,16 +3368,12 @@ static void handle_assoc(struct hostapd_data *hapd,
+ 				resp = WLAN_STATUS_UNSPECIFIED_FAILURE;
+ 				goto fail;
+ 			}
++
++			pos = tmp;
+ 		} else {
+ 			/* The end of the payload is encrypted. Need to decrypt
+ 			 * it before parsing. */
+ 
+-			tmp = os_memdup(pos, left);
+-			if (!tmp) {
+-				resp = WLAN_STATUS_UNSPECIFIED_FAILURE;
+-				goto fail;
+-			}
+-
+ 			res = fils_decrypt_assoc(sta->wpa_sm, sta->fils_session, mgmt,
+ 						 len, tmp, left);
+ 			if (res < 0) {
+-- 
+1.9.1
+

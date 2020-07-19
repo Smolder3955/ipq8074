@@ -1,0 +1,177 @@
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ../..
+
+obj-m += qca_da.o
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+ifeq ($(strip ${QCA_AIRTIME_FAIRNESS}),1)
+EXTRA_CFLAGS+= -DWLAN_ATF_ENABLE
+INCS += -I$(obj)/$(DEPTH)/offload/wlan/target_if/atf
+endif
+
+ifeq ($(QCA_DFS_COMPONENT_ENABLE),1)
+EXTRA_CFLAGS+= -DDFS_COMPONENT_ENABLE
+endif
+
+ifeq ($(strip ${UNIFIED_SMARTANTENNA}),1)
+EXTRA_CFLAGS+= -DWLAN_SA_API_ENABLE
+INCS += -I$(obj)/$(DEPTH)/offload/wlan/target_if/sa_api
+endif
+
+INCS += -I$(obj)/$(DEPTH)/include -I$(obj)/$(DEPTH)/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/if_lmac -I$(obj)/$(DEPTH)/umac/crypto \
+        -I$(obj)/$(DEPTH)/umac/scan -I$(obj)/$(DEPTH)/umac/resmgr \
+        -I$(obj)/$(DEPTH)/umac/pm -I$(obj)/$(DEPTH)/umac/txrx \
+        -I$(obj)/$(DEPTH)/umac/acs -I$(obj)/$(DEPTH)/umac/txbf \
+        -I$(obj)/$(DEPTH)/umac/wnm \
+        -I$(obj)/$(DEPTH)/umac/tdls \
+        -I$(obj)/$(DEPTH)/umac/rpt_placement \
+        -I$(obj)/$(DEPTH)/umac/wifipos \
+        -I$(obj)/$(DEPTH)/umac/wds -I$(obj)/$(DEPTH)/umac/ique \
+        -I$(obj)/$(DEPTH)/direct_attach/hal -I$(obj)/$(DEPTH)/direct_attach/lmac/ath_dev \
+        -I$(obj)/$(DEPTH)/direct_attach/lmac/scan \
+        -I$(obj)/$(DEPTH)/direct_attach/hal/$(OS) \
+        -I$(obj)/$(DEPTH)/umac/vi_dbg \
+        -I$(obj)/$(DEPTH)/umac/smart_antenna \
+        -I$(obj)/$(DEPTH)/umac/smart_ant \
+        -I$(obj)/$(DEPTH)/umac/ald \
+        -I$(obj)/$(DEPTH)/lmac/ath_pktlog \
+        -I$(obj)/$(DEPTH)/direct_attach/lmac/ratectrl \
+        -I$(obj)/$(DEPTH)/os/linux/mem/ \
+        -I$(obj)/$(DEPTH)/umac/base \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/obj_mgr/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/init_deinit/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/mgmt_txrx/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/spectral/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/global_umac_dispatcher/lmac_if/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/global_lmac_if/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/cmn_defs/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/scan/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/scheduler/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/qdf/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/qal/inc \
+        -I$(obj)/$(DEPTH)/umac/scan \
+        -I$(obj)/$(DEPTH)/umac/son/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/son/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/umac/airtime_fairness/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/regulatory/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/scan/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/cp_stats/inc \
+        -I$(obj)/$(DEPTH)/dp/ \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_objmgr/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/vdev_mgr/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/direct_attach/dadp/core/inc \
+	-I$(obj)/$(DEPTH)/direct_attach/dadp/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/utils/inc
+
+ifeq ($(WLAN_SUPPORT_GREEN_AP), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/green_ap/dispatcher/inc
+endif
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/crypto/inc
+INCS += -I$(obj)/$(DEPTH)/component_dev/crypto/inc
+endif
+
+ifeq ($(TARGET),ANDROID)
+COPTS += -Wframe-larger-than=4096
+endif
+
+KASAN := $(shell grep -w CONFIG_KASAN $(KERNELPATH)/.config | cut -f 2 -d '=')
+
+ifeq ($(TARGET),i386-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #x86 stack frame limit
+
+ifeq ($(TARGET),armv4-le-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #arm stack frame limit
+
+
+EXTRA_CFLAGS+= $(INCS) $(COPTS)
+
+ifeq ($(strip $(ATH_HIF_TYPE)),pci)
+EXTRA_CFLAGS += -DHIF_PCI
+endif
+
+OSDEP_SRC := $(DEPTH)/os/linux/src
+
+qca_da-objs := $(OSDEP_SRC)/ath_linux.o \
+               $(DEPTH)/direct_attach/umac/if_lmac/if_ath.o \
+               $(DEPTH)/direct_attach/umac/if_lmac/ath_cwm.o \
+               $(DEPTH)/direct_attach/umac/if_lmac/ath_cwm_project.o \
+               $(DEPTH)/direct_attach/umac/if_lmac/if_ath_quiet.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_dp.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_frag.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_uapsd.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_amsdu.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_mat.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_output.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_input.o \
+               $(DEPTH)/direct_attach/dadp/core/src/da_aponly.o \
+               $(DEPTH)/direct_attach/dadp/dispatcher/src/da_dp_public.o
+
+ifeq ($(UMAC_SUPPORT_ACFG), 1)
+qca_da-objs += $(OSDEP_SRC)/ath_ioctl_acfg.o
+endif
+
+ifeq ($(strip $(BUSNAME)),dual)
+qca_da-objs += if_ath_pci.o
+qca_da-objs += if_ath_ahb.o
+ifeq ($(VERSION), 4)
+ifeq ($(PATCHLEVEL), 4)
+endif
+endif
+endif
+
+ifeq ($(strip $(BUSNAME)),pci)
+qca_da-objs += if_ath_pci.o
+endif
+
+ifeq ($(strip $(BUSNAME)),ahb)
+qca_da-objs += if_ath_ahb.o
+ifeq ($(VERSION), 4)
+ifeq ($(PATCHLEVEL), 4)
+endif
+endif
+endif
+
+ifeq ($(QCA_THIRDPARTY), 1)
+EXTRA_CFLAGS += -DQCA_PARTNER_DA_SUPPORT=1 -DQCA_PARTNER_OL_SUPPORT=0
+endif
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: qca_da.ko
+
+qca_da.mod.o: qca_da.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+qca_da.o: ${qca_da-objs}
+	$(LD) -m elf32btsmip -r -o qca_da.o $(qca_da-objs)
+	$(KERNELPATH)/scripts/mod/modpost qca_da.o
+
+qca_da.ko: qca_da.o qca_da.mod.o
+	$(LD) $(LDOPTS) -o qca_da.ko qca_da.o qca_da.mod.o
+
+%.o: %.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif

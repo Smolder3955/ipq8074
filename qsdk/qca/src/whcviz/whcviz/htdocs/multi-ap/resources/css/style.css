@@ -1,0 +1,109 @@
+/**
+ * @@-COPYRIGHT-START-@@
+ *
+ * Copyright (c) 2015 Qualcomm Atheros, Inc.
+ * All rights reserved.
+ * Qualcomm Atheros Confidential and Proprietary.
+ *
+ * @@-COPYRIGHT-END-@@
+ */
+
+body {
+	font: 10px arial;
+}
+.line {
+	fill: none;
+	stroke-width: 4px;
+}
+.chartline {
+	fill: none;
+	stroke-width: 1px;
+}
+.line1{
+	fill: none;
+	stroke: black;
+	stroke-width: 1px;
+}
+.outer,
+.inner {
+  shape-rendering: crispEdges;
+}
+.outer {
+  fill: none;
+  stroke: #000;
+}
+#main {
+	background-image: url("../images/background_02.png");
+	background-repeat: no-repeat;
+    width: 1600px;
+    height: 900px;
+    border: 4px solid grey;
+    margin: 25px;
+}
+	
+#band{
+	left: 40px; 
+	top: 0px; 
+	position: absolute; 
+	width: 100%; 
+	height: 720px;
+}
+#chart{
+	left: 36px; 
+	top: 790px; 
+	position: absolute; 
+	width: 1600px; 
+	height: 142px;
+}
+#title {
+	width: 1000px;
+	height: 100px;
+	float: left;
+	margin-left: 5px;
+	margin-top: 45px;
+	font-family: "Arial";
+	font-style: normal;
+	font-size: 60px;
+	font-weight: normal;
+    color: "#333333";
+}
+#powerby {
+	width: 250px;
+	height: 100px;
+	float: right;
+	margin-left: 0px;
+	margin-top: 45px;
+	font-family: "Arial";
+	font-style: normal;
+	font-size: 18px;
+	font-weight: normal;
+    color: "#333333";
+}
+#titleimage {
+	float: left;
+	margin-left: 60px;
+	margin-top: 50px;
+}
+.chart .axis {
+	stroke-width: 1;
+}
+
+.chart .axis .tick line {
+	stroke: black;
+}
+
+.chart .axis .tick text {
+	fill: black;
+	font-size: 0.7em;
+}
+
+.chart .axis .domain {
+	fill: none;
+	stroke:  grey;
+}
+
+.chart .group {
+	fill: none;
+	stroke: black;
+	stroke-width: 1.5;
+}

@@ -1,0 +1,159 @@
+#===============================================================================
+#
+# PARTITION_TOOL_EXE.EXE  build script
+#
+# GENERAL DESCRIPTION
+#    Partition Tool EXE image build script
+#
+# Copyright (c) 2012, 2015, 2017 Qualcomm Technologies, Inc.
+# All Rights Reserved
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+#-------------------------------------------------------------------------------
+#
+#                      EDIT HISTORY FOR FILE
+#
+#  This section contains comments describing changes made to the module.
+#  Notice that changes are listed in reverse chronological order.
+#
+# when       who     what, where, why
+# --------   ---     ---------------------------------------------------------
+# 01/27/15   an      nor_tool_exe script copied from Akronite
+#===============================================================================
+import os
+Import('env')
+
+env = env.Clone()
+
+#------------------------------------------------------------------------------
+# Check if we need to load this script or just bail-out
+#------------------------------------------------------------------------------
+# alias first alias is always the target then the other possibles aliases
+
+aliases = [
+   'partition_tool_exe',
+]
+
+image_name = str(aliases[0]).upper()
+env.Replace(PROC = 'x86')
+
+if not env.CheckAlias(image_name, aliases):
+   Return()
+
+#------------------------------------------------------------------------------
+# Init defualt values this PROC/Image
+#------------------------------------------------------------------------------
+# Init root env soo all scosntructs will add their libs
+env.Replace(ROOT_ENV = env)
+env.Replace(LIBS = [])
+env.Replace(IMAGE_ENV = env)
+env.Replace(IMAGE_NAME = image_name)
+
+# set other variables used by the build system...
+env.Replace(PLAT = 'cygwin')
+env.Replace(INSTALL_LIBPATH = env.subst('${INSTALL_LIBPATH}/${PROC}'))
+env.Replace(BUILDPATH = 'flash/' + image_name.lower())
+env.Replace(BUILD_ID = env.subst('${BUILD_ID}'))
+
+if env['MSM_ID'] not in ['6195', '6295', '6695', '6615']:
+   env.Replace(BUILD_ID = env.subst('${BUILD_ID}A'))
+env.Replace(CUST_H = env.subst('CUST${BUILD_ID}.H').lower())
+
+# set image type
+env.Replace(MODEM_PROC = env.subst('${PROC}'))
+env.Replace(PARTITION_TOOL_EXE = env.subst('${PROC}'))
+
+# add environment variables
+env.Replace(BUILD_TOOL_CHAIN = 'yes')
+
+#===============================================================================
+# PARTITION_TOOL build rules
+#===============================================================================
+
+#------------------------------------------------------------------------------
+# define builder for nor_param_cmm
+#------------------------------------------------------------------------------
+
+#------------------------------------------------------------------------------
+# Configure and load in CBSP uses and path variables
+#------------------------------------------------------------------------------
+env.InitBuildConfig()
+
+#------------------------------------------------------------------------------
+# Load in tools scripts, and re define our CCCOM string
+#------------------------------------------------------------------------------
+env.Tool('gcc_x86', toolpath = ['${BUILD_ROOT}/tools/build/scons/scripts'])
+
+#------------------------------------------------------------------------------
+# Print banner
+#------------------------------------------------------------------------------
+env.PrintImageBanner(image_name)
+
+# add extension flags for DBL
+env.Append(CPPDEFINES = [
+   "BUILD_FOR_X86",
+   "BUILD_TOOL_CHAIN",
+   "FLASH_SINGLE_THREADED",
+   "ENDIAN_LITTLE",
+   "BUILD_JNAND",
+   "BUILD_NAND",
+   "IMAGE_MODEM_PROC",
+   "FLASH_LOG_H=\\\"flash_log.h\\\"",
+   "CUST_H=\"\\\"${CUST_H}\\\"\""
+])
+
+#-------------------------------------------------------------------------------
+# Libraries Section
+#-------------------------------------------------------------------------------
+# load Core BSP Lib build rule scripts
+env.LoadCoreBSPLibScripts()
+
+x86_libs = [
+#      File(env.SubstRealPath('${ARMLIB}/armlib/m_t_pu.l'))
+]
+
+subsystem = ARGUMENTS.get('subsystem', None)
+if not subsystem:
+   env.AddLibsToImage('PARTITION_TOOL_EXE', x86_libs)
+
+root_env = env['ROOT_ENV']
+libs = root_env['LIBS']
+libs_path = env['INSTALL_LIBPATH']
+
+#-------------------------------------------------------------------------------
+# Source PATH
+#-------------------------------------------------------------------------------
+SRCPATH = "${BUILD_ROOT}/core/storage/flash/tools/src/nor"
+
+if not env.SubstPathExists(SRCPATH):
+   SRCPATH = "${BUILD_ROOT}/drivers/flash/tools/src"
+
+#print env.Dump()
+#print env.subst(env['CPPDEFINES'])
+
+#-------------------------------------------------------------------------------
+# Beging building PARTITION_TOOL_EXE
+#-------------------------------------------------------------------------------
+env.Replace(TARGET_NAME = 'partition_tool')
+
+partition_tool_exe = env.Program('${TARGET_NAME}', source=[], LIBS=libs, LIBPATH=libs_path)
+
+# copy elf and reloc to needed locations for AMSS tools to load on target
+install_target_exe = env.Install(SRCPATH, partition_tool_exe)
+
+#===============================================================================
+# Define units that will be build
+#===============================================================================
+partition_tool_units = env.Alias (
+   'partition_tool_units', install_target_exe
+)
+
+subsystem = ARGUMENTS.get('subsystem', None)
+
+# user overide default units
+if subsystem:
+   partition_tool_units = env['LIBS']
+
+# add aliases
+for alias in aliases:
+   env.Alias(alias, partition_tool_units)

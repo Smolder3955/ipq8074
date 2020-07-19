@@ -1,0 +1,14 @@
+#ifndef _ERR_H
+#define _ERR_H
+enum {
+	NO_RESPONSE,
+	CANT_SEND_REQ,
+	INVALID_RESPONSE,
+	NO_MEMORY,
+	NO_FILE
+}ERROR_CODES;
+
+
+#endif
+
+

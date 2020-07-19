@@ -1,0 +1,137 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+Akronite Lauterbach
+===================
+
+AK_T32 contains the minimal required TRACE32(T32) cmm scripts to start
+T32 for Akronite reference and development boards DB149, AP148, AP145 for the
+purpose of flashing single FIT image. Please ensure T32 is installed in your
+Windows machine and follow the below steps
+
+The AK_T32 directory structure
+
+|--AK_T32Start.ts2
+|--README
+|--t32_config
+|  |-- AK_DAP_Krait0.cmm
+|  |-- AK_DAP_Krait1.cmm
+|  |-- AK_DAP_RPM.cmm
+|  |-- AK_SWD_Krait0.cmm
+|  |-- AK_SWD_Krait1.cmm
+|  |-- AK_SWD_RPM.cmm
+|--t32_scripts
+   |-- basewin.cmm
+   |-- intercom_run_script_on_rpm.cmm
+   |-- L2_krait_power_up_sequence.cmm
+   |-- load_code_APPS.cmm
+   |-- load_code_RPM_db.cmm
+   |-- init_rpm_db.cmm
+   |-- semihost_setup_apps.cmm
+   |-- semihost_setup_rpm.cmm
+   |-- symbols.cmm
+   |-- symbols_VI.cmm
+   |-- t32_config_apps.cmm
+   |-- t32_config_rpm.cmm
+   |-- tiny_axf_ap148.axf
+   |-- tiny_axf_ap145.axf
+   |-- tiny_axf_basewin.cmm
+   |-- tiny_axf_db149.axf
+
+Step1: Starting T32
+====================
+
+Connect JTAG cable
+Connect the serial-USB cable
+Open serial terminal with baudrate 115200
+
+Starting T32: Enter to Directory $CLONED_DIR\common\t32\
+	      run AK_T32Start.ts2
+
+Please ignore high version warning messages
+
+Step3: Starting T32 RPM Window
+================================
+
+<<In T32Start V2.221 window>>
+Select JTAG DAP Mode1: Podbus Device Chain1:RPM and then click Start Button
+
+Step4: Starting T32 Krait-0 Window
+===================================
+
+<In T32Start V2.221 window>>
+Select JTAG DAP Mode1: Podbus Device Chain?2:Krait0 and then click Start Button
+
+Step5: RPM Out of Reset
+==================================
+
+In DAP (RPM) ARM7 window run the following commands:
+
+A) Based on board type, type one of the below command
+
+    cd.do t32_scripts\load_code_RPM_db.cmm 1 1 db149 (for db149 board, wait till execution completes)
+
+    cd.do t32_scripts\load_code_RPM_db.cmm 1 1 ap148 (for ap148 board, wait till execution completes)
+
+    cd.do t32_scripts\load_code_RPM_db.cmm 1 1 ap145 (for ap145 board, wait till execution completes)
+
+B) wait for message "Init Complete, proceed further" in RPM TERM.GATE window and break
+
+    break
+
+C) Set the RAM BASE
+
+    d.s 0xa40020++7 %le %long 0x4000
+
+D) Clear RPM T32 Window
+
+    winclear
+
+Step6: Krait-0 Out of Reset
+=================================
+
+In DAP (Krait 0) ARM7 window run the following commands:
+
+A)  cd.do t32_scripts\load_code_APPS.cmm (wait till execution completes)
+
+Step7: Flash the Images
+=================================
+
+B) Load the IPQ806x IMAGE (ipq806x-nand.img )using the following command (if you want to flash the new image)
+
+    data.load.binary $IMAGE_DIR\ipq806x-single.img 0x41000000
+
+C) Load SMEM as below
+
+    data.load.binary $IMAGE_DIR\smem.bin 0x40400000
+
+D) Load U-Boot (u-boot) as below
+
+    data.load.elf $IMAGE_DIR\u-boot
+
+E) Execute u-boot
+
+    go
+
+U-boot prompt will appear as below and at the U-boot prompt run the following
+commands in u-boot prompt to flash the the image loaded in step B)
+
+imgaddr=0x41000000
+source $imgaddr:script
+
+Step8: Remove JTAG
+===============================
+
+In DAP(Krait 0) ARM7 Window
+Click <Break> in the DAP Krait 0 ARM7 window
+
+In DAP (RPM) ARM7 Window
+Click <In Target Reset>  and then <Reset CPU Register> in the DAP RPM ARM7 window
+
+DAP (Krait0) ARM7 "&" DAP(RPM)ARM7 Window
+Close both the DAP Krait 0 ARM7 and DAP RPM ARM7 window
+
+Remove JTAG and Power cycle the board

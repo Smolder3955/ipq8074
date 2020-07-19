@@ -1,0 +1,21 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;****************************************************************
+;	semihost_setup_rpm.cmm				       **
+;****************************************************************
+
+print "Loading Semihosting Setup"
+
+break.set 0x0008
+term.heapinfo 0x30000 0x38000 0x3FB00 0x38000
+term.method armswi
+term.scroll on
+term.mode string
+term.size 80. 1000.
+
+enddo

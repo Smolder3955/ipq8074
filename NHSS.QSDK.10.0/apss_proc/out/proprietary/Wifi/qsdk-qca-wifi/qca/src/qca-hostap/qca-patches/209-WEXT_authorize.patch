@@ -1,0 +1,65 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..a9f3aae 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -76,6 +76,7 @@ struct driver_atheros_data {
+ 	/* Last IOC_P2P_SET_CHANNEL req_ie */
+ 	unsigned int req_id;
+ 	u8  own_addr[ETH_ALEN];
++	u8 bssid[ETH_ALEN];
+ 
+ 	int drv_in_scan;
+ 	int drv_in_remain_on_chan;
+@@ -3397,6 +3398,44 @@ driver_atheros_set_ap_wps_ie(void *priv, const struct wpabuf *beacon,
+ 	return 0;
+ }
+ 
++#ifndef CONFIG_NO_STDOUT_DEBUG
++static const char *
++ether_sprintf(const u8 *addr)
++{
++	static char buf[sizeof(MACSTR)];
++
++	if (addr != NULL)
++		os_snprintf(buf, sizeof(buf), MACSTR, MAC2STR(addr));
++	else
++		os_snprintf(buf, sizeof(buf), MACSTR, 0, 0, 0, 0, 0, 0);
++	return buf;
++}
++#endif /* CONFIG_NO_STDOUT_DEBUG */
++
++static int driver_atheros_set_supp_port(void *priv, int authorized)
++{
++	struct driver_atheros_data *drv = priv;
++	struct ieee80211req_mlme mlme;
++	int ret = 0;
++
++	driver_atheros_get_bssid(priv, drv->bssid);
++	wpa_printf(MSG_INFO, "%s: addr=%s authorized=%d",
++		   __func__, ether_sprintf(drv->bssid), authorized);
++
++	if (authorized)
++		mlme.im_op = IEEE80211_MLME_AUTHORIZE;
++	else
++		mlme.im_op = IEEE80211_MLME_UNAUTHORIZE;
++	mlme.im_reason = 0;
++	os_memcpy(mlme.im_macaddr, drv->bssid, IEEE80211_ADDR_LEN);
++	ret = set80211priv(drv, IEEE80211_IOCTL_SETMLME, &mlme, sizeof(mlme),0);
++	if (ret < 0) {
++		wpa_printf(MSG_ERROR, "%s: Failed to %sauthorize STA " MACSTR,
++			   __func__, authorized ? "" : "un", MAC2STR(drv->bssid));
++	}
++
++	return ret;
++}
+ 
+ static const u8 * driver_atheros_get_mac_addr(void *priv)
+ {
+@@ -4252,6 +4291,7 @@ const struct wpa_driver_ops wpa_driver_athr_ops = {
+ 	.if_add = driver_atheros_if_add,
+ 	.if_remove = driver_atheros_if_remove,
+ 	.set_ap_wps_ie = driver_atheros_set_ap_wps_ie,
++	.set_supp_port = driver_atheros_set_supp_port,
+ 	.get_mac_addr = driver_atheros_get_mac_addr,
+ 	.deinit_ap = driver_atheros_deinit_ap,
+ 	.get_noa = athr_get_noa,

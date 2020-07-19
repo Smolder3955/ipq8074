@@ -1,0 +1,23 @@
+qca-hostap: Disable mesh for SAE
+
+---
+ wpa_supplicant/mesh.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/wpa_supplicant/mesh.c b/wpa_supplicant/mesh.c
+index c0c8f91..1d45868 100644
+--- a/wpa_supplicant/mesh.c
++++ b/wpa_supplicant/mesh.c
+@@ -204,7 +204,8 @@ static int wpa_supplicant_mesh_init(struct wpa_supplicant *wpa_s,
+ 
+ 	bss->conf = *conf->bss;
+ 	bss->conf->start_disabled = 1;
+-	bss->conf->mesh = MESH_ENABLED;
++	//bss->conf->mesh = MESH_ENABLED;
++	bss->conf->mesh = 0;
+ 	bss->conf->ap_max_inactivity = wpa_s->conf->mesh_max_inactivity;
+ 	bss->iconf = conf;
+ 	ifmsh->conf = conf;
+-- 
+1.9.1
+

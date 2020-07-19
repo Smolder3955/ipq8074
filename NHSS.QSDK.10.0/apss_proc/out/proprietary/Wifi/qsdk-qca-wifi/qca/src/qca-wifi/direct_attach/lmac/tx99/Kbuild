@@ -1,0 +1,65 @@
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ../../..
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+INCS += -I$(HAL) -I$(HAL)/$(OS) -I$(obj)/inc -I$(ATH) -I$(ATH_RATE) -I$(WLAN) -I$(IF_WLAN) -I${ADF_ADF_INC} -I${ADF_LNX_OS_INC} -I${ADF_LNX_NBUF_INC} -I${ADF_LNX_INC} -I${ADF_LNX_NET_INC} -I$(obj)/$(DEPTH)/adf/net/$(OS) -I${TX99}
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/inc -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/obj_mgr/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/cmn_defs/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/scan/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/global_umac_dispatcher/lmac_if/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/scheduler/inc
+INCS += -I$(obj)/$(DEPTH)/umac/scan
+INCS += -I$(obj)/$(DEPTH)/direct_attach/umac/include
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/mgmt_txrx/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/spectral/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/regulatory/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/green_ap/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/umac/son/dispatcher/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_objmgr/dispatcher/inc
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/crypto/inc
+INCS += -I$(obj)/$(DEPTH)/component_dev/crypto/inc
+endif
+
+ifeq ($(strip ${QCA_DFS_COMPONENT_ENABLE}),1)
+EXTRA_CFLAGS+= -DDFS_COMPONENT_ENABLE
+endif
+
+obj-m += hst_tx99.o
+
+EXTRA_CFLAGS+= $(INCS) $(COPTS)
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+MOD_CFLAGS = -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(hst_tx99.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(hst_tx99)" 
+endif
+
+hst_tx99-objs := ath_tx99.o
+
+hst_tx99-objs += ath_tx99_tgt.o
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: hst_tx99.ko
+
+hst_tx99.mod.o: hst_tx99.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+hst_tx99.o: ${hst_tx99-objs}
+	$(LD) -m elf32btsmip -r -o hst_tx99.o $(hst_tx99-objs)
+	$(KERNELPATH)/scripts/mod/modpost hst_tx99.o
+
+hst_tx99.ko: hst_tx99.o hst_tx99.mod.o
+	$(LD) $(LDOPTS) -o hst_tx99.ko hst_tx99.o hst_tx99.mod.o
+
+%.o: %.c 
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif
+

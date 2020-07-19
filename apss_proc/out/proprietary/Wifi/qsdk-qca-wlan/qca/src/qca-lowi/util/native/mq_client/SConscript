@@ -1,0 +1,5 @@
+Import('env')
+
+mq_client_lib = env.StaticLibrary('libloc_mq_client', Glob('src/*.cpp'))
+
+Return('mq_client_lib')

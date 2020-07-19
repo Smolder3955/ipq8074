@@ -1,0 +1,4 @@
+whcdiag>=3.0.0
+enum34==1.0
+PyYAML>=3.10
+paramiko>=1.10.1

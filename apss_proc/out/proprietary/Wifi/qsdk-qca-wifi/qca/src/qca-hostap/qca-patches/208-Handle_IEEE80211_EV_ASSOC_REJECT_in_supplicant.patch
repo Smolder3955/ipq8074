@@ -1,0 +1,23 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..3759a9a 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -1074,6 +1074,18 @@ driver_atheros_event_wireless_p2p_custom(struct driver_atheros_data *drv,
+ 				     &event);
+ 		break;
+ 	}
++	case IEEE80211_EV_ASSOC_REJECT: {
++		struct ieee80211_ev_assoc_reject assoc_rej;
++
++		os_memcpy(&assoc_rej, buf, sizeof(struct assoc_reject));
++		event.assoc_reject.status_code = assoc_rej.status_code;
++		event.assoc_reject.timed_out = assoc_rej.timed_out;
++
++		wpa_printf(MSG_DEBUG, "WEXT:EV_ASSOC_REJECT status code:%u",
++			   event.assoc_reject.status_code);
++		wpa_supplicant_event(drv->ctx, EVENT_ASSOC_REJECT, &event);
++		break;
++	}
+ 	case IEEE80211_EV_RX_MGMT:
+ 		wpa_printf(MSG_DEBUG, "WEXT: EV_RX_MGMT");
+ 		fetch_pending_big_events(drv);

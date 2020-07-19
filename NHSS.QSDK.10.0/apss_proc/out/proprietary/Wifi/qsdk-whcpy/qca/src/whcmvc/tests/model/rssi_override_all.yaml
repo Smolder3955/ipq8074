@@ -1,0 +1,10 @@
+model:
+    client_devices:
+        client1:
+            mac_addr: 00:11:22:33:44:55
+            traffic_type: streaming
+            client_type: phone
+    rssi_levels:
+        high: 39
+        moderate: 33
+        low: 25

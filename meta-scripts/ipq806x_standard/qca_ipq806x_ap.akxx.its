@@ -1,0 +1,619 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/dts-v1/;
+
+/ {
+	description = "ARM FIT (Flattened Image Tree)";
+	#address-cells = <1>;
+
+	image-info {
+		type="multiplatform";
+	};
+
+	images {
+		kernel@1 {
+			description = "ARM Linux-3.14";
+			data = /incbin/("Image.gz");
+			type = "kernel";
+			arch = "arm";
+			os = "linux";
+			compression = "gzip";
+			load = <0x42208000>;
+			entry = <0x42208000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@1 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap148.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@2 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap148.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@3 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap148.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@4 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap145.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@5 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap145.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@6 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap145.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@7 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap160.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@8 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap160.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@9 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap160.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@10 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap160_2xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@11 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap160_2xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@12 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap160_2xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@13 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ak01.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@14 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ak01.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@15 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ak01.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@16 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap161.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@17 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap161.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@18 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap161.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@19 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap145_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@20 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap145_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@21 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap145_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@22 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-db149.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@23 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-db149.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@24 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-db149.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@25 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap148_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@26 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v2.0-ap148_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@27 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-v3.0-ap148_1xx.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+
+	};
+
+	configurations {
+		default = "config@4704_1";
+
+		config@4704_1 {
+			description = "qcom-ipq8064-ap148";
+			kernel = "kernel@1";
+			fdt = "fdt@1";
+		};
+
+		config@4704_2 {
+			description = "qcom-ipq8064-v2.0-ap148";
+			kernel = "kernel@1";
+			fdt = "fdt@2";
+		};
+
+		config@4704_3 {
+			description = "qcom-ipq8064-v3.0-ap148";
+			kernel = "kernel@1";
+			fdt = "fdt@3";
+		};
+
+		config@4810_1 {
+			description = "qcom-ipq8064-ap145";
+			kernel = "kernel@1";
+			fdt = "fdt@4";
+		};
+
+		config@4810_2 {
+			description = "qcom-ipq8064-v2.0-ap145";
+			kernel = "kernel@1";
+			fdt = "fdt@5";
+		};
+
+		config@4810_3 {
+			description = "qcom-ipq8064-v3.0-ap145";
+			kernel = "kernel@1";
+			fdt = "fdt@6";
+		};
+
+		config@4971_1 {
+			description = "qcom-ipq8064-ap160";
+			kernel = "kernel@1";
+			fdt = "fdt@7";
+		};
+
+		config@4971_2 {
+			description = "qcom-ipq8064-v2.0-ap160";
+			kernel = "kernel@1";
+			fdt = "fdt@8";
+		};
+
+		config@4971_3 {
+			description = "qcom-ipq8064-v3.0-ap160";
+			kernel = "kernel@1";
+			fdt = "fdt@9";
+		};
+
+		config@4991_1 {
+			description = "qcom-ipq8064-ap160_2xx";
+			kernel = "kernel@1";
+			fdt = "fdt@10";
+		};
+
+		config@4991_2 {
+			description = "qcom-ipq8064-v2.0-ap160_2xx";
+			kernel = "kernel@1";
+			fdt = "fdt@11";
+		};
+
+		config@4991_3 {
+			description = "qcom-ipq8064-v3.0-ap160_2xx";
+			kernel = "kernel@1";
+			fdt = "fdt@12";
+		};
+
+		config@5020_1 {
+			description = "qcom-ipq8064-ak01";
+			kernel = "kernel@1";
+			fdt = "fdt@13";
+		};
+
+		config@5020_2 {
+			description = "qcom-ipq8064-v2.0-ak01";
+			kernel = "kernel@1";
+			fdt = "fdt@14";
+		};
+
+		config@5020_3 {
+			description = "qcom-ipq8064-v3.0-ak01";
+			kernel = "kernel@1";
+			fdt = "fdt@15";
+		};
+
+		config@4972_1 {
+			description = "qcom-ipq8064-ap161";
+			kernel = "kernel@1";
+			fdt = "fdt@16";
+		};
+
+		config@4972_2 {
+			description = "qcom-ipq8064-v2.0-ap161";
+			kernel = "kernel@1";
+			fdt = "fdt@17";
+		};
+
+		config@4972_3 {
+			description = "qcom-ipq8064-v3.0-ap161";
+			kernel = "kernel@1";
+			fdt = "fdt@18";
+		};
+
+		config@4812_1 {
+			description = "qcom-ipq8064-ap145_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@19";
+		};
+
+		config@4812_2 {
+			description = "qcom-ipq8064-v2.0-ap145_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@20";
+		};
+
+		config@4812_3 {
+			description = "qcom-ipq8064-v3.0-ap145_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@21";
+		};
+
+		config@4699_1 {
+			description = "qcom-ipq8064-db149";
+			kernel = "kernel@1";
+			fdt = "fdt@22";
+		};
+
+		config@4699_2 {
+			description = "qcom-ipq8064-v2.0-db149";
+			kernel = "kernel@1";
+			fdt = "fdt@23";
+		};
+
+		config@4699_3 {
+			description = "qcom-ipq8064-v3.0-db149";
+			kernel = "kernel@1";
+			fdt = "fdt@24";
+		};
+
+		config@4913_1 {
+			description = "qcom-ipq8064-ap148_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@25";
+		};
+
+		config@4913_2 {
+			description = "qcom-ipq8064-v2.0-ap148_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@26";
+		};
+
+		config@4913_3 {
+			description = "qcom-ipq8064-v3.0-ap148_1xx";
+			kernel = "kernel@1";
+			fdt = "fdt@27";
+		};
+
+	};
+};

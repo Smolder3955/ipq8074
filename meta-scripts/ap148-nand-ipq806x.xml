@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config desc="AP148 NAND IPQ806x"
+    flash_size="256M"
+    sector_size="128K"
+    flash_type="nand"
+    partition_layout="nand-partition.xml">
+    <partition name="SBL1" file="nor_sbl1.mbn" layout="sbl" boot="1"/>
+    <partition name="MIBIB" file="nor-system-partition.bin" layout="sbl" boot="1"/>
+    <partition name="SBL2" file="nor_sbl2.mbn" layout="sbl" boot="1"/>
+    <partition name="DDR" file="ddr.mbn" layout="ddr" boot="1"/>
+    <partition name="DDRCONFIG" file="AP148-cdt.mbn" layout="sbl" boot="1"/>
+    <partition name="SSD" file="ssd.mbn" layout="sbl" boot="1"/>
+    <partition name="TZ" file="tz.mbn" layout="sbl" boot="1"/>
+    <partition name="RPM" file="rpm.mbn" layout="sbl" boot="1"/>
+    <partition name="APPSBL" file="openwrt-ipq806x-u-boot-2016.mbn" layout="sbl"/>
+    <partition name="rootfs" file="openwrt-ipq-ipq806x-qcom-ipq8064-ap148-fit-uImage-initramfs.itb" layout="linux"/>
+</config>

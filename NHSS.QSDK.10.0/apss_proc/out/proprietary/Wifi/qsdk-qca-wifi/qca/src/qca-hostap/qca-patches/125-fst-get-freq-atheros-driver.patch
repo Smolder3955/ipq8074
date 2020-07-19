@@ -1,0 +1,111 @@
+diff --git a/src/ap/ap_drv_ops.c b/src/ap/ap_drv_ops.c
+index 21b5608..b0a4693 100644
+--- a/src/ap/ap_drv_ops.c
++++ b/src/ap/ap_drv_ops.c
+@@ -593,6 +593,14 @@ int hostapd_set_tx_queue_params(struct hostapd_data *hapd, int queue, int aifs,
+ 						 cw_min, cw_max, burst_time);
+ }
+ 
++int hostapd_get_freq(struct hostapd_data *hapd, int* freq)
++{
++	if (hapd->driver == NULL ||
++	    hapd->driver->get_freq == NULL)
++		return -1;
++
++	return hapd->driver->get_freq(hapd->drv_priv, freq);
++}
+ 
+ struct hostapd_hw_modes *
+ hostapd_get_hw_feature_data(struct hostapd_data *hapd, u16 *num_modes,
+diff --git a/src/ap/ap_drv_ops.h b/src/ap/ap_drv_ops.h
+index bf8169d..ca4ca85 100644
+--- a/src/ap/ap_drv_ops.h
++++ b/src/ap/ap_drv_ops.h
+@@ -73,6 +73,7 @@ int hostapd_set_tx_queue_params(struct hostapd_data *hapd, int queue, int aifs,
+ struct hostapd_hw_modes *
+ hostapd_get_hw_feature_data(struct hostapd_data *hapd, u16 *num_modes,
+ 			    u16 *flags, u8 *dfs_domain);
++int hostapd_get_freq(struct hostapd_data *hapd, int* freq);
+ int hostapd_driver_commit(struct hostapd_data *hapd);
+ int hostapd_drv_none(struct hostapd_data *hapd);
+ int hostapd_driver_scan(struct hostapd_data *hapd,
+diff --git a/src/ap/hostapd.c b/src/ap/hostapd.c
+index 12911df..2055bdc 100644
+--- a/src/ap/hostapd.c
++++ b/src/ap/hostapd.c
+@@ -1449,8 +1449,15 @@ static void fst_hostapd_get_channel_info_cb(void *ctx,
+ 					    u8 *channel)
+ {
+ 	struct hostapd_data *hapd = ctx;
+-
+-	*hw_mode = ieee80211_freq_to_chan(hapd->iface->freq, channel);
++	int freq = hapd->iface->freq;
++	if (freq == 0){
++		if(hostapd_get_freq(hapd, &freq) < 0){
++			*hw_mode = NUM_HOSTAPD_MODES;
++			wpa_printf(MSG_ERROR, "FST: Cannot get frequency");
++			return;
++		}
++	}
++	*hw_mode = ieee80211_freq_to_chan(freq, channel);
+ }
+ 
+ 
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 38bc168..c5a573e 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2789,6 +2789,14 @@ struct wpa_driver_ops {
+ 	int (*set_freq)(void *priv, struct hostapd_freq_params *freq);
+ 
+ 	/**
++	 * get_freq - Get frequency (AP only - Atheros driver only)
++	 * @priv: Private driver interface data
++	 * @freq: frequency
++	 * Returns: 0 on success, -1 on failure
++	 */
++	int (*get_freq)(void *priv, int *freq);
++
++	/**
+ 	 * set_rts - Set RTS threshold
+ 	 * @priv: Private driver interface data
+ 	 * @rts: RTS threshold in octets
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index c80a5ea..f3df49e 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -2263,6 +2263,26 @@ static int atheros_wnm_oper(void *priv, enum wnm_oper oper, const u8 *peer,
+ }
+ #endif /* CONFIG_WNM && IEEE80211_APPIE_FRAME_WNM */
+ 
++static int athr_get_freq(void *priv, int *freq)
++{
++	struct atheros_driver_data *drv = priv;
++	struct iwreq iwr;
++	*freq = 0;
++
++	memset(&iwr, 0, sizeof(iwr));
++	os_strlcpy(iwr.ifr_name, drv->iface, IFNAMSIZ);
++
++	if (ioctl(drv->ioctl_sock, SIOCGIWFREQ, &iwr) < 0) {
++		wpa_printf(MSG_ERROR, "athr: ioctl[SIOCGIWFREQ] failed: %s",
++			   strerror(errno));
++		return -1;
++	}
++
++	if (iwr.u.freq.e != 1)
++		return -1;
++	*freq = (iwr.u.freq.m / 100000);
++	return 0;
++}
+ 
+ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.name			= "atheros",
+@@ -2272,6 +2292,7 @@ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.set_privacy		= atheros_set_privacy,
+ 	.set_key		= atheros_set_key,
+ 	.get_seqnum		= atheros_get_seqnum,
++	.get_freq		= athr_get_freq,
+ 	.flush			= atheros_flush,
+ 	.set_generic_elem	= atheros_set_opt_ie,
+ 	.sta_set_flags		= atheros_sta_set_flags,

@@ -1,0 +1,26 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..cfcc7ac 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -2076,7 +2076,8 @@ static int driver_atheros_get_range(void *priv)
+ 				WPA_DRIVER_CAPA_KEY_MGMT_WPA2_PSK;
+ 		}
+ 		drv->capa.enc |= WPA_DRIVER_CAPA_ENC_WEP40 |
+-			WPA_DRIVER_CAPA_ENC_WEP104;
++			WPA_DRIVER_CAPA_ENC_WEP104 |
++                        WPA_DRIVER_CAPA_ENC_WEP128;
+ 		if (range->enc_capa & IW_ENC_CAPA_CIPHER_TKIP)
+ 			drv->capa.enc |= WPA_DRIVER_CAPA_ENC_TKIP;
+ 		if (range->enc_capa & IW_ENC_CAPA_CIPHER_CCMP)
+diff --git a/src/drivers/driver_nl80211_capa.c b/src/drivers/driver_nl80211_capa.c
+index f11a1d7..e90563f 100644
+--- a/src/drivers/driver_nl80211_capa.c
++++ b/src/drivers/driver_nl80211_capa.c
+@@ -283,6 +283,7 @@ static void wiphy_info_cipher_suites(struct wiphy_info_data *info,
+ 			break;
+ 		case RSN_CIPHER_SUITE_WEP104:
+ 			info->capa->enc |= WPA_DRIVER_CAPA_ENC_WEP104;
++                        info->capa->enc |= WPA_DRIVER_CAPA_ENC_WEP128;
+ 			break;
+ 		case RSN_CIPHER_SUITE_WEP40:
+ 			info->capa->enc |= WPA_DRIVER_CAPA_ENC_WEP40;

@@ -1,0 +1,198 @@
+atheros: Process frequency value in received mgmt frames
+
+Get frequency value from received management frames and update it in
+send event data structure for EVENT_RX_MGMT. This is required for DPP,
+where currently received freq is need to take decision on neg_freq.
+
+---
+ src/drivers/driver_atheros.c | 92 +++++++++++++++++++++++++++++++++++---------
+ 1 file changed, 74 insertions(+), 18 deletions(-)
+
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index 018cc76..4379a84 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -856,9 +856,11 @@ static int atheros_set_qos_map(void *ctx, const u8 *qos_map_set,
+ 	return 0;
+ }
+ 
++
+ #ifdef ATHEROS_USE_RAW_RECEIVE
++
+ static void atheros_raw_receive(void *ctx, const u8 *src_addr, const u8 *buf,
+-				size_t len)
++				size_t len, u32 freq)
+ {
+ 	struct atheros_driver_data *drv = ctx;
+ 	const struct ieee80211_mgmt *mgmt;
+@@ -879,8 +881,8 @@ static void atheros_raw_receive(void *ctx, const u8 *src_addr, const u8 *buf,
+ 
+ 	stype = WLAN_FC_GET_STYPE(fc);
+ 
+-	wpa_printf(MSG_DEBUG, "%s: subtype 0x%x len %d", __func__, stype,
+-		   (int) len);
++	wpa_printf(MSG_DEBUG, "%s: subtype 0x%x len %d freq=%d",
++		   __func__, stype, (int) len, freq);
+ 
+ 	if (stype == WLAN_FC_STYPE_PROBE_REQ) {
+ 		if (len < IEEE80211_HDRLEN)
+@@ -902,6 +904,7 @@ static void atheros_raw_receive(void *ctx, const u8 *src_addr, const u8 *buf,
+ 		os_memset(&event, 0, sizeof(event));
+ 		event.rx_mgmt.frame = buf;
+ 		event.rx_mgmt.frame_len = len;
++		event.rx_mgmt.freq = freq;
+ 		wpa_supplicant_event(drv->hapd, EVENT_RX_MGMT, &event);
+ 		return;
+ 	}
+@@ -953,8 +956,17 @@ static void atheros_raw_receive(void *ctx, const u8 *src_addr, const u8 *buf,
+ 		break;
+ 	}
+ }
++
++
++static void atheros_raw_receive_l2_packet(void *ctx, const u8 *src_addr,
++					  const u8 *buf, size_t len)
++{
++	atheros_raw_receive(ctx, src_addr, buf, len, 0);
++}
++
+ #endif /* ATHEROS_USE_RAW_RECEIVE */
+ 
++
+ static int atheros_receive_pkt(struct atheros_driver_data *drv)
+ {
+ 	int ret = 0;
+@@ -985,7 +997,7 @@ static int atheros_receive_pkt(struct atheros_driver_data *drv)
+ 
+ #if defined(CONFIG_WPS) || defined(CONFIG_IEEE80211R) || defined(CONFIG_FILS)
+ 	drv->sock_raw = l2_packet_init(drv->iface, NULL, ETH_P_80211_RAW,
+-				       atheros_raw_receive, drv, 1);
++				       atheros_raw_receive_l2_packet, drv, 1);
+ 	if (drv->sock_raw == NULL)
+ 		return -1;
+ #endif /* CONFIG_WPS || CONFIG_IEEE80211R || CONFIG_FILS */
+@@ -1244,7 +1256,9 @@ static void
+ atheros_wireless_event_wireless_custom(struct atheros_driver_data *drv,
+ 				       char *custom, char *end)
+ {
++#ifndef MGMT_FRAM_TAG_SIZE
+ #define MGMT_FRAM_TAG_SIZE 30 /* hardcoded in driver */
++#endif
+ 	wpa_printf(MSG_DEBUG, "Custom wireless event: '%s'", custom);
+ 
+ 	if (os_strncmp(custom, "MLME-MICHAELMICFAILURE.indication", 33) == 0) {
+@@ -1305,22 +1319,41 @@ atheros_wireless_event_wireless_custom(struct atheros_driver_data *drv,
+ 		 * Atheros driver uses a hack to pass Probe Request frames as a
+ 		 * binary data in the custom wireless event. The old way (using
+ 		 * packet sniffing) didn't work when bridging.
+-		 * Format: "Manage.prob_req <frame len>" | zero padding | frame
++		 * Format: "Manage.prob_req <frame len> freq=<freq>" | zero padding | frame
+ 		 */
+ 		int len = atoi(custom + 16);
++		char *pos;
++		u32 freq = 0;
++		pos = os_strstr(custom, "freq=");
++
++		if (pos) {
++			pos += 5;
++			freq = strtoul(pos, NULL, 10);
++			wpa_printf(MSG_DEBUG, "freq=%d", freq);
++		}
+ 		if (len < 0 || MGMT_FRAM_TAG_SIZE + len > end - custom) {
+ 			wpa_printf(MSG_DEBUG, "Invalid Manage.prob_req event "
+ 				   "length %d", len);
+ 			return;
+ 		}
+ 		atheros_raw_receive(drv, NULL,
+-				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len);
++				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len,
++				    freq);
+ #endif /* CONFIG_WPS */
+ #if defined(CONFIG_IEEE80211R) || defined(CONFIG_IEEE80211W) || defined(CONFIG_FILS)
+ 	} else if (os_strncmp(custom, "Manage.assoc_req ", 17) == 0) {
+-		/* Format: "Manage.assoc_req <frame len>" | zero padding |
++		/* Format: "Manage.assoc_req <frame len> freq=<freq>" | zero padding |
+ 		 * frame */
+ 		int len = atoi(custom + 17);
++		char *pos = os_strstr(custom, "freq=");
++		u32 freq = 0;
++
++		if (pos) {
++			pos += 5;
++			freq = strtoul(pos, NULL, 10);
++			wpa_printf(MSG_DEBUG,"freq=%d", freq);
++		}
++
+ 		if (len < 0 || MGMT_FRAM_TAG_SIZE + len > end - custom) {
+ 			wpa_printf(MSG_DEBUG,
+ 				   "Invalid Manage.assoc_req event length %d",
+@@ -1328,32 +1361,55 @@ atheros_wireless_event_wireless_custom(struct atheros_driver_data *drv,
+ 			return;
+ 		}
+ 		atheros_raw_receive(drv, NULL,
+-				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len);
+-		} else if (os_strncmp(custom, "Manage.auth ", 12) == 0) {
+-		/* Format: "Manage.auth <frame len>" | zero padding | frame */
++				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len,
++				    freq);
++	} else if (os_strncmp(custom, "Manage.auth ", 12) == 0) {
++		/* Format: "Manage.auth <frame len> freq=<freq>" | zero padding | frame */
+ 		int len = atoi(custom + 12);
+-			if (len < 0 ||
+-			    MGMT_FRAM_TAG_SIZE + len > end - custom) {
++		char *pos = os_strstr(custom, "freq=");
++		u32 freq = 0;
++
++		if (pos) {
++			pos += 5;
++			freq = strtoul(pos, NULL, 10);
++			wpa_printf(MSG_DEBUG, "freq=%d", freq);
++		}
++
++		if (len < 0 ||
++		    MGMT_FRAM_TAG_SIZE + len > end - custom) {
+ 			wpa_printf(MSG_DEBUG,
+-				   "Invalid Manage.auth event length %d", len);
++				   "Invalid Manage.auth event length %d",
++				   len);
+ 			return;
+ 		}
+ 		atheros_raw_receive(drv, NULL,
+-				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len);
++				    (u8 *) custom + MGMT_FRAM_TAG_SIZE,
++				    len, freq);
+ #endif /* CONFIG_IEEE80211W || CONFIG_IEEE80211R || CONFIG_FILS */
+ #ifdef ATHEROS_USE_RAW_RECEIVE
+-		} else if (os_strncmp(custom, "Manage.action ", 14) == 0) {
+-		/* Format: "Manage.assoc_req <frame len>" | zero padding | frame
++	} else if (os_strncmp(custom, "Manage.action ", 14) == 0) {
++		/* Format: "Manage.assoc_req <frame len> freq=<freq>" | zero padding | frame
+ 		 */
++		char *pos = os_strstr(custom, "freq=");
++		u32 freq = 0;
+ 		int len = atoi(custom + 14);
+-		if (len < 0 || MGMT_FRAM_TAG_SIZE + len > end - custom) {
++
++		if (pos) {
++			pos += 5;
++			freq = strtoul(pos, NULL, 10);
++			wpa_printf(MSG_DEBUG, "freq=%d", freq);
++		}
++
++		if (len < 0 ||
++		    MGMT_FRAM_TAG_SIZE + len > end - custom) {
+ 			wpa_printf(MSG_DEBUG,
+ 				   "Invalid Manage.action event length %d",
+ 				   len);
+ 			return;
+ 		}
+ 		atheros_raw_receive(drv, NULL,
+-				    (u8 *) custom + MGMT_FRAM_TAG_SIZE, len);
++				    (u8 *) custom + MGMT_FRAM_TAG_SIZE,
++				    len, freq);
+ #endif /* ATHEROS_USE_RAW_RECEIVE */
+ 	}
+ }
+-- 
+1.9.1
+

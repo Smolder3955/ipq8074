@@ -1,0 +1,44 @@
+#!/bin/sh /etc/rc.common
+#
+# Copyright (c) 2013, 2017 Qualcomm Technologies, Inc.
+#
+# All Rights Reserved.
+# Confidential and Proprietary - Qualcomm Technologies, Inc.
+#
+# 2013 Qualcomm Atheros, Inc.
+#
+# All Rights Reserved.
+# Qualcomm Atheros Confidential and Proprietary
+#
+
+. /lib/functions.sh
+
+START=97
+SERVICE_DAEMONIZE=1
+SERVICE_WRITE_PID=1
+
+MTD_ART_PART_NAME="art"
+
+start() {
+	local emmc_flash=""
+	local nor_flash=""
+
+	emmc_flash=$(find_mmc_part 0:ART 2> /dev/null)
+	mtd_name=$(grep -i -w ${MTD_ART_PART_NAME} /proc/mtd | cut -f1 -d:)
+	nor_flash=`find /sys/bus/spi/devices/*/mtd -name ${mtd_name} 2> /dev/null`
+
+	if [ -n "$emmc_flash" ]; then
+		[ -L /dev/caldata ] || \
+			ln -s $emmc_flash /dev/caldata
+	elif [ -n "$nor_flash" -a -n "$arm_platform" ]; then
+		[ -L /dev/caldata ] || \
+			ln -s /dev/${mtd_name} /dev/caldata
+	elif [ -n "$mtd_name" ]; then
+		[ -L /dev/caldata ] || \
+			ln -s /dev/${mtd_name//mtd/mtdblock} /dev/caldata
+	fi
+}
+
+stop() {
+	[ -L /dev/caldata ] && rm /dev/caldata
+}

@@ -1,0 +1,27 @@
+diff --git a/src/ap/ieee802_1x.c b/src/ap/ieee802_1x.c
+index 961ed92..72b9100 100644
+--- a/src/ap/ieee802_1x.c
++++ b/src/ap/ieee802_1x.c
+@@ -1964,6 +1964,7 @@ static void ieee802_1x_rekey(void *eloop_ctx, void *timeout_ctx)
+ {
+ 	struct hostapd_data *hapd = eloop_ctx;
+ 	struct eapol_authenticator *eapol = hapd->eapol_auth;
++	int ret;
+ 
+ 	if (eapol->default_wep_key_idx >= 3)
+ 		eapol->default_wep_key_idx =
+@@ -1985,11 +1986,12 @@ static void ieee802_1x_rekey(void *eloop_ctx, void *timeout_ctx)
+ 
+ 	/* TODO: Could setup key for RX here, but change default TX keyid only
+ 	 * after new broadcast key has been sent to all stations. */
+-	if (hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_WEP,
++	ret = hostapd_drv_set_key(hapd->conf->iface, hapd, WPA_ALG_WEP,
+ 				broadcast_ether_addr,
+ 				eapol->default_wep_key_idx, 1, NULL, 0,
+ 				eapol->default_wep_key,
+-				hapd->conf->default_wep_key_len)) {
++				hapd->conf->default_wep_key_len);
++	if (ret && (ret != -ENETDOWN)) {
+ 		hostapd_logger(hapd, NULL, HOSTAPD_MODULE_IEEE8021X,
+ 			       HOSTAPD_LEVEL_WARNING, "failed to configure a "
+ 			       "new broadcast key");

@@ -1,0 +1,202 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*******************************************************************************
+;   L2_krait_power_up_sequence.cmm
+;
+;   This script executes Krait POR bring-up sequence, as described in the HDD,
+;   to bring L2, Krait0 and Krait1 out of reset.
+;
+;   Pass in boot adddresses for Krait0 or Krait1 if desired
+;
+;   e.g. do L2_krait_power_up_sequence.cmm 0x2A000000 0x2A010000
+;*******************************************************************************
+
+;*******************************************************************
+; Setting up a message window
+;*******************************************************************
+
+area.create krait
+WINPOS 0.0 0.15385 111. 25. 0. 0. W000
+area krait
+area.select krait
+
+local &krait_boot_addr &krait_offset
+local &krait0_addr &krait1_addr &loop_here
+
+entry &krait0_addr &krait1_addr
+
+if ("&krait0_addr"=="-h"||"&krait0_addr"=="-H"||"&krait0_addr"=="/?")
+(
+	goto HELP
+)
+
+if ("&krait0_addr"=="")&&("&krait1_addr"=="")
+(
+   &krait0_addr=0x2a000000
+   &krait1_addr=0x00020000
+)
+else if ("&krait0_addr"!="")&&("&krait1_addr"=="")
+(
+   print "Bringing up Krait 0"
+   &krait1_addr=""
+)
+else if ("&krait0_addr"=="0")&&("&krait1_addr"!="")
+(
+   print "Bringing up Krait 1"
+   &krait0_addr=""
+)
+
+do ~~~~\symbols_VI
+
+; clear this register to 0x0 since it's powered up undefined
+data.set RPM_2X3_SFPB_M2VMT_M2VMR0 %L 0x0
+
+
+; scss sysem wide warm reset and POR
+data.set A:0x009020b4  %long 0x03
+
+
+; Set Sys POR and SYS Ares at RPM
+data.set A:0x009020b4  %long 0x00
+
+
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+; L2-SCU boot sequence
+;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+data.set  APCS_L2_PWR_CTL %L 0x00008100
+wait 0.1s
+
+data.set  APCS_L2_PWR_CTL %L 0x0FFF9700
+wait 0.5s
+
+data.set  APCS_L2_PWR_CTL %L 0x00001600
+wait 0.1s
+
+data.set  APCS_L2_PWR_CTL %L 0x00000200
+wait 0.5s
+; L2 initialization is complete.
+
+if ("&krait0_addr"!="")
+(
+    ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ; Krait0-CPU boot sequence
+    ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ; (Optional) Set krait0 to loop at Boot Address. Otherwise,
+    ; Krait0 code image should have been loaded to Krait0 Boot Address
+    data.set &krait0_addr %long 0xEAFFFFFE
+
+
+    ; configure Krait Start Address
+    data.set A:APCS_START_ADDR %L &krait0_addr
+
+
+    &krait_offset=0x80000 ; krait0
+
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000109
+    wait 0.1s
+
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000101
+    wait 0.1s
+
+    ; RPM asserts COREPOR_RST to reset CPU logic.RPM wait for 32 of the slowest clock period
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000121
+    wait 0.1s
+
+    ; RPM de-asserts CLAMP and wait for ~300(?) ns of the clamp to settle
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000020
+    wait 0.1s
+
+    ; RPM de-asserts COREPOR_RST and wait for the reset to settle
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000000
+    wait 0.5s
+
+    ; RPM asserts CORE_PWRD_UP to tell debugger that the CPU is online
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000080
+    wait 0.5s
+
+    print
+    print " - Krait_0 Boot Address: &krait0_addr"
+
+    ; now we can system.up krait0
+    print " "
+    print "Krait 0 Initialized"
+    print " "
+)
+
+if ("&krait1_addr"!="")
+(
+    ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ; Krait1-CPU boot sequence
+    ;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    ; (Optional) Set krait1 to loop at Boot Address. Otherwise,
+    ; Krait1 code image should have been loaded to Krait1 Boot Address
+    data.set &krait1_addr %long 0xEAFFFFFE
+
+    ; configure Krait Start Address
+    data.set A:APCS_START_ADDR %L &krait1_addr
+
+    &krait_offset=0x90000 // krait1
+
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000109
+    wait 0.1s
+
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000101
+    wait 0.1s
+
+    ; RPM asserts COREPOR_RST to reset CPU logic.RPM wait for 32 of the slowest clock period
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000121
+    wait 0.1s
+
+    ; RPM de-asserts CLAMP and wait for ~300(?) ns of the clamp to settle
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000020
+    wait 0.1s
+
+    ; RPM de-asserts COREPOR_RST and wait for the reset to settle
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000000
+    wait 0.5s
+
+    ; RPM asserts CORE_PWRD_UP to tell debugger that the CPU is online
+    data.set APCS_CPU_PWR_CTL+&krait_offset %L 0x00000080
+    wait 0.5s
+
+    print
+    print " - Krait_1 Boot Address: &krait1_addr"
+
+)
+
+print " L2/Krait bring-up sequence completed."
+print
+
+print " "
+
+area.select
+
+enddo
+
+HELP:
+area.clear
+WINPOS 32.714 11.667 88. 24. 0. 0. W000
+area
+print
+print "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
+print " L2/Krait0/Krait1 Bring-up "
+print
+print " Bring-up Krait0:"
+print "   do L2_krait_power_up_sequence KRAIT0_BOOT_ADDR (e.g. 0x2a000000)"
+print
+print " Bring-up Krait1:"
+print "   do L2_krait_power_up_sequence 0 KRAIT1_BOOT_ADDR (e.g. 0x00020000)"
+print
+print " Bring-up Krait0+Krait1:"
+print "   do L2_krait_power_up_sequence"
+print "OR do L2_krait_power_up_sequence KRAIT0_BOOT_ADDR KRAIT1_BOOT_ADDR"
+print
+print
+print
+
+enddo

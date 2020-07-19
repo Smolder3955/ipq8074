@@ -1,0 +1,35 @@
+.DEFAULT_GOAL = all
+
+.PHONY = all install
+
+all: make_host_manager_11ad make_shell_11ad make_wiburn make_wlctutils make_wlctpciacss make_flashacss install
+
+# the calling make file passes all needed variables in the command line
+# so they will be passed to sub-makes
+make_host_manager_11ad:
+	$(MAKE) -C host_manager_11ad
+
+make_shell_11ad:
+	$(MAKE) -C shell_11ad
+
+make_wiburn: make_wlctutils make_wlctpciacss make_flashacss
+	$(MAKE) -C wiburn
+
+make_wlctutils:
+	$(MAKE) -C lib/utils
+
+make_wlctpciacss:
+	$(MAKE) -C lib/WlctPciAcss
+
+make_flashacss:
+	$(MAKE) -C lib/FlashAcss
+
+install:
+	$(INSTALL_DIR) $(INSTALL_ROOT)/usr/bin $(INSTALL_ROOT)/usr/lib
+	$(INSTALL_BIN) host_manager_11ad/host_manager_11ad $(INSTALL_ROOT)/usr/bin
+	$(INSTALL_BIN) shell_11ad/shell_11ad $(INSTALL_ROOT)/usr/bin
+	$(INSTALL_BIN) lib/FlashAcss/libwigig_flashaccess.so $(INSTALL_ROOT)/usr/lib
+	$(INSTALL_BIN) lib/utils/libwigig_utils.so $(INSTALL_ROOT)/usr/lib
+	$(INSTALL_BIN) lib/WlctPciAcss/libwigig_pciaccess.so $(INSTALL_ROOT)/usr/lib
+	$(INSTALL_BIN) wiburn/wigig_wiburn $(INSTALL_ROOT)/usr/bin
+	ln -s /usr/bin/host_manager_11ad $(INSTALL_ROOT)/usr/bin/3pp_host_manager_11ad

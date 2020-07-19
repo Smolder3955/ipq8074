@@ -1,0 +1,33 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+; basewin.cmm
+;
+; AKRONITE Default Trace32 basewin
+;*****************************************************************************
+ B::
+
+ TOOLBAR ON
+ STATUSBAR ON
+ WINPAGE.RESET
+
+ WINCLEAR
+ WINPOS 125.0 0.0 51. 15. 0. 0. W002
+ Register /spotlight
+
+ WINPOS 124.43 19.231 52. 17. 0. 0. W002
+ Var.Local
+
+ WINPOS 125.43 39.923 50. 21. 0. 0. W0002
+ term.gate
+
+ WINPOS 6.4286 0.53846 113. 55. 13. 1. W000
+ WINTABS 16. 18. 25. 62.
+ d.l
+
+ ENDDO

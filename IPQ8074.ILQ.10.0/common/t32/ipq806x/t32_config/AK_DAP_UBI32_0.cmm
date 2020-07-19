@@ -1,0 +1,35 @@
+; Copyright (c) 2013, 2018 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+;***********************************************************
+;**           AK_DAP_UBI32_0.CMM                          **
+;***********************************************************
+
+;
+; Change the Debug Mux on Ubi32 to point to QDSS.
+; TODO: This needs to be done by the RPM processor or some such as 
+; this CPU is not yet running.
+;
+;data.set ea:0x03000004 0x60
+;data.set easd:0x3000004 %LE %Long 0x60
+
+; select CPU and options
+
+
+SYStem.Reset
+SYStem.CPU IPQ8064-CORE0
+
+SYStem.JTAGCLOCK RTCK
+;SYStem.OPTION ENRESET OFF
+;SYStem.OPTION RESBREAK ON
+SYStem.CONFIG SLAVE ON
+SYStem.CONFIG.COREDEBUG.Base DAP:0x80007000
+
+autostore , history
+
+SYStem.STATE
+
+wait 1s
+SYStem.Attach
+ENDDO

@@ -1,0 +1,172 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+;	           load_code_RPM_db.cmm                                     **
+;
+; Usage
+;	cd.do t32_scripts\load_code_RPM_db.cmm arg1 arg2 arg3
+;
+;	arg1 = t32_load_code_which_frequency_plan [0,1,2,3]
+;	arg2 = t32_enable_dyn_clk_gating [0,1]
+;	arg3 = board_type [db149, ap145, ap148]
+
+;*****************************************************************************
+
+;________________________________________________________________
+;
+; t32_load_code_which_frequency_plan - parameter selects which
+; frequency plan you want. Valid choices are:
+;   0) TCXO
+;   1) Frequency Plan A
+;   2) SVS
+;   3) Turbo
+;
+; Don't worry, if you don't pass a parameter. I will pick frequency
+; plan A by default, then :-)
+;
+; t32_enable_dyn_clk_gating - Dynamic clock gating ON/OFF parameter
+; default = ON, 1 = ON, 0 = OFF
+;________________________________________________________________
+local &t32_load_code_which_frequency_plan &t32_enable_dyn_clk_gating &board_type
+entry &t32_load_code_which_frequency_plan &t32_enable_dyn_clk_gating &board_type
+
+;________________________________________________________________
+;
+;   Starting things off (some of this may be overkill. We will
+;   adjust as needed).
+;________________________________________________________________
+TOOLBAR ON
+STATUSBAR ON
+WINPAGE.RESET
+winclear
+
+;________________________________________________________________
+;
+;   Setting up a little messaging window to print out the outputs
+;   of the various commands and scripts that run, while your
+;   code is loading.
+;________________________________________________________________
+WINPOS 0.0 0.15385 111. 25. 0. 0. W000
+area
+area.reset
+
+;________________________________________________________________
+;
+;   Setting up the paths, and other variable names we will
+;   be using in the rest of the script.
+;________________________________________________________________
+;**********************
+; Top-level directories
+;**********************
+&PROJECT_TOP_LEVEL_DIR="..\..\.."
+
+;**********************
+; Shared Code Root directories
+;**********************
+&SHARED_CODE_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\vi"
+&CDVI_SHARED_CODE_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\cdvi"
+&QNPL_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\QNPL"
+
+
+;**********************
+; Test Root directories
+;**********************
+&TEST_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\test"
+
+;*******************
+; Common directories
+;*******************
+&QNPL_COMMON_SOURCE_DIR="&(QNPL_TOP_LEVEL_DIR)\source"
+
+&SHARED_CODE_COMMON_CMM_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\cmm"
+&SHARED_CODE_COMMON_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\src"
+&HAL_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\hal"
+
+&CDVI_SHARED_CODE_COMMON_SOURCE_DIR="&(CDVI_SHARED_CODE_TOP_LEVEL_DIR)\common\src"
+
+
+&TEST_COMMON_SOURCE_DIR="&(TEST_TOP_LEVEL_DIR)\src\common"
+
+;*******************************
+; Processor-specific directories
+;*******************************
+&PROCESSOR_NAME="RPM_PROC"
+&PROCESSOR_TYPE="ARM7"
+
+&TEST_PROCESSOR_SPECIFIC_SOURCE_DIR="&(TEST_TOP_LEVEL_DIR)\src\&(PROCESSOR_NAME)"
+
+&SHARED_CODE_PROCESSOR_SPECIFIC_CMM_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\cmm"
+&SHARED_CODE_PROCESSOR_SPECIFIC_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\src"
+
+&CDVI_SHARED_CODE_PROCESSOR_SPECIFIC_SOURCE_DIR="&(CDVI_SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\src"
+
+&QNPL_PROCESSOR_SPECIFIC_SOURCE_DIR="&(QNPL_TOP_LEVEL_DIR)\&(PROCESSOR_TYPE)\source"
+
+&UNMANAGED_PROCESSOR_SPECIFIC_OBJECT_CODE_DIR="&(PROJECT_TOP_LEVEL_DIR)\unmanaged\obj\&(PROCESSOR_NAME)"
+&BINARY_IMAGE_DIR="&(PROJECT_TOP_LEVEL_DIR)\unmanaged\bin\&(PROCESSOR_NAME)"
+
+;________________________________________________________________
+;
+;   Configure the Trace 32 environment as needed
+;________________________________________________________________
+print "Configuring Trace 32"
+do t32_config_rpm.cmm
+
+;*******************
+; Generating a reset
+;*******************
+SYSTEM.DOWN
+SYSTEM.UP
+
+;________________________________________________________________
+;
+;   Setting up the symbol source paths. These allow you to see
+;   your source code when single-stepping through your code.
+;________________________________________________________________
+mode.hll
+Symbol.Reset
+Symbol.AsmFrame on
+Symbol.CutLine 3
+Symbol.SourcePATH.SetRecurseDir + "."
+
+;________________________________________________________________
+;
+;   Calling the symbols script. This will allow you to use
+;   the register names as opposed to the addresses.
+;________________________________________________________________
+print "Downloading register symbols"
+do symbols
+
+;________________________________________________________________
+;
+;   Performing the init_rpm script. This will configure the 
+;   such as clocks, memories, busses, pmic, etc.
+;
+;   It will also select which frequency plan will get called in
+;   The "vv_init_device" C-code function.
+;________________________________________________________________
+print "Running init_rpm"
+do init_rpm_db &t32_load_code_which_frequency_plan &t32_enable_dyn_clk_gating &board_type
+
+;________________________________________________________________
+;
+;   Reloading the symbols script. The symbols get reset after
+;   downloading a binary image so it's necessary to call this
+;   script again.
+;________________________________________________________________
+print "Downloading register symbols"
+do symbols
+
+;________________________________________________________________
+;
+;   Semi-hosting Setup (Comment these commands, if you don't
+;   want to use semi-hosting).
+;________________________________________________________________
+do semihost_setup_rpm.cmm
+
+enddo

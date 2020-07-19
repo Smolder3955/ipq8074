@@ -1,0 +1,95 @@
+diff --git a/wpa_supplicant/config_file.c b/wpa_supplicant/config_file.c
+index 6b7abe2..681ad44 100644
+--- a/wpa_supplicant/config_file.c
++++ b/wpa_supplicant/config_file.c
+@@ -140,14 +140,63 @@ static int wpa_config_validate_network(struct wpa_ssid *ssid, int line)
+ 	if (ssid->disabled == 2)
+ 		ssid->p2p_persistent_group = 1;
+ 
+-	if ((ssid->group_cipher & WPA_CIPHER_CCMP) &&
+-	    !(ssid->pairwise_cipher & WPA_CIPHER_CCMP) &&
+-	    !(ssid->pairwise_cipher & WPA_CIPHER_NONE)) {
+-		/* Group cipher cannot be stronger than the pairwise cipher. */
+-		wpa_printf(MSG_DEBUG, "Line %d: removed CCMP from group cipher"
+-			   " list since it was not allowed for pairwise "
+-			   "cipher", line);
+-		ssid->group_cipher &= ~WPA_CIPHER_CCMP;
++
++	if((ssid->group_cipher & (WPA_CIPHER_CCMP | WPA_CIPHER_GCMP |
++                                  WPA_CIPHER_GCMP_256 |
++				  WPA_CIPHER_CCMP_256)) &&
++           (ssid->pairwise_cipher & (WPA_CIPHER_CCMP | WPA_CIPHER_GCMP |
++                                     WPA_CIPHER_GCMP_256 |
++				     WPA_CIPHER_CCMP_256)) &&
++           !(ssid->pairwise_cipher & WPA_CIPHER_NONE)) {
++
++
++                if ((ssid->group_cipher & WPA_CIPHER_CCMP_256) &&
++                    !(ssid->pairwise_cipher & WPA_CIPHER_CCMP_256)){
++                        /*
++                         * Group cipher cannot be stronger `than the
++                         * pairwise cipher.
++                         */
++                        wpa_printf(MSG_DEBUG, "Line %d: removed CCMP 256 from"
++                                   " group cipher list since it was not"
++                                   "allowed for pairwise cipher 0x%x",
++                                   line,ssid->pairwise_cipher);
++                        ssid->group_cipher &= ~WPA_CIPHER_CCMP_256;
++                }
++
++                if ((ssid->group_cipher & WPA_CIPHER_GCMP_256) &&
++                    !(ssid->pairwise_cipher & (WPA_CIPHER_CCMP_256 |
++                                               WPA_CIPHER_GCMP_256))){
++                        /*
++                         * Group cipher cannot be stronger `than the
++                         * pairwise cipher.
++                         */
++                        wpa_printf(MSG_DEBUG, "Line %d: removed GCMP 256 from"
++                                   " group cipher list since it was not"
++                                   "allowed for pairwise cipher 0x%x",
++                                   line,ssid->pairwise_cipher);
++                        ssid->group_cipher &= ~WPA_CIPHER_GCMP_256;
++                }
++
++                if ((ssid->group_cipher & WPA_CIPHER_GCMP) &&
++                    !(ssid->pairwise_cipher & (WPA_CIPHER_CCMP_256 |
++                                               WPA_CIPHER_GCMP_256 |
++                                               WPA_CIPHER_GCMP))){
++                        /*
++                         * Group cipher cannot be stronger `than the
++                         * pairwise cipher.
++                         */
++                        wpa_printf(MSG_DEBUG, "Line %d: removed GCMP from"
++                                   " group cipher list since it was not"
++                                   "allowed for pairwise cipher 0x%x",
++                                   line,ssid->pairwise_cipher);
++                        ssid->group_cipher &= ~WPA_CIPHER_GCMP;
++                }
++
++	} else {
++		ssid->group_cipher &= ~(WPA_CIPHER_CCMP | WPA_CIPHER_GCMP |
++					WPA_CIPHER_GCMP_256 |
++					WPA_CIPHER_CCMP_256);
++
+ 	}
+ 
+ 	if (ssid->mode == WPAS_MODE_MESH &&
+diff --git a/wpa_supplicant/config_ssid.h b/wpa_supplicant/config_ssid.h
+index 15bfa7c..66d6c04 100644
+--- a/wpa_supplicant/config_ssid.h
++++ b/wpa_supplicant/config_ssid.h
+@@ -19,8 +19,12 @@
+ 			     EAPOL_FLAG_REQUIRE_KEY_BROADCAST)
+ #define DEFAULT_PROTO (WPA_PROTO_WPA | WPA_PROTO_RSN)
+ #define DEFAULT_KEY_MGMT (WPA_KEY_MGMT_PSK | WPA_KEY_MGMT_IEEE8021X)
+-#define DEFAULT_PAIRWISE (WPA_CIPHER_CCMP | WPA_CIPHER_TKIP)
+-#define DEFAULT_GROUP (WPA_CIPHER_CCMP | WPA_CIPHER_TKIP)
++#define DEFAULT_PAIRWISE (WPA_CIPHER_CCMP | WPA_CIPHER_TKIP | \
++                          WPA_CIPHER_CCMP_256 | WPA_CIPHER_GCMP |\
++                          WPA_CIPHER_GCMP_256)
++#define DEFAULT_GROUP (WPA_CIPHER_CCMP | WPA_CIPHER_TKIP | \
++                       WPA_CIPHER_CCMP_256 | WPA_CIPHER_GCMP |\
++                       WPA_CIPHER_GCMP_256)
+ #define DEFAULT_FRAGMENT_SIZE 1398
+ 
+ #define DEFAULT_BG_SCAN_PERIOD -1

@@ -1,0 +1,22 @@
+diff --git a/wpa_supplicant/events.c b/wpa_supplicant/events.c
+index cec9441..7f39f1d 100644
+--- a/wpa_supplicant/events.c
++++ b/wpa_supplicant/events.c
+@@ -3674,8 +3674,12 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
+ 		}
+ 		break;
+ 	case EVENT_DISASSOC:
+-		wpas_event_disassoc(wpa_s,
+-				    data ? &data->disassoc_info : NULL);
++		if (wpa_s->wpa_state != WPA_SCANNING)
++			wpas_event_disassoc(wpa_s,
++					    data ? &data->disassoc_info : NULL);
++		else
++			wpa_dbg(wpa_s, MSG_DEBUG, "Disassoc event received during scan state for %s",
++				wpa_s->ifname);
+ 		break;
+ 	case EVENT_DEAUTH:
+ #ifdef CONFIG_TESTING_OPTIONS
+-- 
+1.9.1
+

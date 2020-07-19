@@ -1,0 +1,50 @@
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ..
+
+#
+# Path to the Qualcomm driver framework source base
+#
+QDF := $(src)/../cmn_dev/qdf
+
+#
+# Path to the Atheros service framework source base
+#
+ASF := $(src)
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+INCS += -I$(ASF)/include -I$(QDF)/inc -I$(ASF)/../pld/inc/
+obj-m += asf.o
+
+EXTRA_CFLAGS+= $(INCS) $(COPTS)
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+MOD_CFLAGS = -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(asf.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(asf)"
+endif
+
+asf-objs := asf_print.o linux/asf_module.o
+
+clean-files := modules.order
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: asf.ko
+
+asf.mod.o: asf.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+asf.o: ${asf-objs}
+	$(LD) -m elf32btsmip -r -o asf.o $(asf-objs)
+	$(KERNELPATH)/scripts/mod/modpost asf.o
+
+asf.ko: asf.o asf.mod.o
+	$(LD) $(LDOPTS) -o asf.ko asf.o asf.mod.o
+
+%.o: %.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif

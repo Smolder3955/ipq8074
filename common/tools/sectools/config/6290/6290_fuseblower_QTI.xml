@@ -1,0 +1,526 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+===============================================================================
+
+  Copyright (c) 2013-2017 Qualcomm Technologies, Inc.
+  All Rights Reserved.
+  Confidential and Proprietary - Qualcomm Technologies, Inc.
+
+===============================================================================
+-->
+
+<tns:fuseblower xmlns:tns="http://www.qualcomm.com/fuseblower"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.qualcomm.com/fuseblower ../xsd/fuseblower.xsd">
+
+    <metadata>
+        <chipset>6290</chipset>
+        <version>1.0</version>
+    </metadata>
+
+    <module id="QFPROM_RAW_FUSE_MAP_BASE_CORE">
+        <base_address>0x01e20000</base_address>
+        <description></description>
+        <fuse_region id="QFPROM_RAW_RD_WR_PERMISSION">
+            <description></description>
+            <fuse ignore="false" n="0">
+                <address>0x01e20000</address>
+                <operation>BLOW</operation>
+                <field id="PERMISSION_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>0</bits>
+                </field>
+                <field id="ANTI_ROLLBACK_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>1</bits>
+                </field>
+                <field id="OEM_PK_HASH_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>2</bits>
+                </field>
+                <field id="OEM_SECURE_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>3</bits>
+                </field>
+                <field id="ROM_PATCH_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>4</bits>
+                </field>
+                <field id="Q6_SEQUENCE_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>5</bits>
+                </field>
+                <field id="FEATURE_CONFIG_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>6</bits>
+                </field>
+                <field id="RFA_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>7</bits>
+                </field>
+                <field id="RFA_PDET_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>8</bits>
+                </field>
+                <field id="MEMORY_CONFIG_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>9</bits>
+                </field>
+                <field id="SPARE_REGION_10_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>10</bits>
+                </field>
+                <field id="SPARE_REGION_11_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>11</bits>
+                </field>
+                <field id="SPARE_REGION_12_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>12</bits>
+                </field>
+                <field id="SPARE_REGION_13_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>13</bits>
+                </field>
+                <field id="SPARE_REGION_14_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>14</bits>
+                </field>
+                <field id="SPARE_REGION_15_READ_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>15</bits>
+                </field>
+                <field id="RSVD_0_16">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>16</bits>
+                </field>
+                <field id="RSVD_0_17">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>17</bits>
+                </field>
+                <field id="RSVD_0_18">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>18</bits>
+                </field>
+                <field id="RSVD_0_19">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>19</bits>
+                </field>
+                <field id="RSVD_0_20">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>20</bits>
+                </field>
+                <field id="RSVD_0_21">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>21</bits>
+                </field>
+                <field id="RSVD_0_22">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>22</bits>
+                </field>
+                <field id="RSVD_0_23">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>23</bits>
+                </field>
+                <field id="RSVD_0_24">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>24</bits>
+                </field>
+                <field id="RSVD_0_25">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>25</bits>
+                </field>
+                <field id="RSVD_0_26">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>26</bits>
+                </field>
+                <field id="RSVD_0_27">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>27</bits>
+                </field>
+                <field id="RSVD_0_28">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>28</bits>
+                </field>
+                <field id="RSVD_0_29">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>29</bits>
+                </field>
+                <field id="RSVD_0_30">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>30</bits>
+                </field>
+                <field id="RSVD_0_31">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>31</bits>
+                </field>
+                <field id="PERMISSION_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>32</bits>
+                </field>
+                <field id="ANTI_ROLLBACK_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>33</bits>
+                </field>
+                <field id="OEM_PK_HASH_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>34</bits>
+                </field>
+                <field id="OEM_SECURE_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>35</bits>
+                </field>
+                <field id="ROM_PATCH_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>36</bits>
+                </field>
+                <field id="Q6_SEQUENCE_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>37</bits>
+                </field>
+                <field id="FEATURE_CONFIG_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>38</bits>
+                </field>
+                <field id="RFA_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>39</bits>
+                </field>
+                <field id="RFA_PDET_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>40</bits>
+                </field>
+                <field id="MEMORY_CONFIG_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>41</bits>
+                </field>
+                <field id="SPARE_REGION_10_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>42</bits>
+                </field>
+                <field id="SPARE_REGION_11_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>43</bits>
+                </field>
+                <field id="SPARE_REGION_12_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>44</bits>
+                </field>
+                <field id="SPARE_REGION_13_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>45</bits>
+                </field>
+                <field id="SPARE_REGION_14_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>46</bits>
+                </field>
+                <field id="SPARE_REGION_15_WRITE_DISABLE">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>47</bits>
+                </field>
+                <field id="RSVD_0_47">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>48</bits>
+                </field>
+                <field id="RSVD_0_48">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>49</bits>
+                </field>
+                <field id="RSVD_0_49">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>50</bits>
+                </field>
+                <field id="RSVD_0_50">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>51</bits>
+                </field>
+                <field id="RSVD_0_51">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>52</bits>
+                </field>
+                <field id="RSVD_0_52">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>53</bits>
+                </field>
+                <field id="RSVD_0_53">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>54</bits>
+                </field>
+                <field id="RSVD_0_54">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>55</bits>
+                </field>
+                <field id="RSVD_0_55">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>56</bits>
+                </field>
+                <field id="RSVD_0_56">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>57</bits>
+                </field>
+                <field id="RSVD_0_57">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>58</bits>
+                </field>
+                <field id="RSVD_0_58">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>59</bits>
+                </field>
+                <field id="RSVD_0_59">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>60</bits>
+                </field>
+                <field id="RSVD_0_60">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>61</bits>
+                </field>
+                <field id="RSVD_0_61">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>62</bits>
+                </field>
+                <field id="RSVD_0_63">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>63</bits>
+                </field>
+            </fuse>
+        </fuse_region>
+
+        <fuse_region id="QFPROM_RAW_OEM_SECURE">
+            <description></description>
+               <fuse ignore="false" n="0">
+                <address>0x01e20030</address>
+                <operation>BLOW</operation>
+                <field id="SECURE_BOOT0_AUTH_EN">
+                    <description></description>
+                    <owner>QTI</owner>
+                    <value>0x0</value>
+                    <bits>0</bits>
+                </field>
+            </fuse>
+            <fuse ignore="false" n="1">
+                <address>0x01e20038</address>
+                <operation>BLOW</operation>
+                <field id="OEM_SECURE_BIT32-36">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>36:32</bits>
+                </field>
+                <field id="OEM_SECURE_BIT37">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>37</bits>
+                </field>
+                <field id="OEM_SECURE_BIT38">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>38</bits>
+                </field>
+                <field id="OEM_SECURE_BIT39">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>39</bits>
+                </field>
+                <field id="OEM_SECURE_BIT40">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>40</bits>
+                </field>
+                <field id="OEM_SECURE_BIT41">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>41</bits>
+                </field>
+                <field id="OEM_SECURE_BIT42">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>42</bits>
+                </field>
+                <field id="OEM_SECURE_BIT43">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>43</bits>
+                </field>
+                <field id="OEM_SECURE_BIT54">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>54</bits>
+                </field>
+
+                <field id="OEM_SECURE_BIT55">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>55</bits>
+                </field>
+                <field id="OEM_SECURE_BIT56">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>56</bits>
+                </field>
+                <field id="OEM_SECURE_BIT57">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>57</bits>
+                </field>
+                <field id="OEM_SECURE_BIT58">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>58</bits>
+                </field>
+                <field id="OEM_SECURE_BIT59">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>59</bits>
+                </field>
+                <field id="OEM_SECURE_BIT60">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>60</bits>
+                </field>
+                <field id="OEM_SECURE_BIT61">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>61</bits>
+                </field>
+                <field id="OEM_SECURE_BIT62">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>62</bits>
+                </field>
+                <field id="OEM_SECURE_BIT63">
+                    <description></description>
+                    <value>0x0</value>
+                    <bits>63</bits>
+                </field>
+            </fuse>
+        </fuse_region>
+
+        </module>
+</tns:fuseblower>

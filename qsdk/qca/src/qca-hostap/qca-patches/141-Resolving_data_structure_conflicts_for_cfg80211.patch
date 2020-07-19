@@ -1,0 +1,13 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..f87847d 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -2977,7 +2977,7 @@ static struct hostapd_hw_modes * athr_get_hw_feature_data(void *priv,
+ 		bw_div = 4;
+ 	wpa_printf(MSG_DEBUG, "athr: Channel list");
+ 	for (i = 0; i < chans.ic_nchans; i++) {
+-		struct ieee80211_channel *chan = &chans.ic_chans[i];
++		struct ieee80211_ath_channel *chan = &chans.ic_chans[i];
+ 		int active;
+ 		active = act.ic_channels[chan->ic_ieee / 8] &
+ 			(1 << (chan->ic_ieee % 8));

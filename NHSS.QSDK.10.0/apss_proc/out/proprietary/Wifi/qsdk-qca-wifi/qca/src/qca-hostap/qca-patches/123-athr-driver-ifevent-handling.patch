@@ -1,0 +1,57 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..6778c87 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -53,6 +53,7 @@ struct driver_atheros_data {
+ 	int ifindex;
+ 	int ifindex2;
+ 	int if_removed;
++    int if_disabled;
+ 	u8 *assoc_req_ies;
+ 	size_t assoc_req_ies_len;
+ 	u8 *assoc_resp_ies;
+@@ -1411,6 +1412,7 @@ static void driver_atheros_event_rtm_newlink(void *ctx, struct ifinfomsg *ifi,
+ 	struct driver_atheros_data *drv = ctx;
+ 	int attrlen, rta_len;
+ 	struct rtattr *attr;
++    char namebuf[IFNAMSIZ];
+ 
+ 	if (drv->disabled)
+ 		return;
+@@ -1428,6 +1430,36 @@ static void driver_atheros_event_rtm_newlink(void *ctx, struct ifinfomsg *ifi,
+ 		   (ifi->ifi_flags & IFF_RUNNING) ? "[RUNNING]" : "",
+ 		   (ifi->ifi_flags & IFF_LOWER_UP) ? "[LOWER_UP]" : "",
+ 		   (ifi->ifi_flags & IFF_DORMANT) ? "[DORMANT]" : "");
++
++    if (!drv->if_disabled && !(ifi->ifi_flags & IFF_UP)) {
++        wpa_printf(MSG_DEBUG, "ATHR: Interface down");
++        drv->if_disabled = 1;
++        wpa_supplicant_event(drv->ctx, EVENT_INTERFACE_DISABLED, NULL);
++    }
++
++    if (drv->if_disabled && (ifi->ifi_flags & IFF_UP)) {
++        namebuf[0] = '\0';
++        if (if_indextoname(ifi->ifi_index, namebuf) &&
++            linux_iface_up(drv->ioctl_sock, drv->ifname) == 0) {
++            wpa_printf(MSG_DEBUG, "ATHR: Ignore interface up "
++                   "event since interface %s is down",
++                   namebuf);
++        } else if (if_nametoindex(drv->ifname) == 0) {
++            wpa_printf(MSG_DEBUG, "ATHR: Ignore interface up "
++                   "event since interface %s does not exist",
++                   drv->ifname);
++        } else if (drv->if_removed) {
++            wpa_printf(MSG_DEBUG, "ATHR: Ignore interface up "
++                   "event since interface %s is marked "
++                   "removed", drv->ifname);
++        } else {
++            wpa_printf(MSG_DEBUG, "ATHR: Interface up");
++            drv->if_disabled = 0;
++            wpa_supplicant_event(drv->ctx, EVENT_INTERFACE_ENABLED,
++                         NULL);
++        }
++    }
++
+ 	/*
+ 	 * Some drivers send the association event before the operup event--in
+ 	 * this case, lifting operstate in driver_atheros_set_operstate()

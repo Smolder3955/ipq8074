@@ -1,0 +1,26 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..5ec977f 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -1082,6 +1082,21 @@ driver_atheros_event_wireless_p2p_custom(struct driver_atheros_data *drv,
+ 		wpa_printf(MSG_DEBUG, "WEXT: EV_P2P_SEND_ACTION_CB");
+ 		fetch_pending_big_events(drv);
+ 		break;
++	case IEEE80211_EV_UNPROTECTED_DEAUTH_IND_STA: {
++		u8 sa[6] , da[6];
++		wpa_printf(MSG_DEBUG, "WEXT: EV_UNPROTECT_DEAUTH_IND_STA");
++		if ( len >=14) {
++		        os_memset(&event, 0, sizeof(event));
++			os_memcpy(&sa, buf, 6);
++                        event.unprot_deauth.sa =  sa;
++			os_memcpy(&da, drv->own_addr, 6);
++                        event.unprot_deauth.da =  da;
++			os_memcpy(&event.unprot_deauth.reason_code, buf + 12, 2);
++			wpa_supplicant_event(drv->ctx, EVENT_UNPROT_DEAUTH,
++					     &event);
++                }
++                break;
++        }
+ 	default:
+ 		break;
+ 	}

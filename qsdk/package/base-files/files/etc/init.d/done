@@ -1,0 +1,26 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006 OpenWrt.org
+
+START=95
+boot() {
+	mount_root done
+	rm -f /sysupgrade.tgz
+	local hk_board=$(grep -w  "IPQ807x" /proc/device-tree/model | awk -F: '{print $1}')
+
+        [ -n "$hk_board" ] && {
+		local mount_check=$(ls /lib/firmware/IPQ8074/WIFI_FW/ | grep "bdwlan.bin")
+		if [ -z "$mount_check" ];then
+			. /etc/init.d/wifi_fw_mount
+			mount_wifi_fw
+		fi
+	}
+
+	# process user commands
+	[ -f /etc/rc.local ] && {
+		sh /etc/rc.local
+	}
+
+	# set leds to normal state
+	. /etc/diag.sh
+	set_state done
+}

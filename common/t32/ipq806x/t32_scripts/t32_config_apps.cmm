@@ -1,0 +1,34 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+;********************************************************************
+; 		t32_config_apps.cmm				   **
+;********************************************************************
+
+
+; __________________________________________________________________
+;
+;       Turn off those annoying .bak files Trace32 likes to
+;       create. You'll see this called a bunch of times as
+;       it seems to get negated. Still troubleshooting.
+; __________________________________________________________________
+setup.bakfile off
+
+; __________________________________________________________________
+;
+;       Calling the RPM (via intercomm) to take the Kraits out of reset
+; __________________________________________________________________
+print "Executing remote instructions to tell RPM to take Kraits out of reset"
+do intercom_run_script_on_rpm.cmm  . L2_krait_power_up_sequence.cmm 0x2A000000 0x2A010000
+WAIT !run()
+
+; __________________________________________________________________
+;
+;       Turn off those annoying .bak files Trace32 likes to
+;       create. You'll see this called a bunch of times as
+;       it seems to get negated. Still troubleshooting.
+; __________________________________________________________________
+setup.bakfile off

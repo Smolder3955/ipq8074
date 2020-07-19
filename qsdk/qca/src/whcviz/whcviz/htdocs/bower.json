@@ -1,0 +1,23 @@
+{
+  "name": "whcviz",
+  "authors": [
+    "Qualcomm Atheros, Inc."
+  ],
+  "description": "Whole Home Coverage - Demo GUIs",
+  "main": "",
+  "moduleType": [],
+  "keywords": [
+    "whc",
+    "Wi-Fi SON"
+  ],
+  "license": "Qualcomm Atheros Proprietary",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "node_modules",
+    "common"
+  ],
+  "dependencies": {
+    "d3": "3.5.12"
+  }
+}

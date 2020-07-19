@@ -1,0 +1,74 @@
+/*
+ * Copyright (c) 2015, The Linux Foundation. All rights reserved.
+ *
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
+ * copyright notice and this permission notice appear in all copies.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
+ * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ */
+
+/dts-v1/;
+
+/ {
+	description = "ARM FIT (Flattened Image Tree)";
+	#address-cells = <1>;
+
+	image-info {
+		type="multiplatform";
+	};
+
+	images {
+		kernel@1 {
+			description = "ARM Linux-3.14.43";
+			data = /incbin/("Image.gz");
+			type = "kernel";
+			arch = "arm";
+			os = "linux";
+			compression = "gzip";
+			load = <0x42208000>;
+			entry = <0x42208000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+		fdt@1 {
+			description = "ARM qcom_ipq806x_ap.akxx device tree blob";
+			data = /incbin/("qcom-ipq8064-ap148.dtb.gz");
+			type = "flat_dt";
+			arch = "arm";
+			compression = "gzip";
+			load = <0x43F00000>;
+			hash@1 {
+				algo = "crc32";
+			};
+			hash@2 {
+				algo = "sha1";
+			};
+		};
+
+
+
+	};
+
+	configurations {
+		default = "config@4704_1";
+
+		config@4704_1 {
+			description = "qcom-ipq8064-ap148";
+			kernel = "kernel@1";
+			fdt = "fdt@1";
+		};
+
+	};
+};

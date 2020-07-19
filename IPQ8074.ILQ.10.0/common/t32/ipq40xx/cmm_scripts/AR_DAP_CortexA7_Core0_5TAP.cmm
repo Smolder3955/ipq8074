@@ -1,0 +1,80 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+;*****************************************************************************
+;**           APPS CORTEX A7 CPU 0.CMM                                      **
+;**           This script sets up CORTEX A7 JTAG for DAP mode               **
+;**                                                                         **
+;**           Changes:                                                      **
+;**           12-07-2012   First version Adebnath                           **
+;*****************************************************************************
+local &cmm_dir &cur_dir
+SYStem.Reset
+SYStem.CPU CortexA7
+SYSTEM.JtagClock 10.MHZ
+SYStem.CONFIG SLAVE OFF
+
+
+global &t32_intercom_port_base
+global &t32_intercom_port
+&t32_intercom_port_base=20000.
+&t32_intercom_port=&t32_intercom_port_base+1.
+
+&cur_dir=os.ppd()    	; directory where this script is running from
+;&cmm_dir="&cur_dir/../../RUMI"
+
+
+
+; select CPU and options
+	SYStem.Option EnReset OFF
+	SYStem.CONFIG COREBASE         0x80040000
+	SYStem.CONFIG ETMBASE          0x8004C000
+	;SYStem.CONFIG ETMFUNNELPORT    0.
+	system.config.CTIBASE			0x80051000
+	SYStem.CONFIG CTICONFIG        CORTEXV1
+	;system.config.funnelbase		0x80055000
+
+
+;for R3PC
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG.AXIACCESSPORT 0.
+
+SYStem.CONFIG DAPIRPRE 10.
+SYStem.CONFIG DAPDRPRE 2.
+SYStem.CONFIG DAPIRPOST 16.
+SYStem.CONFIG DAPDRPOST 2.
+
+
+ETM.OFF
+sys.option.enreset ON
+sys.option.resbreak ON
+sys.down
+sys.up
+
+;**********************************00******************************
+; --- Window &  Menu Setup ---
+;****************************************************************
+
+;do "&cur_dir\MENU\menu.cmm"
+do "&cur_dir/semihost_setup.cmm"
+;do "&cur_dir\basewin.cmm"
+
+;*********************************************
+; 		----  DDR Configuration ------
+;*********************************************
+;do "&cur_dir/../vi_cmm_scripts/gcc_init.cmm
+;do "&cur_dir/../vi_cmm_scripts/ddr_init_16bit.cmm
+;d.s 0x0B010004 %LE %LONG 0x80000000
+
+;cd &cmm_dir
+;autostore , history
+;data.load E:\vi_dakota\T32_Dakota\aragorn_cdvi.axf
+
+term.gate
+
+;go
+ENDDO
+

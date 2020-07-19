@@ -1,0 +1,26 @@
+diff --git a/hostapd/hostapd_cli.c b/hostapd/hostapd_cli.c
+index 8b99a0a..15dc7d5 100644
+--- a/hostapd/hostapd_cli.c
++++ b/hostapd/hostapd_cli.c
+@@ -1452,6 +1452,12 @@ static int hostapd_cli_cmd_dpp_pkex_remove(struct wpa_ctrl *ctrl, int argc,
+ #endif /* CONFIG_DPP */
+ 
+ 
++static int hostapd_cli_cmd_update_beacon(struct wpa_ctrl *ctrl, int argc, char *argv[])
++{
++	return wpa_ctrl_command(ctrl, "UPDATE_BEACON");
++}
++
++
+ struct hostapd_cli_cmd {
+ 	const char *cmd;
+ 	int (*handler)(struct wpa_ctrl *ctrl, int argc, char *argv[]);
+@@ -1572,6 +1578,8 @@ static const struct hostapd_cli_cmd hostapd_cli_commands[] = {
+ 	  "= drop all ERP keys"},
+ 	{ "log_level", hostapd_cli_cmd_log_level, NULL,
+ 	  "[level] = show/change log verbosity level" },
++	{ "update_beacon", hostapd_cli_cmd_update_beacon, NULL,
++	  " = update beacon" },
+ 	{ "pmksa", hostapd_cli_cmd_pmksa, NULL,
+ 	  " = show PMKSA cache entries" },
+ 	{ "pmksa_flush", hostapd_cli_cmd_pmksa_flush, NULL,

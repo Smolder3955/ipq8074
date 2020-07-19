@@ -1,0 +1,38 @@
+diff --git a/src/ap/wpa_auth.c b/src/ap/wpa_auth.c
+index f0428d3..1e29a46 100644
+--- a/src/ap/wpa_auth.c
++++ b/src/ap/wpa_auth.c
+@@ -1491,7 +1491,7 @@ void __wpa_send_eapol(struct wpa_authenticator *wpa_auth,
+ 		os_memcpy(key_data, kde, kde_len);
+ 		WPA_PUT_BE16(key_mic + mic_len, kde_len);
+ #ifdef CONFIG_FILS
+-	} else if (!mic_len) {
++	} else if (!mic_len && kde) {
+ 		const u8 *aad[1];
+ 		size_t aad_len[1];
+ 
+@@ -2600,7 +2600,7 @@ u8 * hostapd_eid_assoc_fils_session(struct wpa_state_machine *sm, u8 *buf,
+ 	plain = fils_prepare_plainbuf(sm, hlp);
+ 	if (!plain) {
+ 		wpa_printf(MSG_DEBUG, "FILS: Plain buffer prep failed");
+-		return NULL;
++		return pos;
+ 	}
+ 
+ 	os_memcpy(pos, wpabuf_head(plain), wpabuf_len(plain));
+diff --git a/src/rsn_supp/wpa.c b/src/rsn_supp/wpa.c
+index 449ae8b..a090440 100644
+--- a/src/rsn_supp/wpa.c
++++ b/src/rsn_supp/wpa.c
+@@ -105,6 +105,11 @@ int wpa_eapol_key_send(struct wpa_sm *sm, struct wpa_ptk *ptk,
+ 		if (!ptk || !ptk->kek_len)
+ 			goto out;
+ 
++		if (msg_len < (sizeof(struct ieee802_1x_hdr) +
++			sizeof(struct wpa_eapol_key) + 2)) {
++			goto out;
++		}
++
+ 		key_data_len = msg_len - sizeof(struct ieee802_1x_hdr) -
+ 			sizeof(struct wpa_eapol_key) - 2;
+ 

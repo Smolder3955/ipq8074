@@ -1,0 +1,72 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index c80a5ea..bcd78f5 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -726,6 +726,7 @@ atheros_set_opt_ie(void *priv, const u8 *ie, size_t ie_len)
+ 		os_memcpy(&(app_ie->app_buf[0]), ie, ie_len);
+ 	app_ie->app_buflen = ie_len;
+ 
++	app_ie->identifier = HOSTAPD_IE;
+ 	app_ie->app_frmtype = IEEE80211_APPIE_FRAME_BEACON;
+ 
+ 	/* append WPS IE for Beacon */
+@@ -1015,6 +1016,7 @@ atheros_set_wps_ie(void *priv, const u8 *ie, size_t len, u32 frametype)
+ 	beac_ie = (struct ieee80211req_getset_appiebuf *) buf;
+ 	beac_ie->app_frmtype = frametype;
+ 	beac_ie->app_buflen = len;
++	beac_ie->identifier = HOSTAPD_WPS_IE;
+ 	if (ie)
+ 		os_memcpy(&(beac_ie->app_buf[0]), ie, len);
+ 
+@@ -2130,6 +2132,7 @@ static int athr_wnm_tfs(struct atheros_driver_data *drv, const u8* peer,
+ 		tfs_ie = (struct ieee80211req_getset_appiebuf *) buf;
+ 		tfs_ie->app_frmtype = IEEE80211_APPIE_FRAME_WNM;
+ 		tfs_ie->app_buflen = ETH_ALEN + 2 + 2 + *len;
++		tfs_ie->identifier = HOSTAPD_IE;
+ 
+ 		/* Command header for driver */
+ 		os_memcpy(&(tfs_ie->app_buf[0]), peer, ETH_ALEN);
+@@ -2154,6 +2157,7 @@ static int athr_wnm_tfs(struct atheros_driver_data *drv, const u8* peer,
+ 		tfs_ie->app_buflen = IEEE80211_APPIE_MAX -
+ 			sizeof(struct ieee80211req_getset_appiebuf);
+ 		/* Command header for driver */
++		tfs_ie->identifier = HOSTAPD_IE;
+ 		os_memcpy(&(tfs_ie->app_buf[0]), peer, ETH_ALEN);
+ 		val = oper;
+ 		os_memcpy(&(tfs_ie->app_buf[0]) + ETH_ALEN, &val, 2);
+@@ -2181,6 +2185,7 @@ static int athr_wnm_tfs(struct atheros_driver_data *drv, const u8* peer,
+ 		tfs_ie->app_buflen = IEEE80211_APPIE_MAX -
+ 			sizeof(struct ieee80211req_getset_appiebuf);
+ 		/* Command header for driver */
++		tfs_ie->identifier = HOSTAPD_IE;
+ 		os_memcpy(&(tfs_ie->app_buf[0]), peer, ETH_ALEN);
+ 		val = oper;
+ 		os_memcpy(&(tfs_ie->app_buf[0]) + ETH_ALEN, &val, 2);
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..774ff11 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -3354,6 +3354,7 @@ atheros_set_wps_ie(void *priv, const u8 *ie, size_t len, u32 frametype)
+ 	beac_ie = (struct ieee80211req_getset_appiebuf *) buf;
+ 	beac_ie->app_frmtype = frametype;
+ 	beac_ie->app_buflen = len;
++	beac_ie->identifier = HOSTAPD_IE;
+ 	memcpy(&(beac_ie->app_buf[0]), ie, len);
+ 
+ 	return set80211priv(drv, IEEE80211_IOCTL_SET_APPIEBUF, beac_ie,
+@@ -4109,6 +4110,7 @@ static int athr_wnm_tfs(struct driver_atheros_data *drv, const u8* peer,
+ 		tfs_ie->app_frmtype = IEEE80211_APPIE_FRAME_WNM;
+ 		tfs_ie->app_buflen = IEEE80211_APPIE_MAX -
+ 			sizeof(struct ieee80211req_getset_appiebuf);
++		tfs_ie->identifier = HOSTAPD_IE;
+ 		/* Command header for driver */
+ 		os_memcpy(&(tfs_ie->app_buf[0]), peer, ETH_ALEN);
+ 		val = oper;
+@@ -4140,6 +4142,7 @@ static int athr_wnm_tfs(struct driver_atheros_data *drv, const u8* peer,
+ 		tfs_ie = (struct ieee80211req_getset_appiebuf *) buf;
+ 		tfs_ie->app_frmtype = IEEE80211_APPIE_FRAME_WNM;
+ 		tfs_ie->app_buflen = ETH_ALEN + 2 + 2 + *len;
++		tfs_ie->identifier = HOSTAPD_IE;
+ 
+ 		/* Command header for driver */
+ 		os_memcpy(&(tfs_ie->app_buf[0]), peer, ETH_ALEN);

@@ -1,0 +1,36 @@
+Added NULL pointer to handle possible NULL pointer return
+from function wpa_auth_write_assoc_resp_owe.
+---
+ src/ap/ieee802_11.c  | 5 +++--
+ src/ap/wpa_auth_ie.c | 2 +-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index 8c0de4d..3a454c1 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -3016,7 +3017,7 @@ u8 * owe_assoc_req_process(struct hostapd_data *hapd, struct sta_info *sta,
+ 	owe_buf = wpa_auth_write_assoc_resp_owe(sta->wpa_sm, owe_buf,
+ 						owe_buf_len, NULL, 0);
+ 
+-	if (sta->owe_ecdh) {
++	if (sta->owe_ecdh && owe_buf) {
+ 		struct wpabuf *pub;
+ 
+ 		pub = crypto_ecdh_get_pubkey(sta->owe_ecdh, 0);
+diff --git a/src/ap/wpa_auth_ie.c b/src/ap/wpa_auth_ie.c
+index 28db952..534e22f 100644
+--- a/src/ap/wpa_auth_ie.c
++++ b/src/ap/wpa_auth_ie.c
+@@ -1042,7 +1042,7 @@ u8 * wpa_auth_write_assoc_resp_owe(struct wpa_state_machine *sm,
+ #ifdef CONFIG_TESTING_OPTIONS
+ 	if (conf->own_ie_override_len) {
+ 		if (max_len < conf->own_ie_override_len)
+-			return 0;
++			return pos;
+ 		wpa_hexdump(MSG_DEBUG, "WPA: Forced own IE(s) for testing",
+ 			    conf->own_ie_override, conf->own_ie_override_len);
+ 		os_memcpy(pos, conf->own_ie_override,
+-- 
+1.9.1
+

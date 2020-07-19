@@ -1,0 +1,50 @@
+diff --git a/src/ap/drv_callbacks.c b/src/ap/drv_callbacks.c
+index 358b813..e0f69f1 100644
+--- a/src/ap/drv_callbacks.c
++++ b/src/ap/drv_callbacks.c
+@@ -333,8 +333,10 @@ int hostapd_notif_assoc(struct hostapd_data *hapd, const u8 *addr,
+ 		if ((sta->flags & (WLAN_STA_ASSOC | WLAN_STA_MFP)) ==
+ 		    (WLAN_STA_ASSOC | WLAN_STA_MFP) &&
+ 		    !sta->sa_query_timed_out &&
+-		    sta->sa_query_count > 0)
+-			ap_check_sa_query_timeout(hapd, sta);
++		    sta->sa_query_count > 0) {
++			if(ap_check_sa_query_timeout(hapd, sta))
++				return -1;
++		}
+ 		if ((sta->flags & (WLAN_STA_ASSOC | WLAN_STA_MFP)) ==
+ 		    (WLAN_STA_ASSOC | WLAN_STA_MFP) &&
+ 		    !sta->sa_query_timed_out &&
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index d686701..f030ca7 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -2520,8 +2520,12 @@ static u16 check_assoc_ies(struct hostapd_data *hapd, struct sta_info *sta,
+ 		if ((sta->flags & (WLAN_STA_ASSOC | WLAN_STA_MFP)) ==
+ 		    (WLAN_STA_ASSOC | WLAN_STA_MFP) &&
+ 		    !sta->sa_query_timed_out &&
+-		    sta->sa_query_count > 0)
+-			ap_check_sa_query_timeout(hapd, sta);
++		    sta->sa_query_count > 0) {
++			if(ap_check_sa_query_timeout(hapd, sta)) {
++				sta = NULL;
++				return WLAN_STATUS_UNSPECIFIED_FAILURE;
++			}
++		}
+ 		if ((sta->flags & (WLAN_STA_ASSOC | WLAN_STA_MFP)) ==
+ 		    (WLAN_STA_ASSOC | WLAN_STA_MFP) &&
+ 		    !sta->sa_query_timed_out &&
+diff --git a/src/ap/sta_info.c b/src/ap/sta_info.c
+index 49a0dbe..cd99b1a 100644
+--- a/src/ap/sta_info.c
++++ b/src/ap/sta_info.c
+@@ -1082,6 +1082,9 @@ int ap_check_sa_query_timeout(struct hostapd_data *hapd, struct sta_info *sta)
+ 		sta->sa_query_trans_id = NULL;
+ 		sta->sa_query_count = 0;
+ 		eloop_cancel_timeout(ap_sa_query_timer, hapd, sta);
++                wpa_printf(MSG_DEBUG, "SA Query procedure timeout send disassoc");
++                hostapd_drv_sta_disassoc(hapd, sta->addr, WLAN_REASON_PREV_AUTH_NOT_VALID);
++                ap_free_sta(hapd, sta);
+ 		return 1;
+ 	}
+ 

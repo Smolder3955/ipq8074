@@ -1,0 +1,123 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+
+;**           APPS CORTEX A53 CPU 0.CMM                                     **
+
+;**           This script sets up CORTEX A53 JTAG for DAP mode              **
+
+;**                                                                         **
+
+;**           Changes:                                                      **
+
+;**           11-06-2013   First version aidapala                           **
+
+;*****************************************************************************
+
+;local &cmm_dir &cur_dir
+
+SYStem.Reset
+
+SYStem.CPU CORTEXA53
+
+SYSTEM.JtagClock 1MHZ
+
+SYStem.CONFIG SLAVE OFF
+
+
+
+&cur_dir=os.ppd()    	; directory where this script is running from
+
+;&cmm_dir=".\..\..\RUMI"
+
+
+
+; select CPU and options
+
+
+
+;;ntimescc  ; time out ignored only for debugging 
+
+SYStem.Option EnReset OFF 
+
+
+
+SYStem.CONFIG	corenumber	4
+
+core.assign 1 2 3 4
+
+core.select 0
+
+
+
+SYStem.CONFIG	DAPIRPRE	0.
+
+SYStem.CONFIG	DAPDRPRE	0.
+
+SYStem.CONFIG	DAPIRPOST	16.
+
+SYStem.CONFIG	DAPDRPOST	2.
+
+
+
+SYStem.CONFIG.COREDEBUG.BASE	0x00190000 0x00192000 0x00194000 0x00196000
+
+SYStem.CONFIG.ETM.BASE		0x0619C000 0x0619D000 0x0619E000 0x0619F000
+
+SYStem.CONFIG.CTI.BASE		0x06198000 0x06199000 0x0619A000 0x0619B000
+
+
+
+;;SYStem.CONFIG.CTI.CONFIG	ARMV8
+
+
+
+; Upto BETA-5 Release Addresses
+
+;SYStem.CONFIG COREBASE         DAP:0x80040000 
+
+;SYStem.CONFIG.CTIBASE	       DAP:0x80051000
+
+
+
+; BETA-6 Release Addresses
+
+;;SYStem.CONFIG COREBASE          DAP:0x800D0000
+
+;;SYStem.CONFIG.CTIBASE	       DAP:0x800D8000
+
+
+
+SYStem.config AXIACCESSPORT 0
+
+SYStem.config MEMORYACCESSPORT 0
+
+SYStem.config DEBUGACCESSPORT 1
+
+
+
+ETM.OFF
+
+sys.mode.attach
+
+;system.mode attach
+
+;break
+
+
+
+
+
+;cd &cmm_dir
+
+autostore , history
+
+ENDDO
+
+
+

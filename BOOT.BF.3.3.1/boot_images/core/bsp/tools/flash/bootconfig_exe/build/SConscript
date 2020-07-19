@@ -1,0 +1,159 @@
+#===============================================================================
+#
+# BOOTCONFIG_TOOL.EXE  build script
+#
+# GENERAL DESCRIPTION
+#    Bootconfig Tool EXE image build script
+#
+# Copyright (c) 2015,2016-2017 Qualcomm Technologies Inc.
+# All Rights Reserved.
+#-------------------------------------------------------------------------------
+#
+#  $Header: //components/rel/boot.bf/3.3.1/boot_images/core/bsp/tools/flash/bootconfig_exe/build/SConscript#1 $
+#  $DateTime: 2017/02/07 02:19:26 $
+#  $Author: pwbldsvc $
+#  $Change: 12385566 $
+#                      EDIT HISTORY FOR FILE
+#
+#  This section contains comments describing changes made to the module.
+#  Notice that changes are listed in reverse chronological order.
+#
+# when       who     what, where, why
+# --------   ---     ---------------------------------------------------------
+# 01/30/17   an       Initial Revision for failsafe boot support
+#		      brought in from Dakota.
+# 05/13/16   gd       Initial Revision for failsafe boot support.
+#===============================================================================
+import os
+Import('env')
+
+env = env.Clone()
+
+#------------------------------------------------------------------------------
+# Check if we need to load this script or just bail-out
+#------------------------------------------------------------------------------
+# alias first alias is always the target then the other possibles aliases
+
+aliases = [
+   'bootconfig_exe',
+]
+
+image_name = str(aliases[0]).upper()
+env.Replace(PROC = 'x86')
+
+if not env.CheckAlias(image_name, aliases):
+   Return()
+
+#------------------------------------------------------------------------------
+# Init defualt values this PROC/Image
+#------------------------------------------------------------------------------
+# Init root env soo all scosntructs will add their libs
+env.Replace(ROOT_ENV = env)
+env.Replace(LIBS = [])
+env.Replace(IMAGE_ENV = env)
+env.Replace(IMAGE_NAME = image_name)
+
+# set other variables used by the build system...
+env.Replace(PLAT = 'cygwin')
+env.Replace(INSTALL_LIBPATH = env.subst('${INSTALL_LIBPATH}/${PROC}'))
+env.Replace(BUILDPATH = 'flash/' + image_name.lower())
+env.Replace(BUILD_ID = env.subst('${BUILD_ID}'))
+
+if env['MSM_ID'] not in ['6195', '6295', '6695', '6615']:
+   env.Replace(BUILD_ID = env.subst('${BUILD_ID}A'))
+env.Replace(CUST_H = env.subst('CUST${BUILD_ID}.H').lower())
+
+# set image type
+env.Replace(MODEM_PROC = env.subst('${PROC}'))
+env.Replace(BOOTCONFIG_EXE = env.subst('${PROC}'))
+
+# add environment variables
+env.Replace(BUILD_TOOL_CHAIN = 'yes')
+
+#===============================================================================
+# BOOTCONFIG_TOOL build rules
+#===============================================================================
+
+#------------------------------------------------------------------------------
+# Configure and load in CBSP uses and path variables
+#------------------------------------------------------------------------------
+env.InitBuildConfig()
+
+#------------------------------------------------------------------------------
+# Load in tools scripts, and re define our CCCOM string
+#------------------------------------------------------------------------------
+env.Tool('gcc_x86', toolpath = ['${BUILD_ROOT}/tools/build/scons/scripts'])
+
+#------------------------------------------------------------------------------
+# Print banner
+#------------------------------------------------------------------------------
+env.PrintImageBanner(image_name)
+
+# add extension flags for DBL
+env.Append(CPPDEFINES = [
+   "BUILD_FOR_X86",
+   "BUILD_TOOL_CHAIN",
+   "FLASH_SINGLE_THREADED",
+   "ENDIAN_LITTLE",
+   "BUILD_JNAND",
+   "BUILD_NAND",
+   "IMAGE_MODEM_PROC",
+   "FLASH_LOG_H=\\\"flash_log.h\\\"",
+   "CUST_H=\"\\\"${CUST_H}\\\"\""
+])
+
+#-------------------------------------------------------------------------------
+# Libraries Section
+#-------------------------------------------------------------------------------
+# load Core BSP Lib build rule scripts
+env.LoadCoreBSPLibScripts()
+
+x86_libs = [
+#      File(env.SubstRealPath('${ARMLIB}/armlib/m_t_pu.l'))
+]
+
+subsystem = ARGUMENTS.get('subsystem', None)
+if not subsystem:
+   env.AddLibsToImage('BOOTCONFIG_EXE', x86_libs)
+
+root_env = env['ROOT_ENV']
+libs = root_env['LIBS']
+libs_path = env['INSTALL_LIBPATH']
+
+#-------------------------------------------------------------------------------
+# Source PATH
+#-------------------------------------------------------------------------------
+SRCPATH = "${BUILD_ROOT}/core/storage/flash/tools/src/bootconfig"
+
+if not env.SubstPathExists(SRCPATH):
+   SRCPATH = "${BUILD_ROOT}/drivers/flash/tools/src"
+
+#print env.Dump()
+#print env.subst(env['CPPDEFINES'])
+
+#-------------------------------------------------------------------------------
+# Beging building BOOTCONFIG_EXE
+#-------------------------------------------------------------------------------
+env.Replace(TARGET_NAME = 'bootconfig_tool')
+
+bootconfig_exe = env.Program('${TARGET_NAME}', source=[], LIBS=libs, LIBPATH=libs_path)
+
+# copy elf and reloc to needed locations for AMSS tools to load on target
+install_target_exe = env.Install(SRCPATH, bootconfig_exe)
+
+#===============================================================================
+# Define units that will be build
+#===============================================================================
+bootconfig_tool_units = env.Alias (
+   'bootconfig_tool_units', install_target_exe
+)
+
+subsystem = ARGUMENTS.get('subsystem', None)
+
+# user overide default units
+if subsystem:
+   bootconfig_tool_units = env['LIBS']
+
+# add aliases
+for alias in aliases:
+   env.Alias(alias, bootconfig_tool_units)

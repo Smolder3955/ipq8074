@@ -1,0 +1,676 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+AREA.VIEW
+AREA.RESET
+
+; ******************** GCC clock init ********************;
+
+;========================================================;
+;	main
+;========================================================;
+
+gosub gcc_ddr_pll_init
+gosub gcc_fe_pll_init
+gosub gcc_init_cfg
+gosub apcs_clock_switch 0x5 0x0
+
+ENDDO
+
+
+
+;========================================================;
+;	waitFlagClear
+;========================================================;
+waitFlagClear:
+LOCAL &regAddr &flag
+ENTRY &regAddr &flag
+
+;PRINT "enter waitFlagClear &regAddr &flag"
+
+LOCAL &cnt &status
+&Cnt=0x100
+&status= 0xFFFFFFFF
+
+WHILE ((((&status)&(&flag))!=0x0)&&(&Cnt!=0))
+(
+	&Cnt=&Cnt-1
+	&status= Data.Long(ZSD:&regAddr)
+)
+
+IF (&Cnt)==0
+(
+	PRINT "FlagClear timeout"
+)
+
+RETURN
+
+
+;========================================================;
+;	waitFlagSet
+;========================================================;
+waitFlagSet:
+LOCAL &regAddr &flag
+ENTRY &regAddr &flag
+
+;PRINT "enter waitFlagSet &regAddr &flag"
+
+LOCAL &cnt &status
+&Cnt=0x100
+&status= 0x0
+
+WHILE ((((&status)&(&flag))!=(&flag))&&(&Cnt!=0))
+(
+	&Cnt=&Cnt-1
+	&status= Data.Long(ZSD:&regAddr)
+)
+
+IF (&Cnt)==0
+(
+	PRINT "FlagSet timeout"
+)
+
+RETURN
+
+
+;========================================================;
+;	writeField
+;========================================================;
+writeField:
+LOCAL &regAddr &bitOff &bitLen &fieldVal
+ENTRY &regAddr &bitOff &bitLen &fieldVal
+
+LOCAL &regVal &fieldMask
+&fieldMask=(1<<(&bitOff+&bitLen))-(1<<(&bitOff))
+&fieldMask=~(&fieldMask)
+;PRINT "fieldMask=&fieldMask"
+
+&regVal=Data.Long(ZSD:&regAddr)
+;PRINT "regVal=&regVal"
+
+&regVal=(&regVal)&(&fieldMask)
+;PRINT "regVal=&regVal"
+
+&regVal=(&regVal)|((&fieldVal)<<(&bitOff))
+;PRINT "regVal=&regVal"
+d.s &regAddr %LE %LONG &regVal
+
+RETURN
+
+
+
+
+;================================================================================================================;
+;	gcc_init_cfg
+;================================================================================================================;
+gcc_init_cfg:
+LOCAL &regAddr &regVal
+
+; enable VOTE clock
+d.s 0x01807000 %LE %LONG 0xFFFFFFFF
+
+; ==================== GCC_SDCC1_APPS_GRP: ddr_pll_sdcc1_clk_src, DIV=1, 193.71MHz ====================;
+gosub writeField 0x01818008 0x8 0x3 0x1
+gosub writeField 0x01818008 0x0 0x5 0x0
+gosub writeField 0x01818004 0x0 0x1 0x1
+gosub waitFlagClear 0x01818004 0x1
+
+; ---------- GCC_SDCC1_MISC, DIV=485 ----------;
+gosub writeField 0x01818014 0 0x9 0x1E4
+
+; ---------- GCC_SDCC1_APPS_CBCR, 400KHz ----------;
+gosub writeField 0x0181800C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181800C 0x80000000
+
+; ==================== GCC_BLSP1_QUP1_SPI_APPS_GRP:fepll_pll_200m_clk_src, DIV=8, 25MHz ====================;
+gosub writeField 0x01802028 0x8 0x3 0x2
+gosub writeField 0x01802028 0x0 0x5 0xF
+gosub writeField 0x01802024 0x0 0x1 0x1
+gosub waitFlagClear 0x01802024 0x1
+
+; ---------- GCC_BLSP1_QUP1_SPI_MISC, DIV=1 ----------;
+gosub writeField 0x0180205C 0 0x4 0
+
+; ---------- GCC_BLSP1_QUP1_SPI_APPS_CBCR, 25MHz ----------;
+gosub writeField 0x01802004 0x0 0x1 0x1
+gosub waitFlagClear 0x01802004 0x80000000
+
+
+; ==================== GCC_BLSP1_QUP2_SPI_APPS_GRP:fepll_pll_200m_clk_src, DIV=8, 25MHz ====================;
+gosub writeField 0x01803018 0x8 0x3 0x2
+gosub writeField 0x01803018 0x0 0x5 0xF
+gosub writeField 0x01803014 0x0 0x1 0x1
+gosub waitFlagClear 0x01803014 0x1
+
+; ---------- GCC_BLSP1_QUP2_SPI_MISC, DIV=1 ----------;
+gosub writeField 0x0180304C 0 0x4 0
+
+; ---------- GCC_BLSP1_QUP2_SPI_APPS_CBCR, 25MHz ----------;
+gosub writeField 0x0180300C 0x0 0x1 0x1
+gosub waitFlagClear 0x0180300C 0x80000000
+
+
+; ==================== GCC_BLSP1_UART1_APPS_CMD_RCGR:bi_tcxo, DIV=1, 48MHz ====================;
+; ==================== GCC_BLSP1_UART1_APPS_CMD_RCGR:bi_tcxo, DIV=2, 24MHz ====================;
+gosub writeField 0x01802048 0x8 0x3 0x0
+;gosub writeField 0x01802048 0x0 0x5 0x0
+gosub writeField 0x01802048 0x0 0x5 0x3
+gosub writeField 0x01802044 0x0 0x1 0x1
+gosub waitFlagClear 0x01802044 0x1
+
+; ---------- GCC_BLSP1_UART1_MISC, DIV=1 ----------;
+; ---------- GCC_BLSP1_UART1_MISC, DIV=13 ----------;
+;gosub writeField 0x01802058 0 0x4 0
+gosub writeField 0x01802058 0 0x4 0xC
+
+; ---------- GCC_BLSP1_UART1_APPS_CBCR, 48MHz ----------;
+gosub writeField 0x0180203C 0x0 0x1 0x1
+gosub waitFlagClear 0x0180203C 0x80000000
+
+
+; ==================== GCC_BLSP1_UART2_APPS_CMD_RCGR:bi_tcxo, DIV=1, 48MHz ====================;
+; ==================== GCC_BLSP1_UART2_APPS_CMD_RCGR:bi_tcxo, DIV=1, 24MHz ====================;
+gosub writeField 0x01803038 0x8 0x3 0x0
+;gosub writeField 0x01803038 0x0 0x5 0x0
+gosub writeField 0x01803038 0x0 0x5 0x3
+gosub writeField 0x01803034 0x0 0x1 0x1
+gosub waitFlagClear 0x01803034 0x1
+
+; ---------- GCC_BLSP1_UART2_MISC, DIV=1 ----------;
+; ---------- GCC_BLSP1_UART2_MISC, DIV=13 ----------;
+;gosub writeField 0x01803048 0 0x4 0
+gosub writeField 0x01803048 0 0x4 0xC
+
+; ---------- GCC_BLSP1_UART2_APPS_CBCR ----------;
+gosub writeField 0x0180302C 0x0 0x1 0x1
+gosub waitFlagClear 0x0180302C 0x80000000
+
+; ---------- GCC_SYS_NOC_AT_CBCR, 143MHz ----------;
+gosub writeField 0x01821020 0x0 0x1 0x1
+gosub waitFlagClear 0x01821020 0x80000000
+
+; ---------- GCC_PCNOC_AT_CBCR, 143MHz ----------;
+gosub writeField 0x01821034 0x0 0x1 0x1
+gosub waitFlagClear 0x01821034 0x80000000
+
+; ==================== GCC_SYS_NOC_125M_GRP:BFDCD_DLY2NS:fepll_pll_125m_dly2ns_clk_src, DIV=1, 125MHz ====================;
+gosub writeField 0x01812004 0x8 0x3 0x1
+gosub writeField 0x01812004 0x0 0x5 0x0
+gosub writeField 0x01812000 0x0 0x1 0x1
+gosub waitFlagClear 0x01812000 0x1
+
+
+; ==================== GCC_SYS_NOC_125M_GRP:BFDCD: fepll_pll_125m_clk_src, DIV=1, 125MHz ====================;
+gosub writeField 0x018210E8 0x8 0x3 0x1
+gosub writeField 0x018210E8 0x0 0x5 0x0
+gosub writeField 0x018210E4 0x0 0x1 0x1
+gosub waitFlagClear 0x018210E4 0x1
+
+; ---------- GCC_SYS_NOC_125M_CBCR ----------;
+gosub writeField 0x018210EC 0x0 0x1 0x1
+gosub waitFlagClear 0x018210EC 0x80000000
+
+; ---------- GCC_CRYPTO_CBCR, 125MHz ----------;
+gosub waitFlagClear 0x0181601C 0x80000000
+
+; ---------- GCC_CRYPTO_AXI_CBCR, 125MHz ----------;
+gosub waitFlagClear 0x01816020 0x80000000
+
+; ---------- GCC_SNOC_BUS_TIMEOUT1_AHB_CBCR, 125MHz ----------;
+gosub writeField 0x01821070 0x0 0x1 0x1
+gosub waitFlagClear 0x01821070 0x80000000
+
+; ---------- GCC_SNOC_BUS_TIMEOUT3_AHB_CBCR, 125MHz ----------;
+gosub writeField 0x01821080 0x0 0x1 0x1
+gosub waitFlagClear 0x01821080 0x80000000
+
+; ---------- GCC_ESS_CBCR, 125MHz ----------;
+gosub writeField 0x01812010 0x0 0x1 0x1
+gosub waitFlagClear 0x01812010 0x80000000
+
+
+; ==================== GCC_SLEEP_GRP: core_pi_sleep_clk, 32KHz ====================;
+; ---------- GCC_BLSP1_SLEEP_CBCR, 32KHz ----------;
+gosub waitFlagClear 0x01801004 0x80000000
+
+; ---------- GCC_MPM_SLEEP_CBCR, 32KHz ----------;
+gosub writeField 0x0182400C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182400C 0x80000000
+
+; ---------- GCC_QPIC_SLEEP_CBCR, 32KHz ----------;
+gosub writeField 0x0181C00C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181C00C 0x80000000
+
+; ---------- GCC_GCC_IM_SLEEP_CBCR, 32KHz ----------;
+gosub writeField 0x01821060 0x0 0x1 0x1
+gosub waitFlagClear 0x01821060 0x80000000
+
+
+; ==================== GCC_XO_GRP: bi_tcxo, 48MHz ====================;
+; ---------- GCC_WCSS2G_REF_CBCR, 48MHz ----------;
+gosub writeField 0x0181F00C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181F00C 0x80000000
+
+; ---------- GCC_WCSS5G_REF_CBCR, 48MHz ----------;
+gosub writeField 0x0182000C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182000C 0x80000000
+
+; ---------- GCC_GCC_XO_CBCR, 48MHz ----------;
+gosub writeField 0x01821058 0x0 0x1 0x1
+gosub waitFlagClear 0x01821058 0x80000000
+
+; ---------- GCC_GCC_XO_DIV4_CBCR, 12MHz ----------;
+gosub writeField 0x0182105C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182105C 0x80000000
+
+; ---------- GCC_SNOC_QOSGEN_EXTREF_CTL, disable, DIV=1, 12MHz ----------;
+gosub writeField 0x0182100C 0x0 0x1 0x0
+gosub writeField 0x0182100C 0x10 0x2 0x0
+
+; ---------- GCC_WCSS2G_MISC, PREDIV=4, DIV=366, 32.786KHz ----------;
+gosub writeField 0x0181F014 0x10 0x9 0x3
+gosub writeField 0x0181F014 0x0 0x9 0x16D
+
+; ---------- GCC_WCSS2G_RTC_CBCR, 32.786KHz ----------;
+gosub writeField 0x0181F010 0x0 0x1 0x1
+gosub waitFlagClear 0x0181F010 0x80000000
+
+; ---------- GCC_WCSS5G_MISC, PREDIV=4, DIV=366, 32.786KHz ----------;
+gosub writeField 0x01820014 0x10 0x9 0x3
+gosub writeField 0x01820014 0x0 0x9 0x16D
+
+; ---------- GCC_WCSS5G_RTC_CBCR, 32.786KHz ----------;
+gosub writeField 0x01820010 0x0 0x1 0x1
+gosub waitFlagClear 0x01820010 0x80000000
+
+; ---------- GCC_DCD_XO_CBCR, 48MHz ----------;
+gosub writeField 0x0182103C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182103C 0x80000000
+
+; ==================== GCC_SEC_CTRL_GRP: bi_tcxo, DIV=2, 24MHz ====================;
+gosub writeField 0x0181A038 0x8 0x3 0x0
+gosub writeField 0x0181A038 0x0 0x5 0x3
+gosub writeField 0x0181A034 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A034 0x1
+
+; ---------- GCC_SEC_CTRL_SENSE_CBCR, 12MHz ----------;
+gosub writeField 0x0181A02C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A02C 0x80000000
+
+; ---------- GCC_SEC_CTRL_CBCR, 12MHz ----------;
+gosub writeField 0x0181A028 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A028 0x80000000
+
+; ---------- GCC_SEC_CTRL_PHI90_CBCR, 12MHz ----------;
+gosub writeField 0x0181A03C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A03C 0x80000000
+
+; ---------- GCC_BIMC_SYSNOC_AXI_CBCR, 200MHz ----------;
+gosub writeField 0x0180400C 0x0 0x1 0x1
+gosub waitFlagClear 0x0180400C 0x80000000
+
+; ---------- GCC_IMEM_AXI_CBCR, 200MHz ----------;
+gosub waitFlagClear 0x0180E004 0x80000000
+
+; ---------- GCC_APSS_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01819004 0x0 0x1 0x1
+gosub waitFlagClear 0x01819004 0x80000000
+
+; ---------- GCC_SYS_NOC_APSS_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01821018 0x80000000
+
+; ---------- GCC_SNOC_BUS_TIMEOUT0_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01821068 0x0 0x1 0x1
+gosub waitFlagClear 0x01821068 0x80000000
+
+; ---------- GCC_APSS_AXI_CBCR, 250MHz ----------;
+gosub waitFlagClear 0x01819008 0x80000000
+
+; ---------- GCC_BIMC_AXI_M0_CBCR, 250MHz ----------;
+gosub waitFlagClear 0x01804018 0x80000000
+
+
+
+; ---------- GCC_SNOC_PCNOC_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0182101C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182101C 0x80000000
+
+; ---------- GCC_PCNOC_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01821030 0x0 0x1 0x1
+gosub waitFlagClear 0x01821030 0x80000000
+
+; ---------- GCC_IMEM_CFG_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0180E008 0x0 0x1 0x1
+gosub waitFlagClear 0x0180E008 0x80000000
+
+; ---------- GCC_SDCC1_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01818010 0x0 0x1 0x1
+gosub waitFlagClear 0x01818010 0x80000000
+
+; ---------- GCC_BLSP1_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01801008 0x80000000
+
+; ---------- GCC_NOC_CONF_XPU_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01817000 0x0 0x1 0x1
+gosub waitFlagClear 0x01817000 0x80000000
+
+; ---------- GCC_PCNOC_MPU_CFG_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0181700C 0x0 0x1 0x1
+gosub waitFlagClear 0x0181700C 0x80000000
+
+; ---------- GCC_PCNOC_XPU_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01817008 0x0 0x1 0x1
+gosub waitFlagClear 0x01817008 0x80000000
+
+; ---------- GCC_PRNG_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01813004 0x80000000
+
+; ---------- GCC_QPIC_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0181C008 0x0 0x1 0x1
+gosub waitFlagClear 0x0181C008 0x80000000
+
+; ---------- GCC_QPIC_CBCR, 100MHz ----------;
+gosub writeField 0x0181C004 0x0 0x1 0x1
+gosub waitFlagClear 0x0181C004 0x80000000
+
+; ---------- GCC_MDIO_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01826000 0x0 0x1 0x1
+gosub waitFlagClear 0x01826000 0x80000000
+
+; ---------- GCC_TCSR_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01822004 0x0 0x1 0x1
+gosub waitFlagClear 0x01822004 0x80000000
+
+; ---------- GCC_BOOT_ROM_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x0181300C 0x80000000
+
+; ---------- GCC_TLMM_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01805004 0x80000000
+
+; ---------- GCC_TLMM_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01805008 0x80000000
+
+; ---------- GCC_MPM_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01824008 0x80000000
+
+; ---------- GCC_SEC_CTRL_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0181A024 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A024 0x80000000
+
+; ---------- GCC_SEC_CTRL_BOOT_ROM_PATCH_CBCR, 100MHz ----------;
+gosub writeField 0x0181A030 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A030 0x80000000
+
+; ---------- GCC_SPDM_CFG_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01825004 0x0 0x1 0x1
+gosub waitFlagClear 0x01825004 0x80000000
+
+; ---------- GCC_SPDM_MSTR_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01825008 0x0 0x1 0x1
+gosub waitFlagClear 0x01825008 0x80000000
+
+; ---------- GCC_CRYPTO_AHB_CBCR, 100MHz ----------;
+gosub waitFlagClear 0x01816024 0x80000000
+
+; ---------- GCC_GCC_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x01821050 0x0 0x1 0x1
+gosub waitFlagClear 0x01821050 0x80000000
+
+; ---------- GCC_BIMC_AHB_CBCR, 100MHz ----------;
+gosub writeField 0x0180401C 0x0 0x1 0x1
+gosub waitFlagClear 0x0180401C 0x80000000
+
+; ---------- GCC_SPDM_PCNOC_CY_CBCR, 100MHz ----------;
+gosub writeField 0x0182501C 0x0 0x1 0x1
+gosub waitFlagClear 0x0182501C 0x80000000
+
+; ---------- GCC_SRIF_25M_CBCR, 25MHz ----------;
+gosub writeField 0x018210F8 0x0 0x1 0x1
+gosub waitFlagClear 0x018210F8 0x80000000
+
+
+; ==================== GCC_SPDM_BIMC_CY_GRP: fepll_pll_wcss2g_clk_src, HW_DIV=4, 62.5MHz ====================;
+; ---------- GCC_ACC_MISC, enable ----------;
+gosub writeField 0x0181A01C 0x0 0x1 0x1
+
+; ---------- GCC_SEC_CTRL_ACC_CBCR, 100MHz ----------;
+gosub writeField 0x0181A020 0x0 0x1 0x1
+gosub waitFlagClear 0x0181A020 0x80000000
+
+print "GCC init cfg done!"
+
+return
+
+
+
+;================================================================================================================;
+;	GCC_DDR_PLL init
+;================================================================================================================;
+gcc_ddr_pll_init:
+
+print "start DDR_PLL init"
+
+LOCAL &regAddr &regVal &count
+LOCAL &regGlbCtrlAddr &regPllDivAddr 
+
+&regGlbCtrlAddr=0x182E000
+&regPllDivAddr=0x182E020
+
+
+; PLL_DIV
+&regAddr=&regPllDivAddr
+&regVal=Data.Long(ZSD:&regAddr)
+
+;print "PLL_DIV raw value: &regVal"
+
+; REFCLKDIV, set to 2, 24M ref_clk
+&regVal=(&regVal)&0xFFFFFF
+&regVal=(&regVal)|0x2000000
+
+; FDBKDIV, set to 111, 5328M VCO
+&regVal=(&regVal)&0xFF00FFFF
+&regVal=(&regVal)|0x006F0000
+
+; CR, disable
+&regVal=(&regVal)&0xFFFFFEFF
+&regVal=(&regVal)|0x00000000
+
+; A7_CPU, set to division 9
+; division 8.5 	: 5
+; division 9 	: 6
+; division 9.5 	: 7
+&regVal=(&regVal)&0xFFFFFF0F
+&regVal=(&regVal)|0x00000060
+
+; DDR, set to division 10
+; division 8 	: 1
+; division 10 	: 2
+; division 12 	: 3
+&regVal=(&regVal)&0xFFFFFFF0
+&regVal=(&regVal)|0x00000002
+
+d.s &regAddr %LE %LONG &regVal
+;print "PLL_DIV new value: &regVal"
+
+;--------------------------------------------------------;
+; GLB_CTRL
+&regAddr=&regGlbCtrlAddr
+&regVal=Data.Long(ZSD:&regAddr)
+;print "GLB_CTRL raw value: &regVal"
+
+;--------------------------------------------------------;
+; PLL_EN_PLL enable
+&regVal=(&regVal)|0x00000001
+d.s &regAddr %LE %LONG &regVal
+
+;--------------------------------------------------------;\
+; GLOBAL_RESET enable
+; pull reset high
+&regVal=(&regVal)|0x00001000
+d.s &regAddr %LE %LONG &regVal
+
+; wait 1ms (1us is enough)
+wait 1ms
+
+; pull reset low
+&regVal=(&regVal)&0xFFFFEFFF
+d.s &regAddr %LE %LONG &regVal
+
+;--------------------------------------------------------;
+; VCO_CALIB_EN enable
+&regVal=(&regVal)|0x00000004
+d.s &regAddr %LE %LONG &regVal
+
+; wait 10ms
+wait 100ms
+
+;print "GLB_CTRL new value: &regVal"
+
+;--------------------------------------------------------;
+&regAddr=&regGlbCtrlAddr
+&regVal=Data.Long(ZSD:&regAddr)
+
+if (((&regVal)&0x10000000)!=0)
+(
+	print "DDR PLL LOCKED!"
+)
+else
+(
+	print "DDR PLL UNLOCK!!!"
+)
+
+return
+
+
+
+;================================================================================================================;
+;	GCC_FE_PLL init
+;================================================================================================================;
+gcc_fe_pll_init:
+
+print "start FE_PLL init"
+
+LOCAL &regAddr &regVal &count
+LOCAL &regGlbCtrlAddr &regPllDivAddr &regCalibDebug
+
+&regGlbCtrlAddr=0x182F000
+&regPllDivAddr=0x182F020
+&regCalibDebug=0x182F00C
+
+
+; PLL_DIV
+&regAddr=&regPllDivAddr
+&regVal=Data.Long(ZSD:&regAddr)
+
+;print "PLL_DIV raw value: &regVal"
+
+; REFCLKDIV, set to 3, 16M ref_clk
+&regVal=(&regVal)&0xFFFFFF
+&regVal=(&regVal)|0x3000000
+
+; FDBKDIV, set to 125, 4000M VCO
+&regVal=(&regVal)&0xFF00FFFF
+&regVal=(&regVal)|0x007D0000
+
+
+; WIFI1, set to 250M
+; 266M 	: 0
+; 250M 	: 1
+; 222M 	: 2
+; 200M 	: 3
+&regVal=(&regVal)&0xFFFF0FFF
+&regVal=(&regVal)|0x00001000
+
+; WIFI0, set to 250M
+; 266M 	: 0
+; 250M 	: 1
+; 222M 	: 2
+; 200M 	: 3
+&regVal=(&regVal)&0xFFFFF0FF
+&regVal=(&regVal)|0x00000100
+
+d.s &regAddr %LE %LONG &regVal
+;print "PLL_DIV new value: &regVal"
+
+;--------------------------------------------------------;
+; GLB_CTRL
+&regAddr=&regGlbCtrlAddr
+&regVal=Data.Long(ZSD:&regAddr)
+;print "GLB_CTRL raw value: &regVal"
+
+;--------------------------------------------------------;
+; PLL_EN_PLL enable
+&regVal=(&regVal)|0x00000001
+d.s &regAddr %LE %LONG &regVal
+
+;--------------------------------------------------------;\
+; GLOBAL_RESET enable
+; pull reset high
+&regVal=(&regVal)|0x00001000
+d.s &regAddr %LE %LONG &regVal
+
+; wait 1ms (1us is enough)
+wait 1ms
+
+; pull reset low
+&regVal=(&regVal)&0xFFFFEFFF
+d.s &regAddr %LE %LONG &regVal
+
+;--------------------------------------------------------;
+; VCO_CALIB_EN enable
+&regVal=(&regVal)|0x00000020
+d.s &regAddr %LE %LONG &regVal
+
+; wait 10ms (100us is enough)
+wait 10ms
+
+;print "GLB_CTRL new value: &regVal"
+
+;--------------------------------------------------------;
+&regAddr=&regCalibDebug
+&regVal=Data.Long(ZSD:&regAddr)
+
+if (((&regVal)&0x00000001)!=0)
+(
+	print "CALIB READY!"
+)
+else
+(
+	print "CALIB NOT READY!!!"
+)
+
+; wait 100ms
+wait 100ms
+
+&regAddr=&regGlbCtrlAddr
+&regVal=Data.Long(ZSD:&regAddr)
+
+if (((&regVal)&0x10000000)!=0)
+(
+	print "FE PLL LOCKED!"
+)
+else
+(
+	print "FE PLL UNLOCK!!!"
+)
+
+return
+
+
+;================================================================================================================;
+;	apcs_clock_switch
+;================================================================================================================;
+apcs_clock_switch:
+LOCAL &src_sel &div
+ENTRY &src_sel &div
+
+; switch src clock
+gosub writeField 0x0B011054 0x8 0x3 &src_sel
+gosub writeField 0x0B011054 0x0 0x5 &div
+gosub writeField 0x0B011050 0x0 0x2 0x3
+gosub waitFlagClear 0x0B011050 0x1
+
+return

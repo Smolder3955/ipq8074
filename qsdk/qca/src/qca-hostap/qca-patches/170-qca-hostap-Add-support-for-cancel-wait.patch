@@ -1,0 +1,48 @@
+qca-hostap: Add support for cancel wait
+
+Added support for send action cancel frame.
+reusing the send_action ioctl to indicate cancel request.
+---
+ src/drivers/driver_atheros.c | 19 +++++++++++++++++++
+ 1 file changed, 19 insertions(+)
+
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index fff23f0..018cc76 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -2072,6 +2072,24 @@ set80211big(struct atheros_driver_data *drv, int op, const void *data, int len)
+ 	return 0;
+ }
+ 
++static void atheros_send_action_cancel_wait(void *priv)
++{
++	struct atheros_driver_data *drv = priv;
++	struct ieee80211_p2p_send_action *act;
++
++	act = os_zalloc(sizeof(*act));
++	if (act == NULL)
++		return;
++	/* reusing the send action ioctl for cancel wait */
++	act->cancel_current_wait = 1;
++	wpa_printf(MSG_DEBUG, "%s[%d]",__func__, __LINE__);
++	wpa_hexdump(MSG_MSGDUMP, "athr: act", (u8 *) act, sizeof(*act));
++
++	set80211big(drv, IEEE80211_IOC_P2P_SEND_ACTION, act, sizeof(*act));
++
++	os_free(act);
++
++}
+ 
+ static int atheros_send_action(void *priv, unsigned int freq,
+ 			       unsigned int wait,
+@@ -2294,6 +2312,7 @@ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.add_sta_node    	= atheros_add_sta_node,
+ #endif /* CONFIG_IEEE80211R */
+ 	.send_action		= atheros_send_action,
++	.send_action_cancel_wait = atheros_send_action_cancel_wait,
+ #if defined(CONFIG_WNM) && defined(IEEE80211_APPIE_FRAME_WNM)
+ 	.wnm_oper		= atheros_wnm_oper,
+ #endif /* CONFIG_WNM && IEEE80211_APPIE_FRAME_WNM */
+-- 
+1.9.1
+

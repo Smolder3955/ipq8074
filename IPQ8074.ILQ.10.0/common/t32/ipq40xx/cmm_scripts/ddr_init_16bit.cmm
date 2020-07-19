@@ -1,0 +1,51 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+ ;config density
+d.s 0x400008 %LE %LONG 0x40ff23c1
+;config base address
+d.s 0x40000c %LE %LONG 0x80000000
+d.s 0x400030 %LE %LONG 0x90000000
+;config TWR=8
+d.s 0x400010 %LE %LONG 0xcb627b1c
+d.s 0x400014 %LE %LONG 0xc94e006e
+;config CWL=8 and CL=10
+d.s 0x400018 %LE %LONG 0x0010408b
+;config auto refresh enable
+d.s 0x40001c %LE %LONG 0x186008d0
+;configZQCS
+d.s 0x400020 %LE %LONG 0x80000010
+;config MR0 and MR1: BL=8, CL=10; Twr=8
+d.s 0x400024 %LE %LONG 0x00040c70
+;config MR2 and MR3: CWL=8
+d.s 0x400028 %LE %LONG 0x018
+;config CK output enable
+d.s 0x40002c %LE %LONG 0x00b3232
+
+d.s 0x40007c %LE %LONG 0x31
+;config PHY_LN0
+d.s 0x400080 %LE %LONG 0x01008001
+;config PHY_LN1
+d.s 0x400084 %LE %LONG 0x01008001
+;config ODT
+d.s 0x400090 %LE %LONG 0xe0004444
+;start init
+d.s 0x400004 %LE %LONG 0x40000020
+
+
+
+Data.dump 0x400000--0x400097
+Data.dump 0x80000000
+
+
+;config external scan
+;16bit scan
+;d.s 0x400034 %LE %LONG 0x12345678
+;d.s 0x400038 %LE %LONG 0x87654321
+;d.s 0x40003c %LE %LONG 0x1fda468e
+;d.s 0x400040 %LE %LONG 0x8f3ada6d
+;d.s 0x400004 %LE %LONG 0x20000220
+
+;d.s 0x400004 %LE %LONG 0x20000120

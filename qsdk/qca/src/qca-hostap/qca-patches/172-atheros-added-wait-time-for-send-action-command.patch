@@ -1,0 +1,23 @@
+atheros: added wait time for send action command
+
+added wait time for send action command
+
+---
+ src/drivers/driver_atheros.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index 4379a84..846461f 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -2161,6 +2161,7 @@ static int atheros_send_action(void *priv, unsigned int freq,
+ 	if (act == NULL)
+ 		return -1;
+ 	act->freq = freq;
++	act->scan_time = wait;
+ 	os_memcpy(act->dst_addr, dst, ETH_ALEN);
+ 	os_memcpy(act->src_addr, src, ETH_ALEN);
+ 	os_memcpy(act->bssid, bssid, ETH_ALEN);
+-- 
+1.9.1
+

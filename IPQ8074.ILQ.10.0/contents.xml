@@ -1,0 +1,323 @@
+<?xml version="1.0" ?>
+<contents>
+  <product_info>
+    <product_name>IPQ8074.ILQ.10.0</product_name>
+    <hlos_type cmm_var="HLOS_TYPE">LE</hlos_type>
+    <chipid cmm_var="CHIPID">ipq8074</chipid>
+  </product_info>
+  <builds_flat>
+    <build>
+      <name>common</name>
+      <role>common</role>
+      <chipset>ipq8074</chipset>
+      <build_id>IPQ8074.ILQ.10.0-00303-P-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>common</image_dir>
+      <release_path/>
+    </build>
+    <build>
+      <name>boot</name>
+      <role>boot</role>
+      <chipset>ipq8074</chipset>
+      <build_id>BOOT.BF.3.3.1-00147-IPQ8074HAASANAA-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>boot_images</image_dir>
+      <release_path>HY11_CompileTest</release_path>
+      <file_ref flash_file="true">
+        <file_name>sbl1_nor.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/nor</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>sbl1_nand.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/nand</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>sbl1_emmc.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/emmc</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>sbl1_flashless.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/flashless/</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>partition_tool</file_name>
+        <file_path>boot_images/core/bsp/tools/flash/partition_tool_exe/build/</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>bootconfig_tool</file_name>
+        <file_path>boot_images/core/bsp/tools/flash/bootconfig_exe/build/</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>SBL1_flashless.elf</file_name>
+        <file_path>boot_images/core/boot/secboot3/hw/ipq8074/sbl1/</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>QSaharaServer.exe</file_name>
+        <file_path>boot_images/core/storage/tools/QSaharaServer/</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>sbl1_nor.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/nor</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>sbl1_nand.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/nand</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>sbl1_emmc.mbn</file_name>
+        <file_path>boot_images/build/ms/bin/8074/emmc</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>partition_tool</file_name>
+        <file_path>boot_images/core/bsp/tools/flash/partition_tool_exe/build/</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>bootconfig_tool</file_name>
+        <file_path>boot_images/core/bsp/tools/flash/bootconfig_exe/build/</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>SBL1_flashless.elf</file_name>
+        <file_path>boot_images/core/boot/secboot3/hw/ipq8074/sbl1/</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>QSaharaServer.exe</file_name>
+        <file_path>boot_images/core/storage/tools/QSaharaServer/</file_path>
+      </file_ref>
+      <buildfile_path>boot_images/build/ms/</buildfile_path>
+      <build_command>build.sh TARGET_FAMILY=8074 --prod USES_FLAGS=USES_NO_STRIP_NO_ODM</build_command>
+    </build>
+    <build>
+      <name>tz</name>
+      <role>tz</role>
+      <chipset>ipq8074</chipset>
+      <build_id>TZ.BF.4.0.8-00180-IPQ807xSANAANAZT-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>trustzone_images</image_dir>
+      <release_path>HY11_CompileTest</release_path>
+      <file_ref flash_file="true">
+        <file_name>tz.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>devcfg_noac.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>devcfg.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_file="true">
+        <file_name>devcfg_nosmmu.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>tz.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>devcfg_noac.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>devcfg_nosmmu.mbn</file_name>
+        <file_path>trustzone_images/build/ms/bin/SANAANAA</file_path>
+      </file_ref>
+      <buildfile_path>trustzone_images/build/ms/</buildfile_path>
+      <build_command>cleanpack_8074.sh trustzone_images/build/ms/cleanpack_8074.sh</build_command>
+    </build>
+    <build>
+      <name>rpm</name>
+      <role>rpm</role>
+      <chipset>ipq8074</chipset>
+      <build_id>RPM.BF.2.4.1-00060-IPQ8074AAAAANAZR-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>rpm_proc</image_dir>
+      <release_path>HY11_CompileTest</release_path>
+      <file_ref flash_file="true">
+        <file_name>rpm.mbn</file_name>
+        <file_path>rpm_proc/build/ms/bin/8074/</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>rpm.mbn</file_name>
+        <file_path>rpm_proc/build/ms/bin/8074/</file_path>
+      </file_ref>
+      <buildfile_path>rpm_proc/build/</buildfile_path>
+      <build_command>build_packed.sh 8074</build_command>
+    </build>
+    <build>
+      <name>apps</name>
+      <role>apps</role>
+      <chipset>ipq8074</chipset>
+      <build_id>NHSS.QSDK.10.0-03836-P-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>apss_proc</image_dir>
+      <release_path>HY11_CompileTest</release_path>
+      <file_ref flash_apss_64_file="true">
+        <file_name>openwrt-*</file_name>
+        <file_path>apss_proc/out/ipq807x_64/</file_path>
+      </file_ref>
+      <file_ref flash_apss_64_file="true">
+        <file_name>*</file_name>
+        <file_path>apss_proc/out/ipq807x_64/dtbs/</file_path>
+      </file_ref>
+      <file_ref flash_apss_64_file="true">
+        <file_name>openwrt-ipq807x*.elf</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_file_debug="true">
+        <file_name>build_its.sh</file_name>
+        <file_path>apss_proc/out/meta-scripts/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>openwrt-ipq807x-u-boot-stripped.elf</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>openwrt-ipq-ipq807x-squashfs-root.img</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>openwrt-ipq-ipq807x-qcom-ipq807x-hkxx-fit-uImage.itb</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>openwrt-ipq-ipq807x-ubi-root.img</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>openwrt-*</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <file_ref flash_file_debug="true">
+        <file_name>build_its.sh</file_name>
+        <file_path>apss_proc/out/meta-scripts/</file_path>
+      </file_ref>
+      <file_ref flash_apss_file="true">
+        <file_name>*</file_name>
+        <file_path>apss_proc/out/ipq807x/dtbs/</file_path>
+      </file_ref>
+      <file_ref flash_file_debug="true">
+        <file_name>build_its.sh</file_name>
+        <file_path>apss_proc/out/meta-scripts/</file_path>
+      </file_ref>
+      <file_ref flash_apss_debug_64_file="true">
+        <file_name>openwrt-*</file_name>
+        <file_path>apss_proc/out/ipq807x_64_premium_debug/</file_path>
+      </file_ref>
+      <file_ref flash_apss_debug_64_file="true">
+        <file_name>*</file_name>
+        <file_path>apss_proc/out/ipq807x_64_premium_debug/dtbs/</file_path>
+      </file_ref>
+      <file_ref flash_apss_debug_64_file="true">
+        <file_name>openwrt-ipq807x-u-boot.elf</file_name>
+        <file_path>apss_proc/out/ipq807x/</file_path>
+      </file_ref>
+      <buildfile_path>./</buildfile_path>
+      <build_command>create_BuildProducts ./create_BuildProducts</build_command>
+    </build>
+    <build>
+      <name>wlan</name>
+      <role>wlan</role>
+      <chipset>ipq8074</chipset>
+      <build_id>WLAN.HK.2.0-01576-QCAHKSWPL_SILICONZ-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>wlan_proc</image_dir>
+      <release_path>BIN</release_path>
+      <file_ref flash_file="true">
+        <file_name>*</file_name>
+        <file_path>wlan_proc/build/ms/bin/FW_IMAGES</file_path>
+      </file_ref>
+      <file_ref flash_64_file="true">
+        <file_name>*</file_name>
+        <file_path>wlan_proc/build/ms/bin/FW_IMAGES</file_path>
+      </file_ref>
+      <file_ref flash_file_V2="true">
+        <file_name>*</file_name>
+        <file_path>wlan_proc_hwv2/build/ms/bin/FW_IMAGES</file_path>
+      </file_ref>
+      <file_ref flash_file_V2_64="true">
+        <file_name>*</file_name>
+        <file_path>wlan_proc_hwv2/build/ms/bin/FW_IMAGES</file_path>
+      </file_ref>
+      <buildfile_path>export/</buildfile_path>
+      <build_command>export CRM_BUILDID=${CRM_BUILDID};cd ./wlan_proc/build/ms; sh build_v1_v2.sh</build_command>
+    </build>
+    <build>
+      <name>cnss_sw_ps</name>
+      <role>cnss_sw_ps</role>
+      <chipset>ipq8074</chipset>
+      <build_id>CNSS.PS.3.10-00027-S-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>cnss_proc_ps</image_dir>
+      <buildfile_path>bash/</buildfile_path>
+      <build_command>bash ./cnss_proc_ps/build/build_crm.sh</build_command>
+    </build>
+    <build>
+      <name>wcnss</name>
+      <role>wcnss</role>
+      <chipset>ipq8074</chipset>
+      <build_id>WLAN.BL.3.10-00057-S-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>cnss_proc</image_dir>
+      <buildfile_path>bash/</buildfile_path>
+      <build_command>bash ./cnss_proc/build/support/makesdk --crm-build-id ${CRM_BUILDID} --parallel --static-analysis first --tar --trace --clobber --configs QCA9984-hw-v1 AR900B-hw-v2 IPQ4019-hw-v1 QCA9888-hw-v2</build_command>
+    </build>
+    <build>
+      <name>wgig</name>
+      <role>wgig</role>
+      <chipset>ipq8074</chipset>
+      <build_id>WIGIG.TLN.7.5-00071-WIGIGTLNZ-1</build_id>
+      <windows_root_path>.\</windows_root_path>
+      <linux_root_path>./</linux_root_path>
+      <image_dir>wigig_proc</image_dir>
+      <buildfile_path>./wigig_proc/wigig/build/</buildfile_path>
+      <build_command>build_ver_crm.cmd &amp;&amp; crm_build.bat</build_command>
+    </build>
+  </builds_flat>
+  <build_tools>
+    <tool>
+      <name>create_FIT_image</name>
+      <build>apps</build>
+      <path>apss_proc/out/meta-scripts/pack_hk.py</path>
+    </tool>
+    <tool>
+      <name>meta_tools</name>
+      <build>apps</build>
+      <path>apss_proc/out/meta-tools</path>
+    </tool>
+    <tool>
+      <name>jtag-scripts</name>
+      <build>apps</build>
+      <path>apss_proc/out/jtag-scripts</path>
+    </tool>
+    <tool>
+      <name>exported_packages</name>
+      <build>apps</build>
+      <path>apss_proc/out/ipq807x/packages</path>
+    </tool>
+    <tool>
+      <name>exported_packages_64</name>
+      <build>apps</build>
+      <path>apss_proc/out/ipq807x_64/packages</path>
+    </tool>
+    <tool>
+      <name>skales</name>
+      <build>apps</build>
+      <path>apss_proc/out/skales</path>
+    </tool>
+  </build_tools>
+  <external_tools>
+      
+   </external_tools>
+  <builds_nested>
+      
+   </builds_nested>
+</contents>

@@ -1,0 +1,55 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+;**           AK_SWD_RPM.CMM                                                **
+;*****************************************************************************
+
+SYStem.Reset
+SYStem.CPU ARM7TDMIS
+SYStem.JTAGCLOCK CTCK 10.0MHz
+SYStem.OPTION NOIRCHECK ON
+SYStem.OPTION WAITRESET ON
+SYStem.OPTION ENRESET ON
+SYStem.OPTION RESBREAK OFF
+SYStem.CONFIG SLAVE OFF
+SYStem.CONFIG CTIBASE          0x80002000
+SYStem.CONFIG FUNNELBASE       0x80004000
+SYStem.CONFIG STMFUNNELPORT    2.
+SYStem.CONFIG TPIUBASE         0x80003000
+SYStem.CONFIG ETBBASE          0x80001000
+SYStem.CONFIG ITMBASE          0x80005000
+SYStem.CONFIG STMBASE          0x80006000
+SYStem.CONFIG CTICONFIG        CORTEXV1
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG JTAGACCESSPORT   2.
+SYStem.CONFIG COREJTAGPORT     4.
+SYStem.CONFIG DAPIRPOST 0.
+SYStem.CONFIG DAPDRPOST 0.
+SYStem.CONFIG DAPIRPOST 11.
+SYStem.CONFIG DAPDRPOST 1.
+SYStem.CONFIG SWDP ON
+SYStem.CONFIG DEBUGPORTTYPE SWD
+
+SYStem.MEMACCESS DAP
+
+BREAK.SEL PROGRAM AUTO
+
+RADIX HEX
+SETUP.VAR %HEX.ON
+MODE.HLL
+
+autostore , history
+
+SYStem.STATE
+
+wait 3.0s
+SYStem.attach
+
+ENDDO
+

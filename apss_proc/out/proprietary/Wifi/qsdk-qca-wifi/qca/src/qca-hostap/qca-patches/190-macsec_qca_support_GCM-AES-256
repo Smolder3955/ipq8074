@@ -1,0 +1,127 @@
+diff --git a/src/common/ieee802_1x_defs.h b/src/common/ieee802_1x_defs.h
+index 280c439..e7acff1 100644
+--- a/src/common/ieee802_1x_defs.h
++++ b/src/common/ieee802_1x_defs.h
+@@ -12,6 +12,8 @@
+ #define CS_ID_LEN		8
+ #define CS_ID_GCM_AES_128	0x0080020001000001ULL
+ #define CS_NAME_GCM_AES_128	"GCM-AES-128"
++#define CS_ID_GCM_AES_256	0x0080c20001000002ULL
++#define CS_NAME_GCM_AES_256	"GCM-AES-256"
+ 
+ enum macsec_policy {
+ 	/**
+diff --git a/src/drivers/driver_macsec_qca.c b/src/drivers/driver_macsec_qca.c
+index 66fa278..2fc11e0 100644
+--- a/src/drivers/driver_macsec_qca.c
++++ b/src/drivers/driver_macsec_qca.c
+@@ -39,6 +39,9 @@
+ 
+ #define MAXSC 16
+ 
++#define SAK_128_LEN	16
++#define SAK_256_LEN	32
++
+ /* TCI field definition */
+ #define TCI_ES                0x40
+ #define TCI_SC                0x20
+@@ -229,20 +232,36 @@ static int macsec_qca_set_replay_protect(void *priv, Boolean enabled,
+ 	return ret;
+ }
+ 
++static fal_cipher_suite_e
++macsec_qca_cs_type_get(u64 cs)
++{
++	if (cs == CS_ID_GCM_AES_128)
++		return FAL_CIPHER_SUITE_AES_GCM_128;
++	else if (cs == CS_ID_GCM_AES_256)
++		return FAL_CIPHER_SUITE_AES_GCM_256;
++	else
++		return FAL_CIPHER_SUITE_MAX;
++}
+ 
+ static int macsec_qca_set_current_cipher_suite(void *priv, u64 cs)
+ {
+-	if (cs != CS_ID_GCM_AES_128) {
++	struct macsec_qca_data *drv = priv;
++	int ret = 0;
++	fal_cipher_suite_e cs_type;
++
++	if (cs != CS_ID_GCM_AES_128 && cs != CS_ID_GCM_AES_256) {
+ 		wpa_printf(MSG_ERROR,
+ 			   "%s: NOT supported CipherSuite: %016" PRIx64,
+ 			   __func__, cs);
+ 		return -1;
+ 	}
+ 
+-	/* Support default Cipher Suite 0080020001000001 (GCM-AES-128) */
+-	wpa_printf(MSG_DEBUG, "%s: default support aes-gcm-128", __func__);
++	wpa_printf(MSG_DEBUG, "%s: CipherSuite: %016" PRIx64, __func__, cs);
+ 
+-	return 0;
++	cs_type = macsec_qca_cs_type_get(cs);
++	ret = nss_macsec_secy_cipher_suite_set(drv->secy_id, cs_type);
++
++	return ret;
+ }
+ 
+ 
+@@ -514,8 +533,17 @@ static int macsec_qca_create_receive_sa(void *priv, struct receive_sa *sa)
+ 		   __func__, channel, sa->an, sa->lowest_pn);
+ 
+ 	os_memset(&rx_sak, 0, sizeof(rx_sak));
+-	for (i = 0; i < 16; i++)
+-		rx_sak.sak[i] = sa->pkey->key[15 - i];
++	rx_sak.sak_len = sa->pkey->key_len;
++	if (sa->pkey->key_len == SAK_128_LEN) {
++		for (i = 0; i < 16; i++)
++			rx_sak.sak[i] = sa->pkey->key[15 - i];
++	} else if (sa->pkey->key_len == SAK_256_LEN) {
++		for (i = 0; i < 16; i++) {
++			rx_sak.sak1[i] = sa->pkey->key[15 - i];
++			rx_sak.sak[i] = sa->pkey->key[31 - i];
++		}
++	} else
++		return -1;
+ 
+ 	if (sa->pkey->confidentiality_offset == CONFIDENTIALITY_OFFSET_0)
+ 		offset = 0;
+@@ -694,8 +722,17 @@ static int macsec_qca_create_transmit_sa(void *priv, struct transmit_sa *sa)
+ 		tci |= TCI_E | TCI_C;
+ 
+ 	os_memset(&tx_sak, 0, sizeof(tx_sak));
+-	for (i = 0; i < 16; i++)
+-		tx_sak.sak[i] = sa->pkey->key[15 - i];
++	tx_sak.sak_len = sa->pkey->key_len;
++	if (sa->pkey->key_len == SAK_128_LEN) {
++		for (i = 0; i < 16; i++)
++			tx_sak.sak[i] = sa->pkey->key[15 - i];
++	} else if (sa->pkey->key_len == SAK_256_LEN) {
++		for (i = 0; i < 16; i++) {
++			tx_sak.sak1[i] = sa->pkey->key[15 - i];
++			tx_sak.sak[i] = sa->pkey->key[31 - i];
++		}
++	} else
++		return -1;
+ 
+ 	if (sa->pkey->confidentiality_offset == CONFIDENTIALITY_OFFSET_0)
+ 		offset = 0;
+diff --git a/src/pae/ieee802_1x_kay.c b/src/pae/ieee802_1x_kay.c
+index cad0292..4e6b0f0 100644
+--- a/src/pae/ieee802_1x_kay.c
++++ b/src/pae/ieee802_1x_kay.c
+@@ -45,6 +45,14 @@ static struct macsec_ciphersuite cipher_suite_tbl[] = {
+ 		.sak_len = DEFAULT_SA_KEY_LEN,
+ 		.index = 0,
+ 	},
++	/* GCM-AES-256 */
++	{
++		.id = CS_ID_GCM_AES_256,
++		.name = CS_NAME_GCM_AES_256,
++		.capable = MACSEC_CAP_INTEG_AND_CONF_0_30_50,
++		.sak_len = 32,
++		.index = 1 /* index */
++	},
+ };
+ #define CS_TABLE_SIZE (ARRAY_SIZE(cipher_suite_tbl))
+ #define DEFAULT_CS_INDEX  0

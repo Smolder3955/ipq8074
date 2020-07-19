@@ -1,0 +1,24 @@
+;***************************************************************************
+;**           IPQ807X_UBI32_0.CMM                                         **
+;***************************************************************************
+
+; select CPU and options
+SYStem.Reset
+SYStem.CPU IPQ807X-CORE1
+
+;This re-assignment is a workaround for T32 issue.
+;For some reason, T32 does not send Debug port info (JTAG)
+;toTarget unless it switches value from SWD.
+SYStem.CONFIG SWDP OFF
+SYStem.CONFIG DEBUGPORTTYPE JTAG
+
+RADIX HEX
+SETUP.VAR %HEX.ON
+MODE.HLL
+
+autostore , history
+
+SYStem.STATE
+
+ENDDO
+

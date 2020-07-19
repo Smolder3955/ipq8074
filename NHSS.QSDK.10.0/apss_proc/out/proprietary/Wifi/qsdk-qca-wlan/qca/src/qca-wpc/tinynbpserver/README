@@ -1,0 +1,223 @@
+Tiny NBP Server README
+----------------------
+
+Tinynbpserver is a command line utility to test the Network Based Positioning functions of the Access Point. 
+
+Tested Platforms:
+----------------
+	Ubuntu 10.04
+	Ubuntu 11.04
+
+
+Compilation and installation:	
+-----------------------------
+In order to compile the tinynbpserver you the need the following packages
+	libgtk2.0-dev
+	libpthread-stubs0
+	libpthread-stubs0-dev
+	pkg-config
+	libconfig8
+	libconfig8-dev
+
+To install these packages run ( in ubuntu )
+	sudo apt-get install libgtk2.0-dev libpthread-stubs0 libpthread-stubs0-dev pkg-config libconfig8 libconfig8-dev
+
+Untar the given LSDK*.tgz file and this tinynbpserver source is available at
+		apps/positioning/tinynbpserver
+
+To compile
+	cd apps/positioning/tinynbpserver
+	make
+
+
+Terminology
+-----------
+	Probe frame.
+		The probe frame here refers to either NULL or QosNULL which is used to 
+		probe the stations availabilty and its distance from the AP
+		NB : Its not the 802.11 Probe Req or Probe Resp frame.
+
+	Probing AP
+		The AP which sends out probe( null or qosnull) frames and measures the distance between itself and the station.
+	
+	Associated AP
+		The AP to which the probed station is associated currently.
+
+	For Example, Lets assume AP 192.168.1.1 sends probe frames to probe station 00:03:7f:40:a1:16, which associated to AP 192.168.1.2
+	In this scenario, the probing AP is 192.168.1.1.
+		  the probed station is 00:03:7f:40:a1:16.
+		  the associated AP is 192.168.1.2.
+
+To use nbpserver utility :
+-------------------------
+	Boot the ap and make sure wpc is running in the ap.
+	If not, run it with the below command
+	$wpc -d
+
+	To run wpc in debug mode, issue the below command
+		$ wpc -n
+		Running wpc in debug may reduce the performance as its prints lot of debug info as well.
+
+	then issue the below command at the laptop
+	./nbpserver < prefered options >. Available options are explained below
+
+	nbpserver reads the $(PWD)/nbpserver.conf file during startup to initialize itself. Help is available below on how to use conf file.
+	
+
+
+Example Config file.
+--------------------
+nbpserver:
+{
+    no_of_aps = 1;
+
+    apdetails = ( { ipaddr = "192.168.1.41";     name = "HLS_DB120_41"; channel = 1; },
+            { ipaddr = "192.168.1.21"; name = "StestAp1" ; channel = 6;} ) ;
+
+    no_of_stations = 1;
+
+    station = (
+            { mac = "00:26:c6:a0:71:9c"; apipaddr = "192.168.1.42"; apmac = "00:03:7F:42:1B:99"; ssid = "HLS_DB120_42"; channel = 1; wakeup_interval = 3; },
+            { mac = "1c:bd:b9:3f:32:93"; apipaddr = "192.168.1.42"; apmac = "00:03:7F:42:1B:99"; ssid = "HLS_DB120_42"; channel = 1; wakeup_interval = 3; } );
+
+};
+
+In this example, the nbpserver will send measurements request to ap 192.168.1.41 to 
+find out location of station 00:26:c6:a0:71:9c which is associated with AP, HLS_DB120_42 (192.168.1.42)
+
+
+How to use the Configuration file
+---------------------------------
+
+no_of_aps;
+
+	Setting this value to 1 takes only details of the first AP in the apdetails array 
+	above and send  measurement requests to that AP. The max value of this can be 30. 
+
+	In the above example, nbpserver will send the measurement requests to ap 192.168.1.41.
+
+
+apdetails:
+	Details of probing ap's should be specified here. 
+	ipaddr - IP Address of the AP
+	name - Human readable name for the ap.
+	channel - operating channel of the ap.
+	
+
+no_of_stations;
+	This represents the no of station to be probed specified in the station array
+
+station :
+	This specifies the array of station's that needs to probed. Only the first #no_of_stations from the station array will be used.
+        mac - represents the station's mac.
+        apipaddr - Represents the ip address of the ap with which the station is associated.
+        apmac - Represents the station's associated ap mac. The AP use this mac as spoof mac while sending measurement requests.
+	ssid - SSID of the station's associated ap.
+	channel - Operating channel of station's the associated AP
+	wakeup_interval - 
+
+NBPServer commandline options
+-----------------------------
+		Issuing "./nbpserver -h" will display the available options
+
+		nbpserver - NBP Server.
+	
+		-a, --analyzeresult     Analyzeresult
+		-T, --testduration      Run test for specified seconds
+		-g, --generatereport    Generate Report
+		-d, --showdebug         Display debug messages
+		-D, --dumpfile          Dump measurement responses to file
+		-C, --showchanneldump   Display Channel dumps
+		-i, --requestinterval   Sleep interval b/w requests in millisec. default 200 milli seconds
+		-c, --rttcount          rttcount - Number rttcount to be used in measurement requests. default 50
+		-r, --showrequestresp   Display Requests sent
+		-o, --respoutputfmt     Display output in tabular format
+		-R, --rate              Transmit rate. default 0x0b0b0b0b
+		-p, --packettype        Packet Type. Specifies the packet type to be used. Null(0). Default QosNULL(1). RTS/CTS (2)
+		-m, --requesttype       Request type 0 - Type 0, 1 - Type 1 (Default)
+		-t, --txchainmask       Tx chainmask. default(0). Whatever configured in AP will be the default.
+		-k, --rxchainmask       Rx chainmask. default(0). Whatever configured in AP will be the default. 
+		-I, --interactive       Interactive
+		-w, --wakeupstation     Wakeup Station
+		-s, --synchronizeap     Synchronize AP
+		-S, --Statusrequest     Status Request AP
+		-P, --capabilityreq     Capability Request AP
+		-h, --help              help
+
+
+Brief explanation of commandline options.
+----------------------------------------
+-a, --analyzeresult     Analyzeresult
+	This option will print a statistics of requests sent and responses recieved from the probing aps
+
+-T, --testduration      Run test for specified seconds
+	-T #, Runs the test for the specified # of seconds
+
+-g, --generatereport    Generate Report
+	-g <filename>, dumps the analysis report to the <filename> at the end of the test run.
+
+-d, --showdebug         Display debug messages
+	-d, show debug messages.
+
+-D, --dumpfile          Dump measurement responses to file
+	-D <filename>, dumps measurement responses recieved from the ap to the <filename>
+
+-C, --showchanneldump   Display Channel dumps
+
+-i, --requestinterval   Sleep interval b/w requests in millisec. default 200 milli seconds
+
+-c, --rttcount          rttcount - Number rttcount to be used in measurement requests. default 50
+
+-r, --showrequestresp   Display Requests sent
+
+-o, --respoutputfmt     Display output in tabular format
+
+-R, --rate              Transmit rate. default 0x0b0b0b0b
+			Specifies the data rate at which the probes are sent. 0x0b specifies 6Mbps.
+			Check the MCS rates for complete list
+
+-p, --packettype        Packet Type. Specifies the packet type to be used. Null(0). Default QosNULL(1). RTS/CTS (2)
+	Specifies the packet type to be used to probe the station.
+
+-m, --requesttype       Request type 0 - Type 0, 1 - Type 1 (Default)
+
+-t, --txchainmask       Tx chainmask. default(0). Whatever configured in AP will be the default.
+	Specifies the no of chains to be used to TX
+
+-k, --rxchainmask       Rx chainmask. default(0). Whatever configured in AP will be the default. 
+	Specifies the no of chains to be used to RX
+
+-I, --interactive       Interactive
+	The user has to enter a number everytime to send a measurement request to the AP.
+	The entered number will be used as the rtt_count to be used in the measurement request.
+
+-w, --wakeupstation     Wakeup Station
+	The nbpserver will send wake up request to each Associated AP for all the probed stations which are associated with it.
+	Probing AP will start sending keepalive packets to the stations to keep them awake once it recieves this message.
+	
+	For example, 
+	lets assume PBAP1 and PBAP2 are probing AP's and PSTA, PSTB are two probed stations
+	PSTA, PSTB are associated with AP_PSTA and AP_PSTB respectively.
+	In this scenario, nbpserver will send a wakeup request for AP_PSTA to keep PSTA awake and 
+	send a wakeup request for AP_PSTB to keep PSTB awake.
+	AP_PSTA and AP_PSTB will start sending keepalive message to their respective probed stations to keep them awake.
+
+-s, --synchronizeap     Synchronize AP
+	The nbpserver will send synchronization requests to each probing AP 
+	for every associated AP to which the probed stations are associated.
+	
+	For example, 
+	lets assume PBAP1 and PBAP2 are probing AP's and PSTA, PSTB are two probed stations
+	PSTA, PSTB are associated with AP_PSTA and AP_PSTB respectively.
+	In this scenario, nbpserver will send two sync requests for PBAP1 to keep it synchronized with AP_PSTA and AP_PSTB and
+	send two sync requests for PBAP2 to keep it synchronized with AP_PSTA and AP_PSTB as well.
+		
+-S, --Statusrequest     Status Request AP
+	Sends status request to the probing AP.
+
+-P, --capabilityreq     Capability Request AP
+	Sends capability request to the probing ap. The probing AP will send its capabilities in reponses to this message
+
+-h, --help  
+	Displays this help
+

@@ -1,0 +1,803 @@
+#
+# Linux 2.6 Kbuild file for common modules
+# NB: HAL is build seperately
+#
+
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ..
+
+#include $(obj)/Makefile.inc
+HOST_CMN_CONVG_SRC := $(DEPTH)/cmn_dev
+HOST_COMP_CONVG_SRC := $(DEPTH)/component_dev
+HOST_CMN_CONVG_OBJMGR := $(DEPTH)/cmn_dev/umac/cmn_services/obj_mgr
+HOST_CMN_CONVG_OBJMGR_SRC := $(HOST_CMN_CONVG_OBJMGR)/src
+HOST_CMN_CONVG_SERLIZN := $(DEPTH)/cmn_dev/umac/cmn_services/serialization
+HOST_CMN_CONVG_SERLIZN_SRC := $(HOST_CMN_CONVG_SERLIZN)/src
+
+HOST_CMN_CONVG_CRYPTO := $(HOST_CMN_CONVG_SRC)/umac/cmn_services/crypto
+HOST_CMN_CONVG_CRYPTO_SRC := $(HOST_CMN_CONVG_CRYPTO)/src
+
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+INCS += -I$(obj)/$(DEPTH)/include -I$(obj)/$(DEPTH)/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/if_lmac -I$(obj)/$(DEPTH)/umac/crypto \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/cmn_services/crypto/src \
+        -I$(obj)/$(HOST_COMP_CONVG_SRC)/crypto/src \
+        -I$(obj)/$(DEPTH)/umac/scan -I$(obj)/$(DEPTH)/direct_attach/umac/resmgr \
+        -I$(obj)/$(DEPTH)/umac/pm -I$(obj)/$(DEPTH)/umac/txrx \
+        -I$(obj)/$(DEPTH)/umac/acs -I$(obj)/$(DEPTH)/umac/txbf \
+        -I$(obj)/$(DEPTH)/umac/wnm \
+        -I$(obj)/$(DEPTH)/umac/wifipos \
+        -I$(obj)/$(DEPTH)/umac/rtt \
+        -I$(obj)/$(DEPTH)/umac/wds -I$(obj)/$(DEPTH)/umac/ique \
+        -I$(obj)/$(DEPTH)/direct_attach/hal -I$(obj)/$(DEPTH)/direct_attach/lmac/ath_dev \
+        -I$(obj)/$(DEPTH)/direct_attach/hal/$(OS) \
+        -I$(obj)/$(DEPTH)/umac/aow  \
+        -I$(obj)/$(DEPTH)/umac/vi_dbg \
+        -I$(obj)/$(DEPTH)/umac/ald \
+        -I$(obj)/$(DEPTH)/umac/splitmac/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/wmi \
+        -I$(obj)/$(DEPTH)/lmac/ath_pktlog \
+        -I$(obj)/$(DEPTH)/cmn_dev/wmi/inc \
+        -I$(obj)/$(DEPTH)/direct_attach/lmac/ratectrl \
+        -I$(obj)/$(DEPTH)/os/linux/mem/ \
+        -I$(obj)/$(DEPTH)/ini_cfg/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/umac/base \
+	-I$(obj)/$(DEPTH)/umac/mlme \
+	-I$(obj)/$(DEPTH)/direct_attach/umac/mlme \
+	-I$(obj)/$(DEPTH)/cmn_dev/qdf/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/qal/inc \
+	-I$(obj)/$(DEPTH)/umac/regdmn \
+	-I$(obj)/$(DEPTH)/cmn_dev/qal/linux/src \
+	-I$(obj)/$(DEPTH)/cmn_dev/qdf/linux/src \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/src \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/src/ce \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/src/pcie \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/src/snoc \
+	-I$(obj)/$(DEPTH)/cmn_dev/hif/src/dispatcher \
+	-I$(obj)/$(DEPTH)/pld/inc \
+	-I$(obj)/$(DEPTH)/pld/src \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/htc \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/inc \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/init_deinit/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/global_umac_dispatcher/lmac_if/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/global_lmac_if/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/mgmt_txrx/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/spectral/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/cmn_defs/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/scan/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/ftm/dispatcher/inc \
+	-I$(obj)/$(HOST_CMN_CONVG_SERLIZN)/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/scheduler/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/cfg/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/wlan_cfg \
+	-I$(obj)/$(DEPTH)/qca_ol \
+	-I$(obj)/$(DEPTH)/cmn_dev/os_if/linux \
+	-I$(obj)/$(DEPTH)/cmn_dev/target_if/core/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/target_if/ftm/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/target_if/dp/inc \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/scan/dispatcher/inc \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/cmn_services/cmn_defs/inc \
+	-I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/core/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/utils/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/regulatory/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/umac/son/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/umac/son/core/src \
+	-I$(obj)/$(DEPTH)/direct_attach/umac/son/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/umac/offchan_txrx/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/scan/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/spectral/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/core/src \
+        -I$(obj)/$(HOST_COMP_CONVG_SRC)/direct_attach/umac/dfs/core/src \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/target_if/init_deinit/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/ftm/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/mlme/inc \
+        -I$(obj)/$(DEPTH)/dp/ \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/sm_engine/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_objmgr/dispatcher/inc/ \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/vdev_mgr/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/pdev_mgr/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_utils \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme \
+        -I$(obj)/$(DEPTH)/cmn_dev/wbuff/inc \
+        -I$(obj)/$(DEPTH)/component_dev/wmi/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/include \
+        -I$(obj)/$(DEPTH)/component_dev/umac/mlme/vdev_mgr/dispatcher/inc \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/target_if/mlme/vdev_mgr/inc \
+        -I$(obj)/$(DEPTH)/component_dev/dp/inc \
+        -I$(obj)/$(HOST_COMP_CONVG_SRC)/qal/inc
+
+ifeq ($(DIRECT_BUF_RX_ENABLE), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/target_if/direct_buf_rx/inc
+endif
+
+ifeq (1, ${QCA_WIFI_QCA8074})
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/hal/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/hal/wifi3.0 \
+	-I$(obj)/$(DEPTH)/cmn_dev/fwcommon
+endif
+
+ifeq ($(CMN_VDEV_MLME_SM_ENABLE), 1)
+INCS += -I$(obj)/$(HOST_COMP_CONVG_SRC)/umac/mlme/vdev_mgr/
+endif
+
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+INCS += -I$(obj)/$(HOST_CMN_CONVG_CRYPTO)/inc \
+        -I$(obj)/$(HOST_CMN_CONVG_CRYPTO_SRC) \
+        -I$(obj)/$(DEPTH)/component_dev/crypto/inc \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/cmn_services/crypto/src \
+        -I$(obj)/$(HOST_COMP_CONVG_SRC)/crypto/src
+endif
+
+ifeq ($(WLAN_SUPPORT_GREEN_AP), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/green_ap/dispatcher/inc
+endif
+
+ifdef WLAN_DFS_DIRECT_ATTACH_OR_PARTIAL_OFFLOAD
+INCS += -I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/dfs/core/src
+endif
+
+ifeq ($(strip ${WLAN_DFS_PARTIAL_OFFLOAD}),1)
+INCS += -I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/dfs/core/src
+endif
+
+ifeq ($(strip ${QCA_SUPPORT_ETSI_PRECAC_DFS}),1)
+INCS += -I$(obj)/$(HOST_CMN_CONVG_SRC)/umac/dfs/core/src
+endif
+
+obj-m += umac.o
+
+OSDEP_SRC := $(DEPTH)/os/linux/src
+
+ifeq ($(strip $(BUSNAME)),usb)
+BUS_OBJ = $(OSDEP_SRC)/usb_eth.o
+endif
+
+ifeq ($(strip $(BUSNAME)),gmac)
+BUS_OBJ = $(OSDEP_SRC)/if_ath_gmac.o
+endif
+
+ifneq ($(strip $(UMAC_SUPPORT_APONLY)),0)
+OSDEP_OBJS := $(BUS_OBJ) $(OSDEP_SRC)/ieee80211_wireless.o $(OSDEP_SRC)/osif_umac.o $(OSDEP_SRC)/if_media.o $(OSDEP_SRC)/ieee80211_cfg80211.o $(OSDEP_SRC)/wlan_cfg80211_api.o
+else
+OSDEP_OBJS := $(BUS_OBJ) $(OSDEP_SRC)/ieee80211_wireless.o $(OSDEP_SRC)/osif_umac.o $(OSDEP_SRC)/if_media.o $(OSDEP_SRC)/ieee80211_cfg80211.o $(OSDEP_SRC)/wlan_cfg80211_api.o
+endif
+
+ifeq ($(QCA_NSS_PLATFORM), 1)
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_nss.o
+endif
+
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_fs.o
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_net.o
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_net_event.o
+
+
+ifeq ($(BUILD_QDF_NET_IOCTL),1)
+EXTRA_CFLAGS+= -DQDF_NET_IOCTL_SUPPORT
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_net_ioctl.o
+OSDEP_OBJS +=$(OSDEP_SRC)/osif_net_wext.o
+endif
+
+ifeq ($(HOST_SW_LRO_ENABLE), 1)
+OSDEP_OBJS += $(OSDEP_SRC)/ath_lro.o
+endif
+
+ifeq ($(QCA_SUPPORT_SON), 1)
+OSDEP_OBJS += $(OSDEP_SRC)/ath_band_steering.o
+endif
+
+OSDEP_OBJS += $(OSDEP_SRC)/ath_lowi_if.o
+ifeq ($(ATH_SSID_STEERING),1)
+OSDEP_OBJS += $(OSDEP_SRC)/ath_ssid_steering.o
+endif
+
+ifeq ($(ATH_PARAMETER_API),1)
+OSDEP_OBJS += $(OSDEP_SRC)/ath_papi.o
+endif
+
+ifeq ($(ATH_SUPPORT_EXT_STAT), 1)
+EXTRA_CFLAGS+= -DWLAN_ATH_SUPPORT_EXT_STAT
+endif
+
+ifeq ($(QCA_SUPPORT_CP_STATS), 1)
+EXTRA_CFLAGS+= -DQCA_SUPPORT_CP_STATS
+EXTRA_CFLAGS+= -DQCA_SUPPORT_CP_STATS_DA
+
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cp_stats/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/cp_stats/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/cp_stats/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/cp_stats/inc \
+        -I$(obj)/$(DEPTH)/component_dev/umac/cp_stats/dispatcher/inc \
+
+OSDEP_OBJS += $(HOST_COMP_CONVG_SRC)/umac/cp_stats/dispatcher/src/wlan_cp_stats_ic_tgt_api.o \
+              $(HOST_CMN_CONVG_SRC)/umac/cp_stats/dispatcher/src/wlan_cp_stats_ucfg_api.o \
+              $(HOST_CMN_CONVG_SRC)/umac/cp_stats/dispatcher/src/wlan_cp_stats_utils_api.o \
+              $(HOST_CMN_CONVG_SRC)/umac/cp_stats/core/src/wlan_cp_stats_ol_api.o \
+              $(HOST_CMN_CONVG_SRC)/umac/cp_stats/core/src/wlan_cp_stats_obj_mgr_handler.o \
+              $(HOST_COMP_CONVG_SRC)/umac/cp_stats/dispatcher/src/wlan_cp_stats_ic_ucfg_api.o \
+              $(HOST_CMN_CONVG_SRC)/os_if/linux/cp_stats/src/wlan_cfg80211_ic_cp_stats.o \
+              $(HOST_CMN_CONVG_SRC)/umac/cp_stats/core/src/wlan_cp_stats_comp_handler.o
+
+ifeq ($(DA_SUPPORT), 1)
+OSDEP_OBJS += $(DEPTH)/direct_attach/umac/cp_stats/dispatcher/src/wlan_cp_stats_da_api.o
+endif
+
+endif
+
+ifeq ($(QCA_AIRTIME_FAIRNESS), 1)
+EXTRA_CFLAGS+= -DWLAN_ATF_ENABLE
+INCS += -I$(obj)/$(DEPTH)/umac/airtime_fairness/dispatcher/inc \
+		-I$(obj)/$(DEPTH)/direct_attach/umac/airtime_fairness/core \
+		-I$(obj)/$(DEPTH)/umac/airtime_fairness/core
+
+OSDEP_OBJS += airtime_fairness/core/atf_offload.o \
+              airtime_fairness/core/atf_common.o \
+              airtime_fairness/dispatcher/src/wlan_atf_utils_api.o \
+              airtime_fairness/dispatcher/src/wlan_atf_ucfg_api.o \
+              airtime_fairness/dispatcher/src/wlan_atf_tgt_api.o
+
+ifeq ($(DA_SUPPORT), 1)
+OSDEP_OBJS += $(DEPTH)/direct_attach/umac/airtime_fairness/core/atf_direct_attach.o
+endif
+
+endif
+
+ifeq ($(QCA_CFR_SUPPORT), 1)
+EXTRA_CFLAGS+= -DWLAN_CFR_ENABLE=1
+INCS += -I$(obj)/$(DEPTH)/component_dev/umac/cfr/dispatcher/inc \
+		-I$(obj)/$(DEPTH)/component_dev/umac/cfr/core/inc \
+		-I$(obj)/$(DEPTH)/component_dev/qal/inc
+
+OSDEP_OBJS += $(HOST_COMP_CONVG_SRC)/umac/cfr/dispatcher/src/wlan_cfr_utils_api.o \
+			  $(HOST_COMP_CONVG_SRC)/umac/cfr/dispatcher/src/wlan_cfr_ucfg_api.o \
+			  $(HOST_COMP_CONVG_SRC)/umac/cfr/dispatcher/src/wlan_cfr_tgt_api.o \
+			  $(HOST_COMP_CONVG_SRC)/umac/cfr/core/src/cfr_common.o
+endif
+
+ifeq ($(UNIFIED_SMARTANTENNA), 1)
+EXTRA_CFLAGS+= -DWLAN_SA_API_ENABLE
+INCS += -I$(obj)/$(DEPTH)/umac/sa_api/dispatcher/inc \
+		-I$(obj)/$(DEPTH)/umac/sa_api/core \
+		-I$(obj)/$(DEPTH)/direct_attach/umac/sa_api/core
+
+OSDEP_OBJS += sa_api/core/sa_api_offload.o \
+              sa_api/core/sa_api_common.o \
+              sa_api/dispatcher/src/wlan_sa_api_utils_api.o \
+              sa_api/dispatcher/src/wlan_sa_api_ucfg_api.o \
+              sa_api/dispatcher/src/wlan_sa_api_tgt_api.o
+
+ifeq ($(DA_SUPPORT), 1)
+OSDEP_OBJS += $(DEPTH)/direct_attach/umac/sa_api/core/sa_api_da.o
+endif
+
+endif
+
+
+ifeq ($(WLAN_SPECTRAL_ENABLE), 1)
+EXTRA_CFLAGS+= -DWLAN_SPECTRAL_ENABLE=1
+INCS += -I$(obj)/$(DEPTH)/spectral/dispatcher/inc
+endif
+
+ifeq ($(UMAC_SUPPORT_ACFG), 1)
+OSDEP_OBJS += $(OSDEP_SRC)/ieee80211_ioctl_acfg.o
+OSDEP_OBJS += $(OSDEP_SRC)/acfg_net_event.o
+endif
+
+ifeq ($(ATH_SUPPORT_VLAN), 1)
+OSDEP_OBJS +=  $(OSDEP_SRC)/adf_net_vlan.o
+endif
+
+ifeq ($(ATH_SUPPORT_WRAP), 1)
+OSDEP_OBJS +=  $(OSDEP_SRC)/osif_wrap.o
+endif
+
+ifeq ($(ATH_SUPPORT_LINUX_VENDOR), 1)
+OSDEP_OBJS += $(OSDEP_OBJS_VENDOR)
+endif
+
+ifeq ($(ATH_RXBUF_RECYCLE), 1)
+OSDEP_OBJS += $(OSDEP_SRC)/ath_skbrecycle.o
+endif
+
+ifeq ($(ATH_SUPPORT_HYFI_ENHANCEMENTS), 1)
+OSDEP_OBJS += $(OSDEP_SRC)/ald_netlink.o
+endif
+
+OSDEP_OBJS += $(OSDEP_SRC)/ext_ioctl_drv_if.o
+
+ifeq ($(QCA_THIRDPARTY), 1)
+PLTFRM_OBJS = $(DEPTH)/thirdparty/$(THIRDPARTY_VENDOR)/ath_carr_pltfrm.o
+endif
+
+
+ifeq ($(ATH_PERF_PWR_OFFLOAD), 1)
+
+HOST_CMN_CONVG_HIF_SRC := $(DEPTH)/cmn_dev/hif/src
+HOST_CMN_CONVG_HIF_INC1 := $(DEPTH)/cmn_dev/hif
+HOST_CMN_CONVG_HTC_INC := $(DEPTH)/cmn_dev/htc
+
+ifeq ($(BUILD_X86), y)
+ifeq ($(QCA_THIRDPARTY), 1)
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/$(FIRMWARE_REL_PATH)
+else
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/offload
+endif
+else
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/$(FIRMWARE_REL_PATH)
+endif
+PERF_PWR_OFFLOAD_WMI_SRC := $(DEPTH)/cmn_dev/wmi
+PERF_PWR_OFFLOAD_REGDMN_SRC := $(PERF_PWR_OFFLOAD_SRC)/wlan/regdmn
+
+PERF_PWR_OFFLOAD_INC := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/include \
+            -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/ath_pktlog/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/htt/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/txrx/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/hif/pci \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/hif/pci/linux   \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/os/linux/include \
+            -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/regdmn \
+            -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/lmac_offload_if \
+            -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/target_if/init_deinit/inc \
+
+
+ifeq ($(ATH_TGT_TYPE),AR9888)
+# We build the host driver against the v1 headers - the registers that the host driver
+# uses had better be compatible across v1/v2
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1/extra/hw
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1/extra/
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1
+endif
+
+
+
+ifeq ($(ATH_TGT_TYPE),AR6320)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320/extra/hw
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320/extra/
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320
+endif
+
+
+ifeq ($(ATH_TGT_TYPE),AR6004)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6004/hw
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6004
+endif
+
+
+ifeq ($(ATH_TGT_TYPE),AR900B)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B/extra/hw
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B/extra/
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B
+endif
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/hw/include
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/qca8074/v1/
+INCS += $(PERF_PWR_OFFLOAD_INC)
+
+ifneq ($(strip $(REMOVE_PKT_LOG)),1)
+PERF_PWR_OFFLOAD_OBJS += $(PKTLOG_AC_OBJS)
+endif #REMOVE_PKT_LOG
+
+endif #end perf_pwr_offload
+
+ifeq ($(TARGET),ANDROID)
+COPTS += -Wframe-larger-than=4096
+endif
+
+KASAN := $(shell grep -w CONFIG_KASAN $(KERNELPATH)/.config | cut -f 2 -d '=')
+
+ifeq ($(TARGET),i386-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #x86 stack frame limit
+
+ifeq ($(TARGET),armv4-le-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #arm stack frame limit
+
+ifeq ($(TARGET),mipsisa32-be-elf)
+COPTS += -Wframe-larger-than=1190
+endif #mips stack frame limit
+
+ifeq ($(WLAN_SUPPORT_FILS), 1)
+INCS += -I$(obj)/$(DEPTH)/umac/fils_discovery/dispatcher/inc
+endif
+
+EXTRA_CFLAGS+= $(INCS) $(COPTS) -Wno-unused-function
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+EXTRA_CFLAGS+= -DKBUILD_MODNAME=\"umac\"
+MOD_CFLAGS = -D"KBUILD_STR(s)=\#s" -D"KBUILD_BASENAME=KBUILD_STR(umac.mod)"  -D"KBUILD_MODNAME=KBUILD_STR(umac)"
+endif
+
+ifeq ($(strip ${QCA_DFS_COMPONENT_ENABLE}),1)
+EXTRA_CFLAGS+= -DDFS_COMPONENT_ENABLE
+endif
+
+umac-objs := base/ieee80211_ucfg.o \
+             base/ieee80211_channel.o base/ieee80211_common.o base/ieee80211_config.o \
+             base/ieee80211_node.o base/ieee80211_node_ap.o base/ieee80211_node_sta.o \
+             base/ieee80211_rateset.o base/ieee80211_vap.o \
+             base/ieee80211_msg.o base/ieee80211_tsftimer.o base/ieee80211_vap_ath_info.o \
+             mlme/ieee80211_beacon.o mlme/ieee80211_ie.o mlme/ieee80211_mgmt.o \
+             mlme/ieee80211_mgmt_ap.o mlme/ieee80211_mgmt_sta.o mlme/ieee80211_mlme.o mlme/ieee80211_proto.o \
+             mlme/ieee80211_mlme_ap.o mlme/ieee80211_mlme_sta.o \
+             mlme/ieee80211_mgmt_bss.o mlme/ieee80211_mlme_sw_bmiss.o \
+             mlme/ieee80211_mlme_app_ie.o mlme/ieee80211_ie_utils.o mlme/ieee80211_mlme_dfs.o \
+             mlme/ieee80211_bssload.o mlme/ieee80211_mlme_dfs_interface.o \
+             mlme/ieee80211_mlme_dfs_dispatcher.o mlme/ieee80211_mlme_ops.o mlme/ieee80211_bsscolor.o \
+	     mlme/wlan_mlme_vdev_mgmt_ops.o \
+             pm/ieee80211_ap_power.o pm/ieee80211_power.o pm/ieee80211_sta_power.o \
+             pm/ieee80211_power_queue.o \
+             regdmn/ieee80211_regdmn_dispatcher.o \
+             regdmn/ieee80211_regdmn.o \
+             scan/ieee80211_aplist.o \
+             scan/wlan_scan.o \
+             network_listner/ieee80211_nl.o \
+             acs/ieee80211_acs.o \
+             acs/ieee80211_extacs.o \
+             cbs/ieee80211_cbs.o \
+             acl/ieee80211_acl.o \
+             wds/ieee80211_wds.o \
+             txbf/ieee80211_txbf.o \
+             sme/ieee80211_sm.o sme/ieee80211_assoc_sm.o \
+             sme/ieee80211_connection_sm.o \
+             txrx/ieee80211_input.o txrx/ieee80211_output.o $(OSDEP_OBJS) $(PLTFRM_OBJS) \
+             ique/ieee80211_me.o ique/ieee80211_hbr.o base/ieee80211_vap_pause.o \
+             admctl/ieee80211_admctl.o admctl/ieee80211_admctl_ap.o \
+             wnm/ieee80211_wnm.o wnm/ieee80211_wnm_ap.o wnm/ieee80211_wnm_sta.o\
+             vi_dbg/ieee80211_vi_dbg.o \
+             base/ieee80211_node_proxyarp.o $(OSDEP_SRC)/osif_proxyarp.o \
+             splitmac/dispatcher/src/wlan_splitmac.o \
+             $(OSDEP_SRC)/ath_wbuf.o \
+             $(OSDEP_SRC)/ath_timer.o \
+             $(OSDEP_SRC)/ath_netlink.o \
+             $(HOST_CMN_CONVG_SRC)/init_deinit/dispatcher/src/dispatcher_init_deinit.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_global_obj.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_psoc_obj.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_pdev_obj.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_vdev_obj.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_peer_obj.o \
+             $(HOST_CMN_CONVG_SRC)/umac/global_umac_dispatcher/lmac_if/src/wlan_lmac_if.o \
+             $(HOST_CMN_CONVG_SRC)/global_lmac_if/src/wlan_global_lmac_if.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/mgmt_txrx/core/src/wlan_mgmt_txrx_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/mgmt_txrx/dispatcher/src/wlan_mgmt_txrx_tgt_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/mgmt_txrx/dispatcher/src/wlan_mgmt_txrx_utils_api.o \
+             $(HOST_CMN_CONVG_SRC)/scheduler/src/scheduler_api.o \
+             $(HOST_CMN_CONVG_SRC)/scheduler/src/scheduler_core.o \
+             mlme/ieee80211_objmgr.o \
+             mlme/ieee80211_objmgr_util.o \
+             mlme/wlan_mlme_dispatcher.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_utils.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_rules.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_scan.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_non_scan.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_internal.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_queue.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/dispatcher/src/wlan_scan_tgt_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/dispatcher/src/wlan_scan_ucfg_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/dispatcher/src/wlan_scan_utils_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_cache_db.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_11d.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_manager.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_bss_score.o \
+             $(HOST_CMN_CONVG_SRC)/umac/scan/core/src/wlan_scan_filter.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/utils/src/wlan_utility.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/core/src/reg_db.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/core/src/reg_services_common.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/core/src/reg_priv_objs.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/core/src/reg_build_chan_list.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/dispatcher/src/wlan_reg_services_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/dispatcher/src/wlan_reg_tgt_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/dispatcher/src/wlan_reg_ucfg_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/regulatory/core/src/reg_db_parser.o \
+             $(HOST_CMN_CONVG_SRC)/cfg/src/cfg.o \
+             offchan_txrx/core/src/wlan_offchan_txrx_main.o \
+             offchan_txrx/dispatcher/src/wlan_offchan_txrx_ucfg_api.o \
+             base/wlan_offchan_tx_test.o \
+             $(HOST_CMN_CONVG_SRC)/os_if/linux/scan/src/wlan_cfg80211_scan.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/core/src/vdev_mgr_ops.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/dispatcher/src/wlan_vdev_mgr_utils_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/dispatcher/src/wlan_vdev_mgr_tgt_if_tx_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/dispatcher/src/wlan_vdev_mgr_tgt_if_rx_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/dispatcher/src/wlan_vdev_mgr_ucfg_api.o \
+             $(OSDEP_SRC)/umac_exports.o
+
+ifeq ($(WLAN_SER_UTF), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_utf.o
+endif
+
+ifeq ($(DA_SUPPORT), 1)
+umac-objs += $(DEPTH)/direct_attach/umac/resmgr/ieee80211_resmgr.o \
+             $(DEPTH)/direct_attach/umac/resmgr/ieee80211_resmgr_sm.o \
+             $(DEPTH)/direct_attach/umac/resmgr/ieee80211_resmgr_oc_scheduler.o \
+             $(DEPTH)/direct_attach/umac/base/wlan_mlme_dp_dispatcher.o
+endif
+
+ifeq ($(WLAN_SER_DEBUG), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/cmn_services/serialization/src/wlan_serialization_debug.o
+endif
+
+ifeq ($(CMN_VDEV_MLME_CMPT_ENABLE), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/mlme/mlme_objmgr/dispatcher/src/wlan_vdev_mlme_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/dispatcher/src/wlan_vdev_mlme_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/mlme_objmgr/dispatcher/src/wlan_pdev_mlme_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/mlme_objmgr/dispatcher/src/wlan_cmn_mlme_main.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/pdev_mgr/dispatcher/src/wlan_pdev_mlme_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/vdev_mgr/core/src/vdev_mlme_sm.o \
+             $(HOST_CMN_CONVG_SRC)/umac/cmn_services/sm_engine/src/wlan_sm_engine.o
+endif
+
+ifeq ($(CMN_VDEV_MLME_SM_ENABLE), 1)
+umac-objs += $(HOST_COMP_CONVG_SRC)/umac/mlme/vdev_mgr/core/src/vdev_mlme_sm_actions.o \
+             mlme/wlan_mlme_vdev_sm_if.o \
+             mlme/wlan_mlme_if.o \
+             $(HOST_CMN_CONVG_SRC)/umac/mlme/mlme_utils/wlan_vdev_mlme_ser_if.o
+endif
+
+ifeq ($(SM_ENG_HIST_ENABLE), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/cmn_services/sm_engine/src/wlan_sm_engine_dbg.o
+endif
+
+ifeq ($(ATH_ACS_DEBUG_SUPPORT), 1)
+umac-objs += acs/acs_debug.o
+endif
+
+ifeq ($(QCA_WIFI_FTM),1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/ftm/dispatcher/src/wlan_ftm_init_deinit.o \
+             $(HOST_CMN_CONVG_SRC)/ftm/dispatcher/src/wlan_ftm_ucfg_api.o \
+             $(HOST_CMN_CONVG_SRC)/ftm/core/src/wlan_ftm_svc.o
+ifeq ($(QCA_WIFI_FTM_NL80211),1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/os_if/linux/ftm/src/wlan_cfg80211_ftm.o
+endif
+
+ifeq ($(QCA_WIFI_FTM_IOCTL),1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/os_if/linux/ftm/src/wlan_ioctl_ftm.o
+endif
+endif
+
+ifeq ($(WLAN_SUPPORT_GREEN_AP), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/green_ap/core/src/wlan_green_ap_main.o \
+	$(HOST_CMN_CONVG_SRC)/umac/green_ap/dispatcher/src/wlan_green_ap_api.o \
+	$(HOST_CMN_CONVG_SRC)/umac/green_ap/dispatcher/src/wlan_green_ap_ucfg_api.o
+endif
+
+ifeq ($(strip ${QCA_DFS_COMPONENT_ENABLE}),1)
+
+ifeq ($(strip ${DA_SUPPORT}),1)
+ifeq ($(strip ${WLAN_DFS_DIRECT_ATTACH}),1)
+umac-objs += $(HOST_COMP_CONVG_SRC)/direct_attach/umac/dfs/core/src/filtering/ar5212_radar.o \
+             $(HOST_COMP_CONVG_SRC)/direct_attach/umac/dfs/core/src/filtering/ar5416_radar.o \
+             $(HOST_COMP_CONVG_SRC)/direct_attach/umac/dfs/core/src/filtering/ar9300_radar.o \
+             $(HOST_COMP_CONVG_SRC)/direct_attach/umac/dfs/core/src/filtering/dfs_direct_attach_radar.o
+endif
+endif
+
+ifeq ($(strip ${WLAN_DFS_PARTIAL_OFFLOAD}),1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_partial_offload_radar.o \
+             $(HOST_COMP_CONVG_SRC)/umac/dfs/core/src/misc/dfs_zero_cac.o
+endif
+
+ifeq ($(strip ${WLAN_DFS_FULL_OFFLOAD}),1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_full_offload.o
+endif
+
+WLAN_DFS_DIRECT_ATTACH_OR_PARTIAL_OFFLOAD=
+
+ifeq ($(strip ${WLAN_DFS_DIRECT_ATTACH}),1)
+WLAN_DFS_DIRECT_ATTACH_OR_PARTIAL_OFFLOAD=yes
+endif
+ifeq ($(strip ${WLAN_DFS_PARTIAL_OFFLOAD}),1)
+WLAN_DFS_DIRECT_ATTACH_OR_PARTIAL_OFFLOAD=yes
+endif
+
+ifdef WLAN_DFS_DIRECT_ATTACH_OR_PARTIAL_OFFLOAD
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_fcc_bin5.o \
+             $(HOST_COMP_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_ar.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_bindetects.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_debug.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_init.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_misc.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_phyerr_tlv.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_process_phyerr.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_process_radarevent.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_staggered.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_filter_init.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/filtering/dfs_radar.o
+endif
+
+ifeq ($(strip ${QCA_SUPPORT_ETSI_PRECAC_DFS}),1)
+umac-objs += $(HOST_COMP_CONVG_SRC)/umac/dfs/core/src/misc/dfs_etsi_precac.o
+endif
+
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_cac.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_nol.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_tgt_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_ucfg_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_utils_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_lmac_api.o  \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_mlme_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/dispatcher/src/wlan_dfs_init_deinit_api.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_random_chan_sel.o \
+             $(HOST_CMN_CONVG_SRC)/umac/dfs/core/src/misc/dfs_process_radar_found_ind.o
+endif
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+umac-objs += $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_crc32.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_wep_sw.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_wep.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_tkip_sw.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_tkip.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_ccmp_sw.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_gcmp_sw.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_ctr.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_siv.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_ccm.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_gcm.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_internal.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_omac1.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_internal_enc.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_aes_internal_dec.o \
+             $(HOST_CMN_CONVG_CRYPTO_SRC)/wlan_crypto_main.o \
+             $(HOST_CMN_CONVG_CRYPTO_SRC)/wlan_crypto_obj_mgr.o \
+             $(HOST_CMN_CONVG_CRYPTO_SRC)/wlan_crypto_param_handling.o \
+             $(HOST_CMN_CONVG_CRYPTO_SRC)/wlan_crypto_global_api.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_ccmp.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_wapi.o \
+             $(HOST_COMP_CONVG_SRC)/crypto/src/wlan_crypto_fils.o \
+             crypto/ieee80211_crypto_pmf.o \
+             crypto/ieee80211_wapi.o \
+             crypto/ieee80211_wps.o \
+             crypto/ieee80211_crypto_wep_mbssid.o\
+             crypto/ieee80211_crypto.o \
+             crypto/ieee80211_crypto_nlshim_api.o \
+             crypto/ieee80211_rsn.o
+else
+umac-objs += crypto/aes-gcm.o\
+             crypto/ieee80211_crypto_ccmp.o\
+             crypto/ieee80211_crypto_ccmp_sw.o\
+             crypto/ieee80211_crypto_rijndael.o\
+             crypto/ieee80211_crypto_tkip.o \
+             crypto/ieee80211_crypto_tkip_sw.o\
+             crypto/ieee80211_crypto_wep.o\
+             crypto/ieee80211_crypto_wpi_sms4.o\
+             crypto/ieee80211_crypto_pmf.o \
+             crypto/ieee80211_wapi.o \
+             crypto/ieee80211_wps.o \
+             crypto/ieee80211_crypto_none.o\
+             crypto/ieee80211_crypto_wep_mbssid.o\
+             crypto/ieee80211_crypto.o \
+             crypto/ieee80211_crypto_nlshim_api.o \
+             crypto/ieee80211_rsn.o
+endif
+
+ifeq ($(ATH_SUPPORT_WIFIPOS), 1)
+umac-objs += wifipos/ieee80211_wifipos.o
+endif
+
+umac-objs += $(OSDEP_SRC)/if_bus.o
+
+ifeq ($(strip ${BUS}),AHB)
+umac-objs += $(OSDEP_SRC)/ath_ahb.o
+endif
+
+ifeq ($(strip ${BUS}),PCI)
+umac-objs += $(OSDEP_SRC)/ath_pci.o
+endif
+
+ifeq ($(strip ${BUS}),dual)
+umac-objs += $(OSDEP_SRC)/ath_ahb.o
+umac-objs += $(OSDEP_SRC)/ath_pci.o
+endif
+
+ifeq ($(ATH_SUPPORT_LOWI),1)
+umac-objs += rtt/ieee80211_rtt.o
+endif
+
+ifeq ($(UMAC_SUPPORT_RRM), 1)
+umac-objs += rrm/ieee80211_rrm.o rrm/ieee80211_rrm_ie.o rrm/ieee80211_rrm_ap.o rrm/ieee80211_rrm_sta.o rrm/ieee80211_rrm_misc.o
+endif
+
+
+umac-objs +=son/core/src/wlan_son_main.o \
+         son/core/src/wlan_son_pub.o \
+         son/core/src/wlan_son_pub_event.o \
+         son/core/src/wlan_son_ie.o  \
+         son/dispatcher/src/wlan_son_ucfg_api.o \
+         son/dispatcher/src/wlan_son_utils_api.o
+
+ifeq ($(DA_SUPPORT),1)
+umac-objs +=$(DEPTH)/direct_attach/umac/son/core/src/wlan_son_da.o
+endif
+
+ifeq ($(ATH_PARAMETER_API),1)
+umac-objs +=papi/papi.o
+endif
+
+ifeq ($(ATH_SUPPORT_MBO), 1)
+umac-objs +=mbo/ieee80211_mbo.o
+endif
+
+ifeq ($(QCN_IE), 1)
+umac-objs +=qcn/qcn.o
+endif
+
+
+ifeq ($(UMAC_SUPPORT_QUIET), 1)
+umac-objs +=  \
+             mlme/ieee80211_quiet.o
+endif
+
+umac-objs += $(OSDEP_SRC)/osif_mon.o
+
+
+ifeq ($(ATH_EXT_AP), 1)
+DP_DIR := $(DEPTH)/dp
+umac-objs += $(DP_DIR)/dp_extap_mitbl.o $(DP_DIR)/dp_extap.o
+endif
+
+ifeq ($(DBDC_REPEATER_SUPPORT), 1)
+DP_DIR := $(DEPTH)/dp
+umac-objs += $(DP_DIR)/dp_link_aggr.o
+endif
+
+ifeq ($(ATH_SUPPORT_HYFI_ENHANCEMENTS), 1)
+umac-objs += ald/ieee80211_ald.o
+endif
+
+ifeq ($(WLAN_SUPPORT_FILS), 1)
+umac-objs += fils_discovery/core/fd_priv.o \
+             fils_discovery/dispatcher/src/wlan_fd_tgt_api.o \
+             fils_discovery/dispatcher/src/wlan_fd_ucfg_api.o \
+             fils_discovery/dispatcher/src/wlan_fd_utils_api.o
+endif
+
+ifeq ($(WLAN_OBJMGR_DEBUG), 1)
+umac-objs += $(HOST_CMN_CONVG_SRC)/umac/cmn_services/obj_mgr/src/wlan_objmgr_debug.o
+endif
+
+clean-files := modules.order
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: umac.ko
+
+umac.mod.o: umac.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+umac.o: ${umac-objs}
+	$(LD) -m elf32btsmip -r -o umac.o $(umac-objs)
+	$(KERNELPATH)/scripts/mod/modpost umac.o
+
+umac.ko: umac.o umac.mod.o
+	$(LD) $(LDOPTS) -o umac.ko umac.o umac.mod.o
+
+%.o: %.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif

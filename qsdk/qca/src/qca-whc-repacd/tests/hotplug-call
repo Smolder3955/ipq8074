@@ -1,0 +1,19 @@
+#!/bin/busybox sh
+# Copyright (c) 2016 Qualcomm Atheros, Inc.
+#
+# All Rights Reserved.
+# Qualcomm Atheros Confidential and Proprietary.
+
+# This is a test stub for hotplug-call
+#
+# Create a new file with the environment vars every time we're called
+for i in $(seq 1 10); do
+    ENVFILE=/tmp/hotplug-call-env-${i}.sh
+    ! [ -e $ENVFILE ] && break
+done
+
+echo "PORT=\"$PORT\"" > $ENVFILE
+echo "EVENT=\"$EVENT\"" >> $ENVFILE
+echo "STATE=\"$STATE\"" >> $ENVFILE
+
+exit 0

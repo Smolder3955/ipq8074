@@ -1,0 +1,17 @@
+Index: cnssdiag/cnssdiag/Makefile
+===================================================================
+--- cnssdiag.orig/cnssdiag/Makefile	2017-05-14 08:37:53.661215698 -0700
++++ cnssdiag/cnssdiag/Makefile	2017-05-14 08:52:00.318952564 -0700
+@@ -1,9 +1,8 @@
+-CC := $(ATH_CROSS_COMPILE_TYPE)gcc
+-TARGET_TYPE ?= AR9888
+-TARGET_VERS ?= v2
++CC = gcc
++AR = ar
+ 
+ all:
+-	$(CC) -g3 -Wall  \
++	$(CC) -g3 -Wall $(CFLAGS) $(LDFLAGS) \
+ 		cld-fwlog-netlink.c parser.c nan-parser.c cld-diag-parser.c -o cnss_diag
+ 
+ clean:

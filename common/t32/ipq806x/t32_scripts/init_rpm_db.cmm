@@ -1,0 +1,88 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+;*****************************************************************************
+;**           		init_rpm_db.cmm                                     **
+;*****************************************************************************
+
+local &t32_which_frequency_plan &clock_gating &board_type
+entry &t32_which_frequency_plan &clock_gating &board_type
+
+setup.bakfile off
+
+;*****************************************************
+; This section will write to the Mutex 12 register
+; to select the clock frequency plan.
+; The actual function is done in C code
+; Also the Mutex 13 register is written
+; to select the clock gating setting.
+; The actuall function is done in C code
+;*****************************************************
+; If no parameter is passed, we will set the desired frequency plan to Frequency PLan A
+; If no parameter is passed, clock gating is enabled by default
+if ("&t32_which_frequency_plan"=="")
+(
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   0x1
+
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   0x1
+)
+else if ("&clock_gating"=="")
+(
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   &t32_which_frequency_plan
+
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   0x1
+)
+else
+(
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG12  %LONG   &t32_which_frequency_plan
+
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   0x0
+    DATA.SET SFPB_MUTEX_MUTEX_REG13  %LONG   &clock_gating
+
+)
+
+setup.bakfile off
+
+if ("&board_type"=="")
+(
+	print "board type not passed!!!!"
+	print "loading tiny_axf_db149.axf"
+	d.load.elf tiny_axf_db149.axf
+)
+else if ("&board_type"=="ap148")
+(
+	print "passed board type AP148"
+	print "loading tiny_axf_ap148.axf"
+	d.load.elf tiny_axf_ap148.axf
+)
+else if ("&board_type"=="db149")
+(
+	print "passed board type DB149"
+	print "loading tiny_axf_db149.axf"
+	d.load.elf tiny_axf_db149.axf
+)
+else if ("&board_type"=="ap145")
+(
+        print "passed board type AP145"
+        print "loading tiny_axf_ap145.axf"
+        d.load.elf tiny_axf_ap145.axf
+)
+
+
+do semihost_setup_rpm.cmm
+do tiny_axf_basewin
+setup.bakfile off
+
+go
+
+wait 3.s
+
+enddo

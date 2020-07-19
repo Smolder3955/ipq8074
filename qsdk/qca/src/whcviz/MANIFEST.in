@@ -1,0 +1,1 @@
+recursive-include whcviz/htdocs/common *.js

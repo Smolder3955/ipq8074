@@ -1,0 +1,48 @@
+diff -Nur openswan-original/linux/include/openswan/ipsec_esp.h openswan-modified/linux/include/openswan/ipsec_esp.h
+--- openswan-original/linux/include/openswan/ipsec_esp.h	2018-05-04 13:00:24.269948867 +0530
++++ openswan-modified/linux/include/openswan/ipsec_esp.h	2018-05-04 12:43:00.253546354 +0530
+@@ -1,12 +1,12 @@
+ /*
+  * Copyright (C) 1996, 1997  John Ioannidis.
+  * Copyright (C) 1998, 1999, 2000, 2001  Richard Guy Briggs.
+- * 
++ *
+  * This program is free software; you can redistribute it and/or modify it
+  * under the terms of the GNU General Public License as published by the
+  * Free Software Foundation; either version 2 of the License, or (at your
+  * option) any later version.  See <http://www.fsf.org/copyleft/gpl.txt>.
+- * 
++ *
+  * This program is distributed in the hope that it will be useful, but
+  * WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  * or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+@@ -67,6 +67,7 @@
+ 
+ struct ipsec_skb_cb {
+ 	struct net_device *tunnel_dev;
++	bool flag;
+ };
+ 
+ extern struct xform_functions esp_xform_funcs[];
+diff -Nur openswan-original/linux/net/ipsec/ipsec_esp.c openswan-modified/linux/net/ipsec/ipsec_esp.c
+--- openswan-original/linux/net/ipsec/ipsec_esp.c	2018-05-04 13:00:24.273948868 +0530
++++ openswan-modified/linux/net/ipsec/ipsec_esp.c	2018-05-04 12:43:00.253546354 +0530
+@@ -157,6 +157,7 @@
+ 	} tctx;
+ 
+ 	((struct ipsec_skb_cb *)skb->cb)->tunnel_dev = skb->dev;
++	((struct ipsec_skb_cb *)skb->cb)->flag = irs->ipsp->ips_natt_type ? true : false;
+ 
+ #ifdef CONFIG_KLIPS_OCF
+ 	if (irs->ipsp->ocf_in_use)
+diff -Nur openswan-original/linux/net/ipsec/ipsec_xmit.c openswan-modified/linux/net/ipsec/ipsec_xmit.c
+--- openswan-original/linux/net/ipsec/ipsec_xmit.c	2018-05-04 13:00:24.273948868 +0530
++++ openswan-modified/linux/net/ipsec/ipsec_xmit.c	2018-05-04 12:43:00.253546354 +0530
+@@ -887,6 +887,7 @@
+ 		osw_ip4_hdr(ixs)->protocol = IPPROTO_ESP;
+ 
+ 	((struct ipsec_skb_cb *)ixs->skb->cb)->tunnel_dev = ixs->dev;
++	((struct ipsec_skb_cb *)ixs->skb->cb)->flag = ixs->ipsp->ips_natt_type ? true : false;
+ 
+ #ifdef CONFIG_KLIPS_OCF
+ 	if (ixs->ipsp->ocf_in_use) {

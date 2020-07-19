@@ -1,0 +1,282 @@
+#!/bin/sh
+#
+#  Copyright (c) 2013-2016, The Linux Foundation. All rights reserved.
+#
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions are
+#  met:
+#      * Redistributions of source code must retain the above copyright
+#        notice, this list of conditions and the following disclaimer.
+#      * Redistributions in binary form must reproduce the above
+#        copyright notice, this list of conditions and the following
+#        disclaimer in the documentation and/or other materials provided
+#        with the distribution.
+#      * Neither the name of The Linux Foundation nor the names of its
+#        contributors may be used to endorse or promote products derived
+#        from this software without specific prior written permission.
+#
+#  THIS SOFTWARE IS PROVIDED "AS IS" AND ANY EXPRESS OR IMPLIED
+#  WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+#  MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT
+#  ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS
+#  BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+#  CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+#  SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR
+#  BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+#  WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE
+#  OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN
+#  IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+
+prog=$(basename "$0")
+USAGE="$prog <arch> [initrd] [options]
+
+    --base=<NUM>         specify the address the bootloader loads the kernel to
+    --cmdline=<cmdline>  override the default command line
+    --modules            include modules in ramdisk
+    --directory=<dir>    include directory in ramdisk
+    --dirty              skip cleanup
+    -v                   be verbose
+"
+
+exe=$(readlink -f "$0")
+META_ROOT=$(dirname "$exe")
+META_ROOT=$(cd "$META_ROOT" && pwd)
+
+if test -f "$META_ROOT/config.sh"
+then
+	. "$META_ROOT/config.sh"
+fi
+if test -f .skales/config
+then
+	. .skales/config
+fi
+KOBJ="${KOBJ:-../kobj}"
+BOOTIMG_DIR="${BOOTIMG_DIR:-../}"
+BOOTIMG_DIR="$(readlink -f $BOOTIMG_DIR)"
+
+die() {
+	printf >&2 "%s\n" "$@"
+	exit 1
+}
+
+usage() {
+	die "usage: $USAGE"
+}
+
+error() {
+	printf >&2 "%s\n" "$@"
+	usage
+}
+
+if test -z "$1"
+then
+	usage
+fi
+
+image=zImage pagesize=2048 cmdline= base= initrd= needs_fixup= dtb= modules=
+extra_dir= dtbs= dtarg= arch= uImage= dirty= verbose=
+target="$1"
+
+case "$target" in
+-h|--help)
+	usage
+	;;
+*)
+	if test -f "$META_ROOT/boards/$1"
+	then
+		. "$META_ROOT/boards/$1"
+	else
+		die "Unknown architecture $1"
+	fi
+	;;
+esac
+
+shift
+
+while test $# != 0
+do
+	case "$1" in
+	--cmdline|--cmdline=*)
+		case "$#,$1" in
+		*,*=*)
+			cmdline=`expr "z$1" : 'z-[^=]*=\(.*\)'` ;;
+		1,*)
+			error "'$1' option missing value" ;;
+		*)
+			cmdline="$2"
+			shift ;;
+		esac
+		;;
+	--base|--base=*)
+		case "$#,$1" in
+		*,*=*)
+			base=`expr "z$1" : 'z-[^=]*=\(.*\)'` ;;
+		1,*)
+			error "'$1' option missing value" ;;
+		*)
+			base="$2"
+			shift ;;
+		esac
+		;;
+	--modules)
+		modules=t
+		;;
+	--directory|--directory=*)
+		case "$#,$1" in
+		*,*=*)
+			extra_dir=`expr "z$1" : 'z-[^=]*=\(.*\)'` ;;
+		1,*)
+			error "'$1' option missing value" ;;
+		*)
+			extra_dir="$2"
+			shift ;;
+		esac
+		;;
+	--dirty)
+		dirty=t
+		;;
+	-v)
+		verbose=t
+		;;
+	*)
+		initrd="$1"
+		if ! test -e "$initrd"
+		then
+			initrd="$META_ROOT/initrds/$initrd"
+			if ! test -e "$initrd"
+			then
+				echo >&2 "fatal: can't find initrd"
+				echo >&2 "Available initrds:"
+				for x in $META_ROOT/initrds/*
+				do
+					printf >&2 "  %s\n" $(basename "$x")
+				done
+				exit 1
+			fi
+		else
+			initrd="$(readlink -f $initrd)"
+		fi
+		;;
+	esac
+	shift
+done
+
+silence=
+make_silence=
+if test -z "$verbose"
+then
+	silence='>/dev/null 2>&1'
+	make_silence=-s
+fi
+
+(
+cd $KOBJ &&
+
+if test -n "$modules"
+then
+	if test -z "$initrd"
+	then
+		die "Need an initrd to append modules to"
+	fi
+
+	rm -rf modules &&
+	INSTALL_MOD_PATH=modules make ARCH=$arch $make_silence modules_install &&
+	(
+		cd modules && find . | cpio --quiet -o -H newc
+	) | gzip -n -9 > initrd-modules.gz &&
+	cat $initrd initrd-modules.gz > initrd.gz
+	initrd=initrd.gz
+fi
+
+if test -n "$extra_dir"
+then
+	if test -z "$initrd"
+	then
+		die "Need an initrd to add directory to"
+	fi
+
+	(
+		cd - >/dev/null 2>&1 &&
+		cd $extra_dir && find . | cpio --quiet -o -H newc
+	) | gzip -n -9 > initrd-extra.gz &&
+	cat $initrd initrd-extra.gz > initrd2.gz &&
+	mv initrd2.gz initrd.gz
+	initrd=initrd.gz
+fi
+
+if test "$arch" = "arm"
+then
+	image=arch/arm/boot/$image
+	dtdir1=arch/arm/boot/dts/
+	dtdir2=arch/arm/boot/
+else
+	image=arch/arm64/boot/Image
+	dtdir1=arch/arm64/boot/dts/
+	dtdir2=arch/arm64/boot/dts/
+fi
+
+initrd=${initrd:-/dev/null}
+
+test -f $image || die "Can't find $image. Build a kernel?"
+if test -n "$dtb"
+then
+	# Older kernels have it in different places
+	dbf="$dtdir1$dtb" &&
+	test -f $dbf ||
+	dbf="$dtdir2$dtb" &&
+	test -f $dbf ||
+	die "Can't find '$dtb'. Build a device tree blob?"
+	dtb="$dbf"
+	dtarg="--dt $dtb"
+fi
+
+# Compile the atag fixup if necessary
+if test -n "$needs_fixup"
+then
+	fixup="$META_ROOT/atag-fix/fixup"
+	${CROSS_COMPILE}gcc -c $fixup.S -o $fixup.o &&
+	${CROSS_COMPILE}objcopy -O binary $fixup.o $fixup.bin &&
+
+	cat $fixup.bin $image > fImage &&
+	image=fImage || die "Can't build fixup"
+fi
+
+# build dtbs to append
+if test -n "$dtbs"
+then
+	rm -rf dtbs &&
+	INSTALL_DTBS_PATH=dtbs make $make_silence ARCH=$arch dtbs_install &&
+	eval "$META_ROOT/dtbTool --page-size $pagesize -o .dtblob dtbs/$dtbs $silence" &&
+	dtarg="--dt .dtblob" || die "Can't build dtbs"
+fi
+
+if test -n "$uImage"
+then
+	eval "mkimage -A $arch -O linux -C none -T kernel \
+		-a $base -e $base -n "$target kernel" \
+		-d "$image" $BOOTIMG_DIR/uImage-$target $silence" &&
+	echo "Packaged $(readlink -f $BOOTIMG_DIR/uImage-$target)" &&
+	ln -fs uImage-$target $BOOTIMG_DIR/uImage
+else
+	"$META_ROOT/mkbootimg" --kernel $image \
+		--ramdisk $initrd \
+		--cmdline "$cmdline" \
+		--base $base \
+		--pagesize $pagesize \
+		--output $BOOTIMG_DIR/boot-$target.img \
+		$dtarg &&
+	echo "Packaged $(readlink -f $BOOTIMG_DIR/boot-$target.img)" &&
+	ln -fs boot-$target.img $BOOTIMG_DIR/boot.img
+fi
+
+# Cleanup for people with kobj=working_dir
+if test -z "$dirty"
+then
+	rm -rf fImage modules initrd-modules.gz initrd-extra.gz dtbs .dtblob
+	if test -n "$modules" -o -n "$extra_dir"
+	then
+		rm -rf $initrd
+	fi
+fi
+)

@@ -1,0 +1,173 @@
+
+#ifndef __INCvrateconstantsh
+#define __INCvrateconstantsh
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+typedef enum {
+    vRATE_INDEX_HT20_MCS0=numRateCodes,	
+    vRATE_INDEX_HT20_MCS1,
+    vRATE_INDEX_HT20_MCS2,
+    vRATE_INDEX_HT20_MCS3,
+    vRATE_INDEX_HT20_MCS4,
+    vRATE_INDEX_HT20_MCS5,
+    vRATE_INDEX_HT20_MCS6,
+    vRATE_INDEX_HT20_MCS7,
+    vRATE_INDEX_HT20_MCS8,
+    vRATE_INDEX_HT20_MCS9,
+    vRATE_INDEX_HT20_MCS10,
+    vRATE_INDEX_HT20_MCS11,
+    vRATE_INDEX_HT20_MCS12,
+    vRATE_INDEX_HT20_MCS13,
+    vRATE_INDEX_HT20_MCS14,
+    vRATE_INDEX_HT20_MCS15,
+    vRATE_INDEX_HT20_MCS16,
+    vRATE_INDEX_HT20_MCS17,
+    vRATE_INDEX_HT20_MCS18,
+    vRATE_INDEX_HT20_MCS19,
+    vRATE_INDEX_HT20_MCS20,
+    vRATE_INDEX_HT20_MCS21,
+    vRATE_INDEX_HT20_MCS22,
+    vRATE_INDEX_HT20_MCS23,
+    vRATE_INDEX_HT20_MCS24,
+    vRATE_INDEX_HT20_MCS25,
+    vRATE_INDEX_HT20_MCS26,
+    vRATE_INDEX_HT20_MCS27,
+    vRATE_INDEX_HT20_MCS28,
+    vRATE_INDEX_HT20_MCS29,
+    vRATE_INDEX_HT20_MCS30,
+    vRATE_INDEX_HT20_MCS31,
+    vRATE_INDEX_HT20_MCS32,
+    vRATE_INDEX_HT20_MCS33,
+    vRATE_INDEX_HT20_MCS34,
+    vRATE_INDEX_HT20_MCS35,
+    vRATE_INDEX_HT20_MCS36,
+    vRATE_INDEX_HT20_MCS37,
+    vRATE_INDEX_HT20_MCS38,
+    vRATE_INDEX_HT20_MCS39,
+    vRATE_INDEX_HT40_MCS0=numRateCodes+48,
+    vRATE_INDEX_HT40_MCS1,
+    vRATE_INDEX_HT40_MCS2,
+    vRATE_INDEX_HT40_MCS3,
+    vRATE_INDEX_HT40_MCS4,
+    vRATE_INDEX_HT40_MCS5,
+    vRATE_INDEX_HT40_MCS6,
+    vRATE_INDEX_HT40_MCS7,
+    vRATE_INDEX_HT40_MCS8,
+    vRATE_INDEX_HT40_MCS9,
+    vRATE_INDEX_HT40_MCS10,
+    vRATE_INDEX_HT40_MCS11,
+    vRATE_INDEX_HT40_MCS12,
+    vRATE_INDEX_HT40_MCS13,
+    vRATE_INDEX_HT40_MCS14,
+    vRATE_INDEX_HT40_MCS15,
+    vRATE_INDEX_HT40_MCS16,
+    vRATE_INDEX_HT40_MCS17,
+    vRATE_INDEX_HT40_MCS18,
+    vRATE_INDEX_HT40_MCS19,
+    vRATE_INDEX_HT40_MCS20,
+    vRATE_INDEX_HT40_MCS21,
+    vRATE_INDEX_HT40_MCS22,
+    vRATE_INDEX_HT40_MCS23,
+    vRATE_INDEX_HT40_MCS24,
+    vRATE_INDEX_HT40_MCS25,
+    vRATE_INDEX_HT40_MCS26,
+    vRATE_INDEX_HT40_MCS27,
+    vRATE_INDEX_HT40_MCS28,
+    vRATE_INDEX_HT40_MCS29,
+    vRATE_INDEX_HT40_MCS30,
+    vRATE_INDEX_HT40_MCS31,
+    vRATE_INDEX_HT40_MCS32,
+    vRATE_INDEX_HT40_MCS33,
+    vRATE_INDEX_HT40_MCS34,
+    vRATE_INDEX_HT40_MCS35,
+    vRATE_INDEX_HT40_MCS36,
+    vRATE_INDEX_HT40_MCS37,
+    vRATE_INDEX_HT40_MCS38,
+    vRATE_INDEX_HT40_MCS39,
+    vRATE_INDEX_HT80_MCS0=numRateCodes+96,
+    vRATE_INDEX_HT80_MCS1,
+    vRATE_INDEX_HT80_MCS2,
+    vRATE_INDEX_HT80_MCS3,
+    vRATE_INDEX_HT80_MCS4,
+    vRATE_INDEX_HT80_MCS5,
+    vRATE_INDEX_HT80_MCS6,
+    vRATE_INDEX_HT80_MCS7,
+    vRATE_INDEX_HT80_MCS8,
+    vRATE_INDEX_HT80_MCS9,
+    vRATE_INDEX_HT80_MCS10,
+    vRATE_INDEX_HT80_MCS11,
+    vRATE_INDEX_HT80_MCS12,
+    vRATE_INDEX_HT80_MCS13,
+    vRATE_INDEX_HT80_MCS14,
+    vRATE_INDEX_HT80_MCS15,
+    vRATE_INDEX_HT80_MCS16,
+    vRATE_INDEX_HT80_MCS17,
+    vRATE_INDEX_HT80_MCS18,
+    vRATE_INDEX_HT80_MCS19,
+    vRATE_INDEX_HT80_MCS20,
+    vRATE_INDEX_HT80_MCS21,
+    vRATE_INDEX_HT80_MCS22,
+    vRATE_INDEX_HT80_MCS23,
+    vRATE_INDEX_HT80_MCS24,
+    vRATE_INDEX_HT80_MCS25,
+    vRATE_INDEX_HT80_MCS26,
+    vRATE_INDEX_HT80_MCS27,
+    vRATE_INDEX_HT80_MCS28,
+    vRATE_INDEX_HT80_MCS29,
+    vRATE_INDEX_HT80_MCS30,
+    vRATE_INDEX_HT80_MCS31,
+    vRATE_INDEX_HT80_MCS32,
+    vRATE_INDEX_HT80_MCS33,
+    vRATE_INDEX_HT80_MCS34,
+    vRATE_INDEX_HT80_MCS35,
+    vRATE_INDEX_HT80_MCS36,
+    vRATE_INDEX_HT80_MCS37,
+    vRATE_INDEX_HT80_MCS38,
+    vRATE_INDEX_HT80_MCS39,
+}vRATE_INDEX ;
+
+enum
+{
+	vRateAll=1010,
+	vRateHt20,
+	vRateHt40,
+	vRateHt80,
+	vRateDvt,
+};
+
+
+//const A_UINT16 numRateCodes = sizeof(rateCodes)/sizeof(A_UCHAR);
+#define vNumRateCodes 192
+extern const A_UCHAR vRateValues[vNumRateCodes];
+extern const A_UCHAR vRateCodes[vNumRateCodes];
+extern char *vRateStrAll[vNumRateCodes];
+
+#define UNKNOWN_RATE_CODE 0xff
+#define IS_1STREAM_vRATE_INDEX(x) (((x) >= vRATE_INDEX_HT20_MCS0 && (x) <= vRATE_INDEX_HT20_MCS9) || ((x) >= vRATE_INDEX_HT40_MCS0 && (x) <= vRATE_INDEX_HT40_MCS9) || ((x) >= vRATE_INDEX_HT80_MCS0 && (x) <= vRATE_INDEX_HT80_MCS9))
+#define IS_2STREAM_vRATE_INDEX(x) (((x) >= vRATE_INDEX_HT20_MCS10 && (x) <= vRATE_INDEX_HT20_MCS19) || ((x) >= vRATE_INDEX_HT40_MCS10 && (x) <= vRATE_INDEX_HT40_MCS19) || ((x) >= vRATE_INDEX_HT80_MCS10 && (x) <= vRATE_INDEX_HT80_MCS19))
+#define IS_3STREAM_vRATE_INDEX(x) (((x) >= vRATE_INDEX_HT20_MCS20 && (x) <= vRATE_INDEX_HT20_MCS29) || ((x) >= vRATE_INDEX_HT40_MCS20 && (x) <= vRATE_INDEX_HT40_MCS29) || ((x) >= vRATE_INDEX_HT80_MCS20 && (x) <= vRATE_INDEX_HT80_MCS29))
+#define IS_HT80_vRATE_INDEX(x)    ((x) >= numRateCodes+96 && (x) <= numRateCodes+135)
+#define IS_HT40_vRATE_INDEX(x)    ((x) >= numRateCodes+48 && (x) <= numRateCodes+87)
+#define IS_HT20_vRATE_INDEX(x)    ((x) >= numRateCodes && (x) <= numRateCodes+39)
+#define IS_vRate(x)				(x>=numRateCodes)
+
+extern A_UINT32 descvRate2bin(A_UINT32 descRateCode);
+extern A_UINT32 descvRate2RateIndex(A_UINT32 descRateCode, unsigned char htMode);
+extern A_UINT32 vRate2bin(A_UINT32 rateCode);
+extern int vRateCount(A_UINT32 rateMaskMcs20, A_UINT32 rateMaskMcs40, A_UINT32 rateMaskMcs80, int *Rate);
+extern int vRateExpand(int *rate, int nrate);
+extern void vRateMaskGet (A_UINT32 *rateMaskMcs20, A_UINT32 *rateMaskMcs40, A_UINT32 *rateMaskMcs80, int *Rate, int nrate);
+extern void vRateMask2UtfRateMask (A_UINT32 rateMask, A_UINT32 rateMaskMcs20, A_UINT32 rateMaskMcs40,
+						   A_UINT32 *utfRateMask);
+extern int UtfvRateBit2RateIndx(A_UINT32 rateBit);
+extern int vRateIndx2UtfRateBit(int rateIndx);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+
+#endif
+

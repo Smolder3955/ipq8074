@@ -1,0 +1,141 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+
+;*****************************************************************************
+;**           load_code_APPS.cmm                                            **
+;*****************************************************************************
+
+;________________________________________________________________
+;
+;   Starting things off (some of this may be overkill. We will
+;   adjust as needed).
+;________________________________________________________________
+TOOLBAR ON
+STATUSBAR ON
+WINPAGE.RESET
+winclear
+
+;________________________________________________________________
+;
+;   Setting up a little messaging window to print out the outputs
+;   of the various commands and scripts that run, while your
+;   code is loading.
+;________________________________________________________________
+WINPOS 0.0 0.15385 111. 25. 0. 0. W000
+area
+area.reset
+
+;________________________________________________________________
+;
+;   Setting up the paths, and other variable names we will
+;   be using in the rest of the script.
+;________________________________________________________________
+;**********************
+; Top-level directories
+;**********************
+&PROJECT_TOP_LEVEL_DIR="..\..\.."
+
+;**********************
+; Shared Code Root directories
+;**********************
+&SHARED_CODE_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\vi"
+&CDVI_SHARED_CODE_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\cdvi"
+&QNPL_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\shared_code\QNPL"
+
+
+;**********************
+; Test Root directories
+;**********************
+&TEST_TOP_LEVEL_DIR="&(PROJECT_TOP_LEVEL_DIR)\test"
+
+;*******************
+; Common directories
+;*******************
+&QNPL_COMMON_SOURCE_DIR="&(QNPL_TOP_LEVEL_DIR)\source"
+
+&SHARED_CODE_COMMON_CMM_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\cmm"
+&SHARED_CODE_COMMON_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\src"
+&HAL_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\common\hal"
+
+&CDVI_SHARED_CODE_COMMON_SOURCE_DIR="&(CDVI_SHARED_CODE_TOP_LEVEL_DIR)\common\src"
+
+
+&TEST_COMMON_SOURCE_DIR="&(TEST_TOP_LEVEL_DIR)\src\common"
+
+;*******************************
+; Processor-specific directories
+;*******************************
+&PROCESSOR_NAME="APPS_PROC0"
+&PROCESSOR_TYPE="KRAIT"
+
+&TEST_PROCESSOR_SPECIFIC_SOURCE_DIR="&(TEST_TOP_LEVEL_DIR)\src\&(PROCESSOR_NAME)"
+
+&SHARED_CODE_PROCESSOR_SPECIFIC_CMM_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\cmm"
+&SHARED_CODE_PROCESSOR_SPECIFIC_SOURCE_DIR="&(SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\src"
+
+&CDVI_SHARED_CODE_PROCESSOR_SPECIFIC_SOURCE_DIR="&(CDVI_SHARED_CODE_TOP_LEVEL_DIR)\&(PROCESSOR_NAME)\src"
+
+&QNPL_PROCESSOR_SPECIFIC_SOURCE_DIR="&(QNPL_TOP_LEVEL_DIR)\&(PROCESSOR_TYPE)\source"
+
+&UNMANAGED_PROCESSOR_SPECIFIC_OBJECT_CODE_DIR="&(PROJECT_TOP_LEVEL_DIR)\unmanaged\obj\&(PROCESSOR_NAME)"
+&BINARY_IMAGE_DIR="&(PROJECT_TOP_LEVEL_DIR)\unmanaged\bin\&(PROCESSOR_NAME)"
+
+;________________________________________________________________
+;
+;   Configure the Trace 32 environment as needed
+;________________________________________________________________
+print "Configuring Trace 32"
+do t32_config_apps.cmm
+
+;*******************
+; Generating a reset
+;*******************
+SYSTEM.DOWN
+SYSTEM.UP
+
+;________________________________________________________________
+;
+;   Setting up the symbol source paths. These allow you to see
+;   your source code when single-stepping through your code.
+;________________________________________________________________
+mode.hll
+Symbol.Reset
+Symbol.AsmFrame on
+Symbol.CutLine 3
+sYmbol.SourcePATH.SetRecurseDir + "."
+
+;________________________________________________________________
+;
+;   Calling the symbols script. This will allow you to use
+;   the register names as opposed to the addresses.
+;________________________________________________________________
+print "Downloading register symbols"
+do symbols
+
+;________________________________________________________________
+;
+;   Reloading the symbols script. The symbols get reset after
+;   downloading a binary image so it's necessary to call this
+;   script again.
+;________________________________________________________________
+print "Downloading register symbols"
+do symbols
+
+;________________________________________________________________
+;
+;   Semi-hosting Setup (Comment these commands, if you don't
+;   want to use semi-hosting).
+;________________________________________________________________
+do semihost_setup_apps.cmm
+
+;________________________________________________________________
+;
+;   Setting up the windows.
+;________________________________________________________________
+do basewin
+
+enddo

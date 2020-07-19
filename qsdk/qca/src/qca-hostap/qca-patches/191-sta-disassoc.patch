@@ -1,0 +1,13 @@
+diff --git a/src/drivers/driver_nl80211_event.c b/src/drivers/driver_nl80211_event.c
+index 66a3667..ca9647c 100644
+--- a/src/drivers/driver_nl80211_event.c
++++ b/src/drivers/driver_nl80211_event.c
+@@ -1334,7 +1334,7 @@ static void nl80211_del_station_event(struct wpa_driver_nl80211_data *drv,
+ 	wpa_printf(MSG_DEBUG, "nl80211: Delete station " MACSTR,
+ 		   MAC2STR(addr));
+ 
+-	if (is_ap_interface(drv->nlmode) && drv->device_ap_sme) {
++	if (is_ap_interface(drv->nlmode) ) {
+ 		drv_event_disassoc(bss->ctx, addr);
+ 		return;
+ 	}

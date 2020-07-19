@@ -1,0 +1,40 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+
+local &arg1
+entry &arg1
+
+area.view
+print "value 1: &arg1"
+
+SYStem.Reset
+SYStem.CPU CORTEXA53
+SYSTEM.JtagClock Ctck 20.0MHz
+SYStem.CONFIG SLAVE OFF
+
+&cur_dir=os.ppd()    	; directory where this script is running from
+SYStem.Option EnReset OFF
+TrOnchip.Set reset  OFF
+
+SYStem.CONFIG	DAPIRPRE	0.
+SYStem.CONFIG	DAPDRPRE	0.
+SYStem.CONFIG	DAPIRPOST	16.
+SYStem.CONFIG	DAPDRPOST	2.
+
+SYStem.CONFIG.COREDEBUG.BASE	0x00192000
+SYStem.CONFIG.ETM.BASE			0x0019D000
+SYStem.CONFIG.CTI.BASE			0x00199000
+
+SYStem.config AXIACCESSPORT 	0
+SYStem.config MEMORYACCESSPORT 	0
+SYStem.config DEBUGACCESSPORT 	1
+
+ETM.OFF
+sys.mode.attach
+
+autostore , history
+ENDDO
+

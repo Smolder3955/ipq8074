@@ -1,0 +1,62 @@
+#
+# Makefile for the HAL-based Atheros driver.
+#
+ifeq ($(obj),)
+obj := $(shell pwd)
+endif
+
+DEPTH := ../..
+
+include $(obj)/$(DEPTH)/os/linux/Makefile.inc
+
+obj-m += \
+    $(DEPTH)/asf/  $(DEPTH)/smartantenna/ $(DEPTH)/testmodule/ \
+    $(DEPTH)/cmn_dev/qdf/
+
+
+ifeq ($(DA_SUPPORT),1)
+obj-m += $(DEPTH)/direct_attach/lmac/ $(DEPTH)/direct_attach/os/linux/ath_hal/
+endif
+
+obj-m += $(DEPTH)/lmac/ath_pktlog/
+
+ifeq ($(ATH_PERF_PWR_OFFLOAD),1)
+ifeq ($(strip $(ATH_HIF_TYPE)),sim)
+obj-m += $(PERF_PWR_OFFLOAD_DIR_PATH)/drivers/host/hif/sim/linux/
+endif
+
+ifeq ($(strip $(ATH_HIF_TYPE)),sdio)
+ifeq ($(strip $(NATIVE_SDIO)),0)
+	obj-m += $(PERF_PWR_OFFLOAD_DIR_PATH)/drivers/host/sdiostack/src/
+endif
+endif
+
+endif
+
+ifneq ($(strip ${ATH_WLAN_COMBINE}),1)
+obj-m += $(DEPTH)/umac/
+obj-m += $(DEPTH)/qca_ol/
+ifeq ($(DA_SUPPORT),1)
+obj-m += $(DEPTH)/direct_attach/qca_da/
+endif
+obj-m += $(DEPTH)/qca_ol/wifi2.0/
+obj-m += $(DEPTH)/qca_ol/wifi3.0/
+endif
+ifeq ($(strip ${BUS}),USB)
+obj-m += $(DEPTH)/os/linux/src/
+endif
+ifeq ($(ATH_SUPPORT_TX99),1)
+ifeq ($(DA_SUPPORT),1)
+obj-m += $(DEPTH)/direct_attach/lmac/tx99/
+endif
+endif
+ifeq ($(ATH_SW_WOW_SUPPORT),1)
+obj-m += $(DEPTH)/wow/
+endif
+ifeq ($(WIFI_MEM_MANAGER_SUPPORT),1)
+obj-m += $(DEPTH)/os/linux/mem/
+endif
+ifeq ($(WLAN_SPECTRAL_ENABLE),1)
+obj-m += $(DEPTH)/cmn_dev/spectral/
+endif
+

@@ -1,0 +1,399 @@
+#!/bin/sh /etc/rc.common
+# Copyright (c) 2013-2016 Qualcomm Atheros, Inc.
+# All Rights Reserved.
+# Qualcomm Atheros Confidential and Proprietary.
+
+START=75
+SERVICE_WRITE_PID=1
+SERVICE_DAEMONIZE=1
+SERVICE_STOP_TIME=1
+SERVICE_PATH="/usr/sbin/mcsd"
+MCSD_CONFIG_FILE="/tmp/mcs.conf"
+MCSD_RESTART_PID="/tmp/.mcs.restart.pid"
+MCSD_RESTART_LOCK="/tmp/.mcs.restart.lock"
+
+BR_DEVICE=
+QCA_WLAN_DEVICES=
+NONQCA_WLAN_DEVICES=
+WLAN_DEV_READY=
+WLAN_DEV_NOT_READY=
+ETHER_DEVICES=
+PLC_DEVICE=
+ALL_DEVICES=
+MANAGED_INF_NUM=0
+
+mcs_cfg_append() {
+	echo "$1" >> "$MCSD_CONFIG_FILE.$$"
+}
+
+
+__mcs_iterate_networks() {
+	local config="$1"
+	local type br_device
+
+	[ -n "$BR_DEVICE" ] && return
+
+	config_get type "$config" type
+	[ -z "$type" -o ! "$type" = "bridge" ] && return
+
+	BR_DEVICE="$config"
+}
+
+
+mcs_get_bridge_iface() {
+	BR_DEVICE=""
+
+	config_load network
+	config_foreach __mcs_iterate_networks interface
+	eval "$1='$BR_DEVICE'"
+}
+
+__mcs_get_switch_iface() {
+	local loc_switch_iface="auto"
+	local implicit_vlan="0"
+	local ref_design
+
+	config_load mcsd
+	config_get loc_switch_iface config SwitchInterface ""
+	if [ -z "$loc_switch_iface" ]; then
+		eval "$1=''"
+		return
+	fi
+
+	if [ "$loc_switch_iface" = "auto" ]; then
+		ref_design=`cat /tmp/sysinfo/board_name`
+
+		# List of supported reference designs. For other designs
+		# either add to cases, or setup SwitchInterface.
+		case "$ref_design" in
+		ap148|ap145|db149)
+		# S17c switch
+			loc_switch_iface="eth1"
+			;;
+		ap-dk0*)
+			loc_switch_iface="eth1"
+			implicit_vlan="1"
+			;;
+		ap135)
+		# ap135 has S17 switch, which is not fully supported by
+		# the multicast switch wrapper. Disable it for now until
+		# support for S17 will be added.
+			loc_switch_iface=""
+			;;
+		*)
+			loc_switch_iface=""
+			;;
+		esac
+	fi
+
+	local loc_switch_cpu_port
+	mcs_get_switch_cpu_port loc_switch_cpu_port
+
+	local lan_vid
+	mcs_get_switch_lan_vid lan_vid
+
+	if [ -z "$switch_cpu_port_tagged" -o "$implicit_vlan" = "1" ]; then
+		eval "$1='$loc_switch_iface'"
+	else
+		eval "$1='${loc_switch_iface}.${lan_vid}'"
+	fi
+}
+
+mcs_get_switch_lan_vid() {
+	local loc_lan_vid
+
+	config_load mcsd
+	config_get loc_lan_vid config SwitchLanVid ""
+
+	eval "$1='$loc_lan_vid'"
+}
+
+__mcs_get_switch_cpu_port_iterate() {
+	config_get vlan "$1" "vlan"
+	config_get ports "$1" "ports"
+
+	if [ "${vlan}" = "$2" ]; then
+		switch_cpu_port=`echo ${ports} |sed 's/t//g' |cut -f 1 -d " "`
+		switch_cpu_port_tagged=`echo ${ports} |grep t`
+	fi
+}
+
+mcs_get_switch_cpu_port() {
+	local lan_vid
+	mcs_get_switch_lan_vid lan_vid
+
+	config_load network
+	config_foreach __mcs_get_switch_cpu_port_iterate switch_vlan $lan_vid
+
+	eval "$1='$switch_cpu_port'"
+}
+
+__mcs_get_plc_iface() {
+	local plciface iface
+	local br_device="$1"
+
+	config_load plc
+	config_get plciface config PlcIfname
+
+	[ -z "$plciface" ] && return
+
+	config_load network
+	config_get ifnames $br_device device
+
+	for iface in $ifnames; do
+		if [ "$iface" = "$plciface" ]; then
+			PLC_DEVICE=${plciface}:PLC
+			MANAGED_INF_NUM=$((MANAGED_INF_NUM + 1))
+			return
+		fi
+	done
+}
+
+# mcs_get_plc_iface()
+# input: $1 bridge interface
+mcs_get_plc_iface() {
+	local br_device="$1"
+
+	PLC_DEVICE=""
+
+	__mcs_get_plc_iface $br_device
+}
+
+
+__mcs_get_wlan_ifaces() {
+	local config="$1"
+	local iface network disabled device devtype
+
+	config_get iface "$config" ifname
+	config_get network "$config" network
+	config_get device "$config" device
+	config_get devtype  "$device" type ''
+	config_get disabled "$device" disabled '0'
+	config_unset "$config" ifname
+
+	if [ "$2" = "$network" -a "$disabled" -eq 0 ]; then
+		if [ -n "$iface" ]; then
+			if [ "$devtype" = "qcawifi" ] || [ "$devtype" = "qcawificfg80211" ]; then
+				QCA_WLAN_DEVICES="${QCA_WLAN_DEVICES}${QCA_WLAN_DEVICES:+","}${iface}:WLAN"
+			else
+				NONQCA_WLAN_DEVICES="${NONQCA_WLAN_DEVICES}${NONQCA_WLAN_DEVICES:+","}${iface}:ETHER"
+			fi
+			WLAN_DEV_READY=$((WLAN_DEV_READY +1))
+		else
+			WLAN_DEV_NOT_READY=$((WLAN_DEV_NOT_READY +1))
+		fi
+	fi
+}
+
+# mcs_get_wlan_ifaces()
+# input: $1 bridge interface
+# output: $2 List of all WLAN interfaces bound to the bridge
+mcs_get_wlan_ifaces() {
+	local br_device="$1"
+
+	NONQCA_WLAN_DEVICES=""
+	QCA_WLAN_DEVICES=""
+	WLAN_DEV_READY=0
+	WLAN_DEV_NOT_READY=0
+	config_load wireless
+	config_foreach __mcs_get_wlan_ifaces wifi-iface $br_device
+
+	eval "$2='${QCA_WLAN_DEVICES}'"
+}
+
+
+__mcs_get_ether_ifaces() {
+	local config="$1"
+	local ifnames network plciface
+
+	config_get ifnames "$config" device
+
+	config_load plc
+	config_get plciface config PlcIfname
+
+
+	local switch_iface
+	__mcs_get_switch_iface switch_iface
+
+	if [ "$2" = "$config" ]; then
+	   for iface in $ifnames; do
+		[ "$iface" = "$plciface" ] && continue
+
+		cat /sys/class/net/${iface}/operstate > /dev/null 2>&1 || continue
+
+		if [ "$iface" = "$switch_iface" ]; then
+			ETHER_DEVICES="${ETHER_DEVICES}${ETHER_DEVICES:+","}${iface}:ESWITCH"
+		else
+			ETHER_DEVICES="${ETHER_DEVICES}${ETHER_DEVICES:+","}${iface}:ETHER"
+		fi
+		MANAGED_INF_NUM=$((MANAGED_INF_NUM + 1))
+	   done
+	fi
+}
+
+# mcs_get_ether_ifaces()
+# input: $1 bridge interface
+# output: $2 List of all Ethernet interfaces bound to the bridge
+mcs_get_ether_ifaces() {
+	local br_device="$1"
+
+	ETHER_DEVICES=""
+	config_load network
+	config_foreach __mcs_get_ether_ifaces interface $br_device
+
+	eval "$2='${ETHER_DEVICES}'"
+}
+
+# mcs_get_ifaces()
+# input: $1 bridge interface
+# output: $2 List of ALL interface bound to the bridge
+mcs_get_ifaces() {
+	local br_device="$1"
+	local retry=0
+
+	QCA_WLAN_DEVICES=""
+	NONQCA_WLAN_DEVICES=""
+	WLAN_DEV_READY=0
+	WLAN_DEV_NOT_READY=0
+	ETHER_DEVICES=""
+	PLC_DEVICE=""
+
+	config_load network
+	config_foreach __mcs_get_ether_ifaces interface $br_device
+
+	mcs_get_plc_iface $br_device
+
+	config_load wireless
+	config_foreach __mcs_get_wlan_ifaces wifi-iface $br_device
+
+	while [ "$WLAN_DEV_NOT_READY" -gt 0 ]; do
+		retry=$((retry +1))
+		if [ "$retry" -gt 5 ]; then
+			echo "WLAN $WLAN_DEV_NOT_READY interfaces not ready, failed" >/dev/console
+			break
+		fi
+		sleep 2
+
+		NONQCA_WLAN_DEVICES=""
+		QCA_WLAN_DEVICES=""
+		WLAN_DEV_READY=0
+		WLAN_DEV_NOT_READY=0
+		config_load wireless
+		config_foreach __mcs_get_wlan_ifaces wifi-iface $br_device
+	done
+
+	ALL_DEVICES=$QCA_WLAN_DEVICES
+	if [ -n "$ETHER_DEVICES" ]; then
+		[ -z "$ALL_DEVICES" ] || ALL_DEVICES="${ALL_DEVICES},"
+		ALL_DEVICES="${ALL_DEVICES}${ETHER_DEVICES}"
+	fi
+	if [ -n "$PLC_DEVICE" ]; then
+		[ -z "$ALL_DEVICES" ] || ALL_DEVICES="${ALL_DEVICES},"
+		ALL_DEVICES="${ALL_DEVICES}${PLC_DEVICE}"
+	fi
+	if [ -n "$NONQCA_WLAN_DEVICES" ]; then
+		[ -z "$ALL_DEVICES" ] || ALL_DEVICES="${ALL_DEVICES},"
+		ALL_DEVICES="${ALL_DEVICES}${NONQCA_WLAN_DEVICES}"
+	fi
+
+	eval "$2='${ALL_DEVICES}'"
+}
+
+
+mcs_cfg_add_interface() {
+	local all_ifaces
+	local switch_lan_vid
+	local switch_cpu_root_port
+
+	mcs_cfg_append 'BridgeName=br-'$BR_DEVICE
+
+	# Get a list of all interfaces
+	mcs_get_ifaces $BR_DEVICE all_ifaces
+	while [ -z $all_ifaces ]; do
+		sleep 1
+		mcs_get_ifaces $BR_DEVICE all_ifaces
+	done
+	mcs_cfg_append 'ManagedInterfacesList='$all_ifaces
+
+	# Get switch VLAN ID and CPU port
+	mcs_get_switch_lan_vid switch_lan_vid
+	mcs_get_switch_cpu_port switch_cpu_root_port
+	mcs_cfg_append 'SwitchLanVid='"$switch_lan_vid"
+	mcs_cfg_append 'SwitchCpuPort='"$switch_cpu_root_port"
+}
+
+
+mcs_create_config() {
+	rm -f "$MCSD_CONFIG_FILE"
+	mcs_cfg_append ';  Automatically generated mcsd configuration file,do not change it.'
+	mcs_cfg_append '[INTERFACE]'
+	mcs_cfg_add_interface
+}
+
+
+mcs_set_wlan_mcastenhance() {
+	mcs_get_wlan_ifaces $BR_DEVICE wlan_ifaces
+	[ -z "$wlan_ifaces" ] && return
+	#strip device type
+	wlan_ifaces=`echo $wlan_ifaces | sed 's/:[A-Z]*,/ /g' | sed 's/:[A-Z]*//g'`
+
+	for wlan_iface in ${wlan_ifaces}; do
+		iwpriv $wlan_iface mcastenhance $1
+	done;
+}
+
+
+start() {
+	config_load 'mcsd'
+	config_get_bool enabled config 'Enable' '0'
+	[ "$enabled" -gt 0 ] || {
+		return 1;
+	}
+
+	[ -f "$MCSD_RESTART_PID" ] && {
+		local prev_pid=`cat $MCSD_RESTART_PID`
+		kill $prev_pid
+		[ -f "$MCSD_CONFIG_FILE.$prev_pid" ] && rm $MCSD_CONFIG_FILE.$prev_pid
+	}
+	echo $$ >  "$MCSD_RESTART_PID"
+
+	# Get bridge name and attach
+	mcs_get_bridge_iface br_device
+
+	# Create configuration file and start mcsd
+	mcs_create_config
+
+	MANAGED_INF_NUM=$((MANAGED_INF_NUM + WLAN_DEV_READY))
+	[ "$MANAGED_INF_NUM" -gt 16 ] && {
+		echo "Interface number $MANAGED_INF_NUM is more than 16, stop IGMP/MLD snooping" >/dev/console
+		mcs_cfg_append "; Managed Interfaces number $MANAGED_INF_NUM is over the limit"
+		return
+	}
+
+	# Enable wlan WLAN multicast enhancement
+	# mcs_set_wlan_mcastenhance 5
+
+	mcsctl -s br-$br_device state enable
+	service_stop ${SERVICE_PATH}
+	mv $MCSD_CONFIG_FILE.$$ $MCSD_CONFIG_FILE
+	service_start ${SERVICE_PATH} -d -C "$MCSD_CONFIG_FILE"
+	rm "$MCSD_RESTART_PID"
+}
+
+
+stop() {
+	service_stop ${SERVICE_PATH}
+
+	# Get bridge name and attach
+	mcs_get_bridge_iface mcs_bridge
+	mcsctl -s br-$mcs_bridge state disable
+
+	# Disable wlan WLAN multicast enhancement
+	# mcs_set_wlan_mcastenhance 0
+}
+
+
+restart() {
+	stop
+	start
+}

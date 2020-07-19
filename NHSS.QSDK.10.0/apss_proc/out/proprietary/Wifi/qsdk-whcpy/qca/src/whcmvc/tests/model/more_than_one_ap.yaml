@@ -1,0 +1,40 @@
+model:
+    client_devices:
+        client1:
+            mac_addr: 00:11:22:33:44:55
+        client2:
+            mac_addr: 00:22:44:66:88:AA
+        client3:
+            mac_addr: 00:33:66:33:66:99
+
+    access_points:
+        ap1:
+            mac_addr: "11:11:11:00:00:01"
+            vaps:
+                ap1-2.4g:
+                    iface_name: ath0
+                    radio_iface: wifi0
+                    band: 2.4
+                    channel_group: 24G
+                    overload_threshold: 70
+                ap1-5g:
+                    iface_name: ath2
+                    radio_iface: wifi1
+                    band: 5
+                    channel_group: 5GL
+                    overload_threshold: 70
+        ap2:
+            mac_addr: "11:11:11:00:00:02"
+            vaps:
+                ap2-5g:
+                    iface_name: ath1
+                    radio_iface: wifi0
+                    band: 5
+                    channel_group: 5GL
+                    overload_threshold: 70
+                ap2-2.4g:
+                    iface_name: ath0
+                    radio_iface: wifi1
+                    band: 2.4
+                    channel_group: 24G
+                    overload_threshold: 70

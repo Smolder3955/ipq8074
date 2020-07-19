@@ -1,0 +1,17 @@
+diff --git a/src/ap/ieee802_11.c b/src/ap/ieee802_11.c
+index 598d290..32b9981 100644
+--- a/src/ap/ieee802_11.c
++++ b/src/ap/ieee802_11.c
+@@ -2463,7 +2463,11 @@ static u16 check_assoc_ies(struct hostapd_data *hapd, struct sta_info *sta,
+ 		sta->flags |= WLAN_STA_MAYBE_WPS;
+ 	} else
+ #endif /* CONFIG_WPS */
+-	if (hapd->conf->wpa && wpa_ie == NULL) {
++	if ((hapd->conf->wpa && wpa_ie == NULL)
++#ifdef CONFIG_HS20
++		&& (!hapd->conf->osen)
++#endif
++	) {
+ 		hostapd_logger(hapd, sta->addr, HOSTAPD_MODULE_IEEE80211,
+ 			       HOSTAPD_LEVEL_INFO,
+ 			       "No WPA/RSN IE in association request");

@@ -1,0 +1,660 @@
+diff --git a/cnss_qmi_client.c b/cnss_qmi_client.c
+index 7e4dfb2..e82f552 100644
+--- a/cnss_qmi_client.c
++++ b/cnss_qmi_client.c
+@@ -36,7 +36,7 @@ struct cnss_client_data{
+ 	int data_valid;
+ } cnss_client;
+ 
+-static struct ind_handlers {
++struct ind_handlers {
+ 	int ind;
+ 	nl_loop_ind_handler handler;
+ 	void *user_data;
+diff --git a/cnss_user.c b/cnss_user.c
+index f36c07e..e8c09db 100644
+--- a/cnss_user.c
++++ b/cnss_user.c
+@@ -15,7 +15,7 @@
+ #include "wlfw_qmi_client.h"
+ #include "cnss_cli.h"
+ 
+-static int cnss_user_sock;
++int cnss_user_sock;
+ 
+ int cnss_user_get_fd(void)
+ {
+diff --git a/debug.c b/debug.c
+index 7235575..897850c 100644
+--- a/debug.c
++++ b/debug.c
+@@ -41,7 +41,7 @@ char *msg_abbr[] = {
+ };
+ 
+ #ifdef CONFIG_DEBUG_FILE
+-static FILE *log_file = NULL;
++FILE *log_file = NULL;
+ #endif
+ 
+ #ifdef CONFIG_DEBUG_SYSLOG
+diff --git a/main.c b/main.c
+index 8000326..08df535 100644
+--- a/main.c
++++ b/main.c
+@@ -46,7 +46,7 @@
+ 
+ int wsvc_debug_level = MSG_DEFAULT;
+ pthread_mutex_t wait_for_qmi_thread;
+-static char *progname = NULL;
++char *progname = NULL;
+ /*
+  * The glibc doesn't provide a header file declaration for init_module API.
+  * Hence adding it here
+@@ -71,10 +71,33 @@ static void usage(void)
+ 		, progname);
+ 	exit(EXIT_FAILURE);
+ }
++int g_sighandler = 0;
+ static void wlan_service_sighandler(int signum)
+ {
+ 	wsvc_printf_info("Caught Signal: %d", signum);
+ 	nl_loop_terminate();
++	g_sighandler = signum;
++#ifndef CONFIG_WLAN_MSG_SVC
++	pthread_mutex_unlock(&wait_for_qmi_thread);
++#endif
++	return;
++}
++
++char g_str[406];
++static void wlan_service_sighandler1(int sig, siginfo_t *siginfo, void *context) {
++	// get pid of sender,
++	pid_t sender_pid = siginfo->si_pid;
++	pid_t self_pid = getpid();
++	int fd = 0;
++
++	snprintf(g_str, sizeof(g_str), "cat /proc/%d/cmdline > /dev/kmsg", sender_pid);
++	system(g_str);
++	snprintf(g_str, sizeof(g_str), "cat /proc/%d/stat > /dev/kmsg", sender_pid);
++	system(g_str);
++	snprintf(g_str, sizeof(g_str), "echo ERROR: Signal[%d] delivered to cnssdaemon[%d]   by %d > /dev/kmsg", sig, self_pid, sender_pid);
++	system(g_str);
++
++	nl_loop_terminate();
+ #ifndef CONFIG_WLAN_MSG_SVC
+ 	pthread_mutex_unlock(&wait_for_qmi_thread);
+ #endif
+@@ -86,8 +109,9 @@ static int wlan_service_setup_sighandler(void)
+ 	struct sigaction sig_act;
+ 
+ 	memset(&sig_act, 0, sizeof(sig_act));
+-	sig_act.sa_handler = wlan_service_sighandler;
++	sig_act.sa_handler = wlan_service_sighandler1;
+ 	sigemptyset(&sig_act.sa_mask);
++	sig_act.sa_flags |= SA_SIGINFO;
+ 
+ 	sigaction(SIGQUIT, &sig_act, NULL);
+ 	sigaction(SIGTERM, &sig_act, NULL);
+@@ -220,13 +244,16 @@ int process_wlan_messages(void)
+ *  The mutex wait here is done to hold the main thread from exiting,
+ *  WIN is interested only on the QMI features of this daemon.
+ */
++int g_process_wlan_messages = 0;
+ int process_wlan_messages(void)
+ {
+ 	int rc = 0;
+ 
++	g_process_wlan_messages = 1;
+ 	rc = pthread_mutex_init(&wait_for_qmi_thread, NULL);
+ 	if (rc != 0) {
+ 		wsvc_printf_err("Failed to init mutex, ret %d", rc);
++		g_process_wlan_messages = -1;
+ 		goto out;
+ 	}
+ 	pthread_mutex_lock(&wait_for_qmi_thread);
+@@ -236,15 +263,18 @@ int process_wlan_messages(void)
+ 	rc = pthread_mutex_destroy(&wait_for_qmi_thread);
+ 	if (rc != 0) {
+ 		wsvc_printf_err("Failed to destroy mutex, ret %d", rc);
++		g_process_wlan_messages = -2;
+ 		return -EINVAL;
+ 	}
++	g_process_wlan_messages = 2;
+ 	return 0;
+ out:
++	g_process_wlan_messages = -3;
+ 	wsvc_printf_err("Failed to init mutex, ret %d", rc);
+ 	return -EINVAL;
+ }
+ #endif
+-
++int g_main = 0;
+ int main(int argc, char *argv[])
+ {
+ 	int c;
+@@ -303,15 +333,17 @@ int main(int argc, char *argv[])
+ 
+ 	if (optind < argc)
+ 		usage();
+-
++	g_main = 1;
+ 	configure_default_debug_level();
+ 	wsvc_debug_init();
+ 
++	g_main = 2;
+ 	if (flag & SYS_LOG)
+ 		wsvc_debug_open_syslog();
+ 	else if (flag & LOG_FILE)
+ 		wsvc_debug_open_file(log_file);
+ 
++	g_main = 3;
+ 	wlan_service_setup_sighandler();
+ 
+ #ifdef CONFIG_DUAL_LOAD
+@@ -321,62 +353,78 @@ int main(int argc, char *argv[])
+ 	}
+ #endif
+ 
++	g_main = 4;
+ 	if (flag & DAEMONIZE && daemon(0, 0)) {
+ 		wsvc_perror("daemon");
+ 		exit(EXIT_FAILURE);
+ 	}
+ 
++	g_main = 5;
++
+ 	if (nl_loop_init()) {
+ 		wsvc_printf_err("Failed to init nl_loop");
+ 		goto out;
+ 	}
+ 
++	g_main = 6;
+ 	if (cnss_gw_update_init()) {
+ 		wsvc_printf_err("Failed to init gw update loop");
+ 		goto gw_init_fail;
+ 	}
+ 
++	g_main = 7;
+ 	if (cnss_user_socket_init()) {
+ 		wsvc_printf_err("Failed to init user interface");
+ 		goto register_fail;
+ 	}
+ 
++	g_main = 8;
+ 	if (0 != wlan_service_start()) {
+ 		wsvc_printf_err("Failed to start wlan service");
+ 		goto register_fail;
+ 	}
++	g_main = 9;
+ 
+ 	if (wlan_dp_service_start()) {
+ 		wsvc_printf_err("Failed to start wlan datapath service");
+ 		goto register_fail;
+ 	}
+ 
++	g_main = 10;
+ 	if (cnss_genl_init()) {
+ 		wsvc_printf_err("Failed to init genl between daemon and platform");
+ 		goto register_fail;
+ 	}
+ 
++	g_main = 11;
+ 	if (wlfw_start(SVC_START) != 0) {
+ 		wsvc_printf_err("Failed to start wlfw service");
+ 		goto register_fail;
+ 	}
+ 
++	g_main = 12;
+ 	process_wlan_messages();
+ 
+ 	wlfw_stop(SVC_EXIT);
+ 
++	g_main = 13;
+ 	cnss_genl_exit();
+ 	wlan_dp_service_stop();
+ 	wlan_service_stop();
+ 
++	g_main = 14;
+ register_fail:
+ 	nl_loop_deinit();
+ 
++	g_main = 15;
+ gw_init_fail:
+ 	cnss_gw_update_deinit();
+ 
++	g_main = 16;
+ out:
+ 	wsvc_debug_close_syslog();
++	g_main = 17;
+ 	wsvc_debug_close_file();
++	g_main = 18;
+ 	exit(EXIT_SUCCESS);
+ }
+diff --git a/nl_loop.c b/nl_loop.c
+index 7675ef2..06e62bb 100644
+--- a/nl_loop.c
++++ b/nl_loop.c
+@@ -49,7 +49,7 @@ struct nl_loop {
+ };
+ 
+ static int nl_loop_process_msg_svc(struct wlan_hdr *ani_hdr);
+-static struct nl_loop nl_loop;
++struct nl_loop nl_loop;
+ 
+ static inline char *nl_loop_ind_to_str(int ind)
+ {
+diff --git a/wlfw_qmi_client.c b/wlfw_qmi_client.c
+index 2beb7e1..2e8a14f 100644
+--- a/wlfw_qmi_client.c
++++ b/wlfw_qmi_client.c
+@@ -66,8 +66,19 @@
+ const char *bdf_dir_list[] = {"/firmware/image/", "/vendor/firmware/",
+ 				"/vendor/firmware_mnt/image/", NULL};
+ 
+-static int svc_running = 0;
+-static int dms_running = 0;
++int svc_running = 0;
++int dms_running = 0;
++int g_wlfw_stop = 0;
++int E_g_wlfw_stop = 0;
++int g_wlfw_service_request = 0;
++int E_g_wlfw_service_request = 0;
++int g_wlfw_start = 0;
++int E_g_wlfw_start = 0;
++
++int g_wlfw_hawkeye_init = 0;
++int E_g_wlfw_hawkeye_init = 0;
++int g_wlfw_qmi_err_cb = 0;
++int g_wlfw_stop_exit = 0;
+ 
+ #ifdef CONFIG_RECORD_DAEMON_QMI_LOG
+ const char debug_file[] =  "/sys/kernel/debug/cnss/qmi_record";
+@@ -274,11 +285,11 @@ void ind_data_dequeue(struct ind_data **i_data)
+ 	}
+ 	pthread_mutex_unlock(&(gdata.mutex));
+ }
+-
++int g_ind_data_free_queue;
+ void ind_data_free_queue(void)
+ {
+ 	struct ind_data *i_data = gdata.head;
+-
++	g_ind_data_free_queue = 1;
+ 	pthread_mutex_lock(&(gdata.mutex));
+ 	while (i_data != NULL) {
+ 		i_data = gdata.head;
+@@ -288,6 +299,7 @@ void ind_data_free_queue(void)
+ 	gdata.head = NULL;
+ 	gdata.tail = NULL;
+ 	pthread_mutex_unlock(&(gdata.mutex));
++	g_ind_data_free_queue = 2;
+ }
+ 
+ static int wlfw_send_ind_register_req(uint64_t *fw_status)
+@@ -1402,19 +1414,29 @@ static void wlfw_qmi_ind_cb(qmi_client_type user_handle,
+ 		break;
+ 	}
+ }
+-
+ static void wlfw_qmi_err_cb(qmi_client_type user_handle,
+ 			    qmi_client_error_type error,
+ 			    void *err_cb_data)
+ {
+ 	int rc;
+ 
++	g_wlfw_qmi_err_cb = 1;
+ 	if (user_handle == NULL) {
+ 		wsvc_printf_err("%s: Invalid user_handle", __func__);
+ 		return;
+ 	}
+-	(void)err_cb_data;
+ 
++	g_wlfw_stop = 0;
++	E_g_wlfw_stop = 0;
++	g_wlfw_service_request = 0;
++	E_g_wlfw_service_request = 0;
++	g_wlfw_start = 0;
++	E_g_wlfw_start = 0;
++
++	g_wlfw_hawkeye_init = 0;
++	E_g_wlfw_hawkeye_init = 0;
++
++	(void)err_cb_data;
+ 	wsvc_printf_info("%s: Server disconnect, err %d client %pK",
+ 			 __func__, error, (void *)user_handle);
+ 
+@@ -1423,13 +1445,17 @@ static void wlfw_qmi_err_cb(qmi_client_type user_handle,
+ 	rc = wlfw_stop(SVC_DISCONNECTED);
+ 	if (rc != 0) {
+ 		wsvc_printf_err("%s: Fail to stop wlfw client", __func__);
++		g_wlfw_qmi_err_cb = -100;
+ 		return;
+ 	}
++	g_wlfw_qmi_err_cb = 2;
+ 	rc = wlfw_start(SVC_RECONNECT);
+ 	if (rc != 0) {
+ 		wsvc_printf_err("%s: Fail to re-start wlfw client", __func__);
++		g_wlfw_qmi_err_cb = -101;
+ 		return;
+ 	}
++	g_wlfw_qmi_err_cb = 3;
+ }
+ 
+ void wlfw_handle_ind_data(struct ind_data *i_data)
+@@ -1479,7 +1505,6 @@ void wlfw_handle_ind_data(struct ind_data *i_data)
+ 		break;
+ 	}
+ }
+-
+ void wlfw_build_cal_table(void)
+ {
+ 	char filename[MAX_FILE_PATH];
+@@ -1512,12 +1537,14 @@ static int wlfw_hawkeye_init(void)
+ 	dms_running = 0;
+ 
+ 	wlfw_build_cal_table();
+-
++	g_wlfw_hawkeye_init = 1;
+ 	rc = wlfw_send_ind_register_req(&fw_status);
+ 	if (rc != QMI_NO_ERR) {
+ 		wsvc_printf_err("Failed to send indication register request!");
++		g_wlfw_hawkeye_init = -101;
+ 		return rc;
+ 	}
++	g_wlfw_hawkeye_init = 2;
+ 
+ 	if (fw_status & QMI_WLFW_ALREADY_REGISTERED_V01) {
+ 		wsvc_printf_info("Already registered to FW, FW status: 0x%" PRIx64,
+@@ -1526,13 +1553,16 @@ static int wlfw_hawkeye_init(void)
+ 		if (fw_status & QMI_WLFW_FW_MEM_READY_V01) {
+ 			wsvc_printf_dbg("FW memory is ready");
+ 			gdata.state |= CNSS_FW_MEM_READY;
++			g_wlfw_hawkeye_init = 201;
+ 		}
+ 
+ 		if (fw_status & QMI_WLFW_FW_READY_V01) {
+ 			wsvc_printf_info("FW is already ready, skip!");
++			g_wlfw_hawkeye_init = -102;
+ 			goto out;
+ 		}
+ 	}
++	g_wlfw_hawkeye_init = 3;
+ 
+ 	if (!CNSS_IS_FW_MEM_READY(gdata.state)) {
+ 		wsvc_printf_dbg("Wait for FW memory ready indication");
+@@ -1542,9 +1572,11 @@ static int wlfw_hawkeye_init(void)
+ 	}
+ 
+ 	wlfw_send_cap_req();
++	g_wlfw_hawkeye_init = 4;
+ 	wlfw_send_cal_report_req();
+-
++	g_wlfw_hawkeye_init = 5;
+ out:
++	E_g_wlfw_hawkeye_init = -1000;
+ 	return QMI_NO_ERR;
+ }
+ 
+@@ -1677,7 +1709,6 @@ skip_cal_report:
+ skip_mac_addr:
+ 	return rc;
+ }
+-
+ void *wlfw_service_request(void *arg)
+ {
+ 	int rc;
+@@ -1688,12 +1719,13 @@ void *wlfw_service_request(void *arg)
+ 	(void)arg;
+ 
+ 	wsvc_printf_dbg("%s: Start the pthread: %pK", __func__, arg);
+-
++	g_wlfw_service_request = 1;
+ 	/* release any old handles for qmi client */
+ 	if (gdata.clnt_handler) {
+ 		qmi_client_release(gdata.clnt_handler);
+ 		gdata.clnt_handler = NULL;
+ 	}
++	g_wlfw_service_request = 2;
+ 
+ 	gdata.svc_obj = wlfw_get_service_object_v01();
+ 
+@@ -1707,16 +1739,20 @@ void *wlfw_service_request(void *arg)
+ 
+ 	if (rc != QMI_NO_ERR) {
+ 		wsvc_printf_err("Failed to init client");
++		g_wlfw_service_request = -100;
+ 		return NULL;
+ 	}
++	g_wlfw_service_request = 3;
+ 
+ 	rc = qmi_client_register_error_cb(clnt,
+ 					  wlfw_qmi_err_cb,
+ 					  NULL);
+ 	if (rc != QMI_NO_ERR) {
+ 		wsvc_printf_err("Failed to register error cb");
++		g_wlfw_service_request = -101;
+ 		goto release_client;
+ 	}
++	g_wlfw_service_request = 4;
+ 
+ 	gdata.clnt_handler = clnt;
+ 	gdata.state |= CNSS_WLFW_QMI_CONNECTED;
+@@ -1728,34 +1764,45 @@ void *wlfw_service_request(void *arg)
+ 					     &info);
+ 	if (rc != QMI_NO_ERR) {
+ 		wsvc_printf_err("Failed to get service instance!");
++		g_wlfw_service_request = -102;
+ 		goto release_client;
+ 	}
+-
++	
++	g_wlfw_service_request = 5;
+ 	rc = qmi_client_get_instance_id(&info, &gdata.instance_id);
+ 	if (rc != QMI_NO_ERR) {
+ 		wsvc_printf_err("Failed to get instance ID!");
++		g_wlfw_service_request = -103;
+ 		goto release_client;
+ 	}
+ 
++	g_wlfw_service_request = 6;
+ 	if (gdata.instance_id == NAPIER_ID) {
+ 		rc = wlfw_napier_init();
+ 	} else if (gdata.instance_id == ADRASTEA_ID) {
+ 		rc = wlfw_adrastea_init();
+ 	} else if (gdata.instance_id == HAWKEYE_ID) {
+ 		rc = wlfw_hawkeye_init();
++		g_wlfw_service_request = 7;
+ 	}
+ 
+-	if (rc != QMI_NO_ERR)
++	if (rc != QMI_NO_ERR) {
++		g_wlfw_service_request = -104;
+ 		goto unset_state;
++	}
++	g_wlfw_service_request = 8;
+ 
+ 	while (svc_running) {
+ 		pthread_mutex_lock(&(gdata.mutex));
+ 		pthread_cond_wait(&gdata.cond, &gdata.mutex);
+ 		pthread_mutex_unlock(&(gdata.mutex));
+ 
+-		if (!svc_running)
++		if (!svc_running) {
++			g_wlfw_service_request = 9;
+ 			break;
++		}
+ 
++		g_wlfw_service_request = 10;
+ 		ind_data_dequeue(&i_data);
+ 		while (i_data) {
+ 			/* handle ind */
+@@ -1768,12 +1815,15 @@ void *wlfw_service_request(void *arg)
+ 
+ 	wsvc_printf_info("%s: Pthread exiting", __func__);
+ 
++	g_wlfw_service_request = 11;
+ 	return NULL;
+ 
+ release_client:
++	E_g_wlfw_service_request = -104;
+ 	qmi_client_release(clnt);
+ unset_state:
+ 	gdata.state &= ~CNSS_WLFW_QMI_CONNECTED;
++	E_g_wlfw_service_request = -105;
+ 	return NULL;
+ }
+ 
+@@ -1997,6 +2047,8 @@ int pthread_initialize_dms(void)
+ }
+ #endif
+ 
++
++
+ int wlfw_start(enum wlfw_svc_flag flag)
+ {
+ 	int rc = 0;
+@@ -2008,41 +2060,53 @@ int wlfw_start(enum wlfw_svc_flag flag)
+ 
+ 	svc_running = 1;
+ 	dms_running = 1;
+-
++	g_wlfw_start = 1;
+ 	rc = pthread_mutex_init(&(gdata.mutex), NULL);
+ 	if (0 != rc) {
+ 		wsvc_printf_err("Failed to init mutex, ret %d", rc);
++		g_wlfw_start = -100;
+ 		goto out;
+ 	}
++	g_wlfw_start = 2;
+ 
+ #ifdef CONFIG_RECORD_DAEMON_QMI_LOG
+ 	rc = pthread_mutex_init(&(qmi_record_mutex), NULL);
+ 	if (rc != 0) {
+-		wsvc_printf_err("Failed to init qmi_record_mutex, ret %d", rc);
++		wsvc_printf_err("Fai1led to init qmi_record_mutex, ret %d", rc);
++		g_wlfw_start = -101;
+ 		goto err_fail_mutex;
+ 	}
+ #endif
++	g_wlfw_start = 3;
+ 	rc = pthread_cond_init(&(gdata.cond), NULL);
+ 	if (0 != rc) {
+ 		wsvc_printf_err("Failed to init cond, ret %d", rc);
++		g_wlfw_start = -102;
+ 		goto err_fail_cond;
+ 	}
++	g_wlfw_start = 4;
+ 	rc = pthread_cond_init(&(gdata.cond_rsp), NULL);
+ 	if (0 != rc) {
+ 		wsvc_printf_err("Failed to init cond_rsp, ret %d", rc);
++		g_wlfw_start = -103;
+ 		goto err_fail_cond_rsp;
+ 	}
+-
++	g_wlfw_start = 5;
+ 	rc = pthread_initialize_dms();
+-	if (rc != 0)
++	if (rc != 0) {
++		g_wlfw_start = -104;
+ 		goto err_fail_thread_create;
++	}
++	g_wlfw_start = 6;
+ 
+ 	rc = pthread_create(&(gdata.thread_id), NULL,
+ 			    wlfw_service_request, NULL);
+ 	if (0 != rc) {
+ 		wsvc_printf_err("Failed to create thread, ret %d", rc);
++		g_wlfw_start = -105;
+ 		goto err_fail_thread_create;
+ 	}
++	g_wlfw_start = 7;
+ 
+ #ifdef CONFIG_RECORD_DAEMON_QMI_LOG
+ 	daemon_debuglog_file = open(debug_file, O_RDWR);
+@@ -2052,7 +2116,7 @@ int wlfw_start(enum wlfw_svc_flag flag)
+ 	}
+ #endif
+ 	wsvc_printf_dbg("%s: Start done: %d", __func__, rc);
+-
++	g_wlfw_start = 8;
+ 	return rc;
+ err_fail_thread_create:
+ 	rc = pthread_cond_destroy(&(gdata.cond_rsp));
+@@ -2078,6 +2142,7 @@ err_fail_mutex:
+ 	}
+ out:
+ 	svc_running = 0;
++	E_g_wlfw_start = -106;
+ 	return rc;
+ }
+ 
+@@ -2123,37 +2188,44 @@ int wlfw_stop(enum wlfw_svc_flag flag)
+ 
+ 	wsvc_printf_dbg("%s: Stopping: %d", __func__, flag);
+ 
++	g_wlfw_stop = 1;
+ 	svc_running = 0;
+ 	dms_running = 0;
+ 	pthread_mutex_lock(&(gdata.mutex));
+ 	pthread_cond_signal(&(gdata.cond_rsp));
+ 	pthread_cond_signal(&(gdata.cond));
+ 	pthread_mutex_unlock(&(gdata.mutex));
+-
++	g_wlfw_stop = 2;
+ 	rc = pthread_join(gdata.thread_id, NULL);
+ 	if (0 != rc) {
++		E_g_wlfw_stop = -104;
+ 		wsvc_printf_err("Failed to join mutex, ret %d", rc);
+ 	}
+ 	pthread_signal_and_join_dms();
+-
++	g_wlfw_stop = 3;
+ 	if (gdata.clnt_handler && (SVC_EXIT == flag)) {
+ 		qmi_client_release(gdata.clnt_handler);
++		g_wlfw_stop_exit = 1;
+ 		gdata.clnt_handler = NULL;
+ 	}
+ 
+ 	ind_data_free_queue();
+ 
+ 	pthread_cleanup_dms();
+-
++	g_wlfw_stop = 4;
+ 	rc = pthread_cond_destroy(&(gdata.cond_rsp));
+ 	if (0 != rc) {
++		E_g_wlfw_stop = -106;
+ 		wsvc_printf_err("Failed to destroy cond_rsp, ret %d", rc);
+ 	}
++	g_wlfw_stop = 4;
+ 	rc = pthread_cond_destroy(&(gdata.cond));
+ 	if (0 != rc) {
++		E_g_wlfw_stop = -107;
+ 		wsvc_printf_err("Failed to destroy cond, ret %d", rc);
+ 	}
+ 
++	g_wlfw_stop = 5;
+ #ifdef CONFIG_RECORD_DAEMON_QMI_LOG
+ 	rc = pthread_mutex_destroy(&(qmi_record_mutex));
+ 	if (rc != 0) {
+@@ -2162,17 +2234,20 @@ int wlfw_stop(enum wlfw_svc_flag flag)
+ 	if (daemon_debuglog_file >= 0)
+ 		close(daemon_debuglog_file);
+ #endif
++	g_wlfw_stop = 7;
+ 	rc = pthread_mutex_destroy(&(gdata.mutex));
+ 	if (0 != rc) {
++		E_g_wlfw_stop = -108;
+ 		wsvc_printf_err("Failed to destroy mutex, ret %d", rc);
+ 	}
+ 	/* free and clear cached CAL data */
+ 	if (flag == SVC_EXIT) {
++		E_g_wlfw_stop = -109;
+ 		free_cal_file();
+ 		if (gdata.instance_id == ADRASTEA_ID)
+ 			pm_deinit();
+ 	}
+-
++	g_wlfw_stop = 8;
+ 	wsvc_printf_dbg("%s: Stop done: %d", __func__, rc);
+ 
+ 	return rc;

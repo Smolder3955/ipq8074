@@ -1,0 +1,53 @@
+model:
+    client_devices:
+        client1:
+            mac_addr: 00:11:22:33:44:55
+            traffic_type: streaming
+            client_type: phone
+        client2:
+            mac_addr: 00:22:44:66:88:AA
+            traffic_type: download
+            client_type: tablet
+        client3:
+            mac_addr: 00:33:66:33:66:99
+            traffic_type: interactive
+            client_type: laptop
+        client4:
+            mac_addr: 00:44:88:CC:00:44
+            client_type: PC
+        client5:
+            mac_addr: 00:55:AA:FF:44:99
+
+    access_points:
+        ap1:
+            type: CAP
+            mac_addr: "11:11:11:00:00:01"
+            vaps:
+                2.4g_1:
+                    iface_name: ath0
+                    radio_iface: wifi0
+                    band: 2.4
+                    channel: 7
+                    channel_group: 24G
+                    overload_threshold: 75
+                5g_1:
+                    iface_name: ath1
+                    radio_iface: wifi1
+                    band: 5
+                    channel: 100
+                    channel_group: 5GH
+                    overload_threshold: 80
+                2.4g_2:
+                    iface_name: ath2
+                    radio_iface: wifi0
+                    band: 2.4
+                    channel: 6
+                    channel_group: 24G
+                    overload_threshold: 85
+                5g_2:
+                    iface_name: ath3
+                    radio_iface: wifi1
+                    band: 5
+                    channel: 150
+                    channel_group: 5GH
+                    overload_threshold: 70

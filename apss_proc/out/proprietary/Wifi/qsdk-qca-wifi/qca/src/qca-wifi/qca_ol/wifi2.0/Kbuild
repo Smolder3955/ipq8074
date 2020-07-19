@@ -1,0 +1,527 @@
+ifeq ($(obj),)
+obj := .
+endif
+
+DEPTH := ../..
+OSDEP_SRC := $(DEPTH)/os/linux/src
+HOST_CMN_CONVG_SRC := $(DEPTH)/cmn_dev
+HOST_CMN_CONVG_HIF_SRC := $(DEPTH)/cmn_dev/hif/src
+HOST_CMN_CONVG_HIF_INC1 := $(DEPTH)/cmn_dev/hif
+HOST_CMN_CONVG_HTC_INC := $(DEPTH)/cmn_dev/htc
+HOST_CMN_CONVG_DP_INC := $(DEPTH)/cmn_dev/dp/wifi3.0
+HOST_CMN_CONVG_CFG_INC := $(DEPTH)/cmn_dev/wlan_cfg
+HOST_CMN_CONVG_HAL_INC := $(DEPTH)/cmn_dev/hal/inc
+HOST_CMN_CONVG_HAL_WIFI_INC := $(DEPTH)/cmn_dev/hal/wifi3.0
+PERF_PWR_OFFLOAD_WMI_SRC := $(DEPTH)/cmn_dev/wmi
+PERF_PWR_OFFLOAD_REGDMN_SRC := $(DEPTH)/offload/wlan/regdmn
+PERF_PWR_OFFLOAD_TARGET_IF_SRC := $(DEPTH)/cmn_dev/target_if
+
+obj-m += wifi_2_0.o
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+export QCA_PARTNER_MAKE_F_INC=1
+endif
+
+ifeq ($(QCA_DFS_COMPONENT_ENABLE),1)
+EXTRA_CFLAGS+= -DDFS_COMPONENT_ENABLE
+endif
+
+include $(obj)/$(DEPTH)/os/linux/Makefile-linux.common
+
+INCS += -I$(obj)/$(DEPTH)/include -I$(obj)/$(DEPTH)/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/include \
+        -I$(obj)/$(DEPTH)/direct_attach/umac/if_lmac -I$(obj)/$(DEPTH)/umac/crypto \
+        -I$(obj)/$(DEPTH)/umac/scan -I$(obj)/$(DEPTH)/umac/resmgr \
+        -I$(obj)/$(DEPTH)/umac/pm -I$(obj)/$(DEPTH)/umac/txrx \
+        -I$(obj)/$(DEPTH)/umac/acs -I$(obj)/$(DEPTH)/umac/txbf \
+        -I$(obj)/$(DEPTH)/umac/wnm \
+        -I$(obj)/$(DEPTH)/umac/tdls \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/umac/rpt_placement \
+        -I$(obj)/$(DEPTH)/umac/wifipos \
+        -I$(obj)/$(DEPTH)/umac/wds -I$(obj)/$(DEPTH)/umac/ique \
+        -I$(obj)/$(DEPTH)/direct_attach/hal -I$(obj)/$(DEPTH)/direct_attach/lmac/ath_dev \
+        -I$(obj)/$(DEPTH)/direct_attach/hal/$(OS) \
+        -I$(obj)/$(DEPTH)/umac/vi_dbg \
+        -I$(obj)/$(DEPTH)/umac/ald \
+        -I$(obj)/$(DEPTH)/lmac/ath_pktlog \
+        -I$(obj)/$(DEPTH)/direct_attach/lmac/ratectrl \
+        -I$(obj)/$(DEPTH)/os/linux/mem/ \
+        -I$(obj)/$(DEPTH)/umac/base \
+        -I$(obj)/$(DEPTH)/umac/mlme \
+	-I$(obj)/$(DEPTH)/qca_ol \
+	-I$(obj)/$(DEPTH)/cmn_dev/qdf/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/qdf/linux/src \
+        -I$(obj)/$(DEPTH)/cmn_dev/qal/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/qal/linux/src \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/src \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/src/ce \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/src/pcie \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/src/snoc \
+        -I$(obj)/$(DEPTH)/cmn_dev/hif/src/dispatcher \
+        -I$(obj)/$(DEPTH)/pld/inc  \
+        -I$(obj)/$(DEPTH)/pld/src  \
+	-I$(obj)/$(DEPTH)/cmn_dev/hal/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/hal/wifi3.0 \
+	-I$(obj)/$(DEPTH)/cmn_dev/dp/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/dp/wifi3.0 \
+	-I$(obj)/$(DEPTH)/cmn_dev/wlan_cfg \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/htc \
+        -I$(obj)/$(DEPTH)/cmn_dev/wmi/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/obj_mgr/inc \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/scheduler/inc \
+        -I$(obj)/$(HOST_CMN_CONVG_SRC)/init_deinit/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/global_umac_dispatcher/lmac_if/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/mgmt_txrx/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/spectral/dispatcher/inc \
+	-I$(obj)/$(DEPTH)/cmn_dev/target_if/init_deinit/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/global_lmac_if/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/cmn_defs/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/core/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/scan/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/umac/scan \
+        -I$(obj)/$(DEPTH)/umac/son/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/umac/son/core/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/son/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/ol_if \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/scan/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/serialization/core/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/regulatory/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/regulatory/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/utils/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/dfs/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/dfs/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/target_if/dfs/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/os_if/linux/scan/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/utils/nlink/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/utils/fwlog/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/utils \
+        -I$(obj)/$(DEPTH)/cmn_dev/dp/cmn_dp_api \
+        -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/htt_stats \
+        -I$(obj)/$(DEPTH)/umac/offchan_txrx/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/umac/splitmac/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/cfg/inc \
+        -I$(obj)/$(DEPTH)/ini_cfg/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/mlme_objmgr/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/vdev_mgr/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/umac/mlme/pdev_mgr/dispatcher/inc \
+        -I$(obj)/$(DEPTH)/cmn_dev/wbuff/inc \
+        -I$(obj)/$(DEPTH)/component_dev/wmi/inc \
+        -I$(obj)/$(DEPTH)/component_dev/dp/inc
+
+ifeq ($(WLAN_CONV_CRYPTO_SUPPORTED), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/cmn_services/crypto/inc
+INCS += -I$(obj)/$(DEPTH)/component_dev/crypto/inc
+endif
+
+# config
+EXTRA_CFLAGS += -DWLAN_HEADERS=1 -DSUPPORT_11N=1 -DSUPPORT_VHT=1
+EXTRA_CFLAGS += -DCONVERGED_SW=1
+# ATH_PERF_PWR_OFFLOAD is the replacement for CONVERGED_SW,
+# but CONVERGED_SW is still needed temporarily until cleanups are completed.
+EXTRA_CFLAGS += -DATH_PERF_PWR_OFFLOAD=1
+# enable TEMP aggregation configuration
+EXTRA_CFLAGS += -DTEMP_AGGR_CFG=1
+
+ifeq ($(BUILD_X86), y)
+ifeq ($(QCA_THIRDPARTY), 1)
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/$(FIRMWARE_REL_PATH)
+else
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/offload
+endif
+else
+PERF_PWR_OFFLOAD_SRC := $(DEPTH)/$(FIRMWARE_REL_PATH)
+endif
+
+PERF_PWR_OFFLOAD_INC := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/include \
+	                -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/ath_pktlog/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/htt/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/txrx/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/hif/pci \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/hif/pci/linux   \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/os/linux/include \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/regdmn \
+			-I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/lmac_offload_if \
+			-I$(HOST_CMN_CONVG_HIF_INC1)/inc \
+			-I$(HOST_CMN_CONVG_HIF_INC1)/src \
+			-I$(HOST_CMN_CONVG_HIF_INC1)/src/pcie \
+			-I$(HOST_CMN_CONVG_HIF_INC1)/src/snoc \
+			-I$(HOST_CMN_CONVG_HIF_SRC)/ce \
+			-I$(HOST_CMN_CONVG_HTC_INC) \
+			-I$(HOST_CMN_CONVG_CFG_INC) \
+			-I$(HOST_CMN_CONVG_DP_INC) \
+			-I$(HOST_CMN_CONVG_HAL_INC) \
+			-I$(HOST_CMN_CONVG_HAL_WIFI_INC) \
+                        -I$(PERF_PWR_OFFLOAD_WMI_SRC)/inc \
+			-I$(obj)/$(DEPTH)/offload/extra_include
+
+ifeq ($(WLAN_SUPPORT_GREEN_AP), 1)
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/target_if/green_ap/inc
+INCS += -I$(obj)/$(DEPTH)/cmn_dev/umac/green_ap/dispatcher/inc
+endif
+
+ifeq ($(QCA_AIRTIME_FAIRNESS), 1)
+EXTRA_CFLAGS+= -DWLAN_ATF_ENABLE
+INCS += -I$(obj)/$(DEPTH)/umac/airtime_fairness/dispatcher/inc
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/target_if/atf
+endif
+
+ifeq ($(UNIFIED_SMARTANTENNA), 1)
+EXTRA_CFLAGS+= -DWLAN_SA_API_ENABLE
+INCS += -I$(obj)/$(DEPTH)/umac/sa_api/dispatcher/inc
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/target_if/sa_api
+endif
+
+ifeq ($(QCA_CFR_SUPPORT), 1)
+EXTRA_CFLAGS+= -DWLAN_CFR_ENABLE=1
+INCS += -I$(obj)/$(DEPTH)/component_dev/umac/cfr/dispatcher/inc
+PERF_PWR_OFFLOAD_INC += -I$(obj)/$(DEPTH)/component_dev/target_if/cfr/inc
+PERF_PWR_OFFLOAD_INC += -I$(obj)/$(DEPTH)/component_dev/qal/inc
+endif
+
+
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/target_if/offchan_txrx
+
+ifeq ($(WLAN_SPECTRAL_ENABLE), 1)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/wlan/target_if/spectral
+endif
+
+ifeq ($(ATH_SUPPORT_MCAST2UCAST), 1)
+EXTRA_CFLAGS += -DATH_SUPPORT_MCAST2UCAST
+endif
+
+ifeq ($(QCA_OL_TX_CACHEDHDR), 1)
+EXTRA_CFLAGS += -DQCA_OL_TX_CACHEDHDR=1
+endif
+
+######### WIFI_2.0 INC & FLAGS #########################
+ifeq ($(ATH_TGT_TYPE),AR9888)
+   EXTRA_CFLAGS += -DCONFIG_AR9888_SUPPORT
+   EXTRA_CFLAGS += -DCONFIG_11AC_SUPPORT
+   EXTRA_CFLAGS += -DAR9888_HEADERS_DEF=1
+   EXTRA_CFLAGS += -DCONFIG_AR900B_SUPPORT
+   EXTRA_CFLAGS += -DAR900B_HEADERS_DEF=1
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR9888)
+# We build the host driver against the v1 headers - the registers that the host driver
+# uses had better be compatible across v1/v2
+PERF_PWR_OFFLOAD_INC+= -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1/extra/hw
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1/extra/
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR9888/v1
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR6320)
+   EXTRA_CFLAGS += -DCONFIG_AR6320_SUPPORT
+   EXTRA_CFLAGS += -DCONFIG_11AC_SUPPORT
+   EXTRA_CFLAGS += -DAR6320_HEADERS_DEF=1
+#   EXTRA_CFLAGS += -DEPPING_TEST
+endif
+
+
+ifeq ($(ATH_TGT_TYPE),AR6320)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320/extra/hw
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320/extra/
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6320
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR6004)
+   EXTRA_CFLAGS += -DCONFIG_AR6004_SUPPORT
+   EXTRA_CFLAGS += -DAR6004_HEADERS_DEF=1
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR6004)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6004/hw
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR6004
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR900B)
+   EXTRA_CFLAGS += -DCONFIG_AR900B_SUPPORT
+   EXTRA_CFLAGS += -DCONFIG_11AC_SUPPORT
+   EXTRA_CFLAGS += -DAR900B_HEADERS_DEF=1
+   EXTRA_CFLAGS += -DCONFIG_AR9888_SUPPORT
+   EXTRA_CFLAGS += -DAR9888_HEADERS_DEF=1
+   EXTRA_CFLAGS += -DIPQ4019_HEADERS_DEF=1
+   EXTRA_CFLAGS += -DQCA9984_HEADERS_DEF=1
+   EXTRA_CFLAGS += -DQCA9888_HEADERS_DEF=1
+#   EXTRA_CFLAGS += -DEPPING_TEST
+endif
+
+ifeq ($(ATH_TGT_TYPE),AR900B)
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B/extra/hw
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B/extra/
+#PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/AR900B
+endif
+PERF_PWR_OFFLOAD_INC += -I$(PERF_PWR_OFFLOAD_DIR_PATH)/hw/include
+
+# TBD: Check if this is required for Dakota
+ifeq ($(ATH_WAR_AR900B_MPHYR), 1)
+EXTRA_CFLAGS += -DHOST_SUPPORT_BEELINER_MPHYR
+endif
+
+ifeq ($(ATH_AR900B_LEGACY_INT), 1)
+EXTRA_CFLAGS += -DATH_AR900B_LEGACY_INT
+endif
+
+ifeq ($(strip $(ATH_HIF_TYPE)),pci)
+EXTRA_CFLAGS += -DHIF_MESSAGE_BASED
+ATH_HIF_MESSAGE_BASED =yes
+endif
+
+ifeq ($(strip $(ATH_HIF_TYPE)),sim)
+EXTRA_CFLAGS += -DHIF_MESSAGE_BASED
+ATH_HIF_MESSAGE_BASED =yes
+endif # end hif-sim
+
+ifeq ($(strip $(ATH_HIF_TYPE)),sdio)
+ATH_HIF_MESSAGE_BASED =yes
+endif #NATIVE_SDIO
+######### WIFI_2.0 INC & FLAGS #########################
+
+INCS += $(PERF_PWR_OFFLOAD_INC)
+
+###################### WIFI_2.0 SRC #########################
+ifeq ($(WLAN_FEATURE_BMI), 1)
+WIFI_2.0_OFFLOAD_OBJS += $(PERF_PWR_OFFLOAD_SRC)/bmi/bmi.o
+WIFI_2.0_OFFLOAD_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/lmac_offload_if/ol_if_bmi.o
+CFLAGS_ol_if_bmi.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+endif
+
+#hif-pci
+ifeq ($(strip $(ATH_HIF_TYPE)),pci)
+ifeq ($(WLAN_FEATURE_BMI), 1)
+HIF_PCI_OBJS += $(HOST_CMN_CONVG_HIF_SRC)/ce/ce_bmi.o
+endif
+
+WIFI_2.0_OFFLOAD_OBJS += $(HIF_PCI_OBJS)
+endif # end hif-pci
+
+#hif-sdio
+ifeq ($(strip $(ATH_HIF_TYPE)),sdio)
+ifeq ($(WLAN_FEATURE_BMI), 1)
+HIF_SDIO_OBJS += $(PERF_PWR_OFFLOAD_SRC)/hif/common/hif_bmi_reg_access.o
+endif
+
+WIFI_2.0_OFFLOAD_OBJS += $(HIF_SDIO_OBJS)
+endif #end hif-sdio
+
+WIFI_2.0_OFFLOAD_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wds/wds_addr.o \
+			$(PERF_PWR_OFFLOAD_SRC)/misc/dbglog_host.o
+
+CFLAGS_wds_addr.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_dbglog_host.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+WIFI_2.0_WMI_OBJS += $(DEPTH)/component_dev/wmi/src/wmi_unified_non_tlv.o
+CFLAGS_wmi_unified_non_tlv.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+WIFI_2.0_OFFLOAD_OBJS += $(WIFI_2.0_WMI_OBJS)
+
+HIF_PCI_OBJS += $(HOST_CMN_CONVG_HIF_SRC)/ce/ce_service_legacy.o
+HIF_PCI_OBJS += $(HOST_CMN_CONVG_HIF_SRC)/hif_main_legacy.o
+
+WIFI_2.0_OFFLOAD_OBJS += $(HIF_PCI_OBJS)
+
+PKTLOG_AC_2_0_OBJS := $(PERF_PWR_OFFLOAD_SRC)/wlan/ath_pktlog/wifi2.0/pktlog_internal_2_0.o
+CFLAGS_pktlog_internal_2_0.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+ifneq ($(strip $(REMOVE_PKT_LOG)),1)
+WIFI_2.0_OFFLOAD_OBJS += $(PKTLOG_AC_2_0_OBJS)
+endif #REMOVE_PKT_LOG
+
+# txrx
+TXRX_OBJS := $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rx.o  \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rx_fwd.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rx_defrag.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_txrx_peer_find.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rx_pn.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rx_reorder.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_desc.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_txrx.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_txrx_cfg.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_send.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_txrx_prot_an.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_txrx_event.o \
+             $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_me.o
+
+ifeq ($(QCA_OL_SUPPORT_RAWMODE_TXRX), 1)
+TXRX_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rawmode_rx.o
+TXRX_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_rawmode_tx.o
+CFLAGS_ol_rawmode_rx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rawmode_tx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+endif
+
+ifeq ($(HOST_SW_TSO_ENABLE),1)
+TXRX_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_tso.o
+endif
+
+ifeq ($(HOST_SW_TSO_SG_ENABLE),1)
+TXRX_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_tso_sg.o
+endif
+
+ifeq ($(HOST_SW_SG_ENABLE),1)
+TXRX_OBJS += $(PERF_PWR_OFFLOAD_SRC)/wlan/txrx/ol_tx_sg.o
+endif
+
+
+CFLAGS_ol_tx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_txrx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_tx_sg.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_tx_tso_sg.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rx_fwd.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rx_defrag.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_txrx_peer_find.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rx_pn.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_rx_reorder.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_tx_desc.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_tx_send.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_txrx_prot_an.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_txrx_event.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_ol_tx_me.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+WIFI_2.0_OFFLOAD_OBJS += $(TXRX_OBJS)
+
+# htt
+HTT_OBJS := $(PERF_PWR_OFFLOAD_SRC)/htt/htt.o \
+            $(PERF_PWR_OFFLOAD_SRC)/htt/htt_h2t.o \
+            $(PERF_PWR_OFFLOAD_SRC)/htt/htt_rx.o \
+            $(PERF_PWR_OFFLOAD_SRC)/htt/htt_t2h.o \
+            $(PERF_PWR_OFFLOAD_SRC)/htt/htt_fw_stats.o \
+            $(PERF_PWR_OFFLOAD_SRC)/htt/htt_tx.o
+
+CFLAGS_htt.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_htt_h2t.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_htt_rx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_htt_t2h.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_htt_fw_stats.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_htt_tx.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+WIFI_2.0_OFFLOAD_OBJS += $(HTT_OBJS)
+
+HW_OBJS := $(PERF_PWR_OFFLOAD_SRC)/hw/ar.o
+HW_OBJS += $(PERF_PWR_OFFLOAD_SRC)/hw/QCA9984/rx_desc.o
+HW_OBJS += $(PERF_PWR_OFFLOAD_SRC)/hw/AR900B/rx_desc.o
+HW_OBJS += $(PERF_PWR_OFFLOAD_SRC)/hw/AR9888/rx_desc.o
+
+CFLAGS_rx_desc.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+
+WIFI_2.0_OFFLOAD_OBJS += $(HW_OBJS)
+
+WIFI_2.0_OFFLOAD_OBJS += qca_ol_if_wifi2_0.o
+
+ifeq ($(QCA_NSS_WIFI_2_0_OFFLOAD_SUPPORT), 1)
+WIFI_2.0_OFFLOAD_OBJS +=$(OSDEP_SRC)/osif_nss_wifiol_be_vdev_if.o
+WIFI_2.0_OFFLOAD_OBJS +=$(OSDEP_SRC)/osif_nss_wifiol_if.o
+CFLAGS_osif_nss_wifiol_be_vdev_if.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+CFLAGS_osif_nss_wifiol_if.o := -I$(PERF_PWR_OFFLOAD_DIR_PATH)/include/legacy
+endif
+
+ifeq ($(WIFI_TARGET_2_0),1)
+PERF_PWR_OFFLOAD_OBJS += $(WIFI_2.0_OFFLOAD_OBJS)
+endif
+
+###################### WIFI_2.0 SRC #########################
+
+ifeq ($(ATH_PERF_PWR_OFFLOAD), 1)
+wifi_2_0-objs += $(PERF_PWR_OFFLOAD_OBJS)
+endif
+
+
+ifeq ($(TARGET),ANDROID)
+COPTS += -Wframe-larger-than=4096
+endif
+
+KASAN := $(shell grep -w CONFIG_KASAN $(KERNELPATH)/.config | cut -f 2 -d '=')
+
+ifeq ($(TARGET),i386-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #x86 stack frame limit
+
+ifeq ($(TARGET),armv4-le-elf)
+ifeq ($(KASAN),y)
+COPTS += -Wframe-larger-than=2048
+else
+COPTS += -Wframe-larger-than=1190
+endif #KASAN
+endif #arm stack frame limit
+
+ifeq ($(TARGET),mipsisa32-be-elf)
+COPTS += -Wframe-larger-than=1190
+endif #mips stack frame limit
+
+EXTRA_CFLAGS+= $(INCS) $(COPTS)
+
+ifeq ($(strip $(BUSNAME)),pci)
+EXTRA_CFLAGS += -DHIF_PCI
+endif
+
+ifeq ($(strip $(BUSNAME)),dual)
+EXTRA_CFLAGS += -DHIF_PCI -DHIF_AHB
+endif
+
+ifeq ($(strip $(ATH_HIF_TYPE)),sim)
+EXTRA_CFLAGS += -DA_SIMOS_DEVHOST -DHIF_SIM
+endif
+
+ifeq ($(strip $(ATH_HIF_TYPE)),sdio)
+EXTRA_CFLAGS += -DHIF_SDIO
+ifeq ($(ATH_TGT_TYPE),AR6320)
+EXTRA_CFLAGS += -DSDIO_3_0
+endif
+endif
+
+QCA_OL_SRC := $(DEPTH)/qca_ol
+
+ifeq ($(strip $(BUSNAME)),ahb)
+wifi_2_0-objs += if_ath_ahb.o
+ifeq ($(VERSION), 4)
+ifeq ($(PATCHLEVEL), 4)
+endif
+endif
+endif
+
+ifeq ($(strip $(BUSNAME)),pci)
+ifneq ($(strip $(ATH_HIF_TYPE)),sdio)
+wifi_2_0-objs += if_ath_pci.o
+endif
+endif
+
+ifeq ($(strip $(BUSNAME)),dual)
+wifi_2_0-objs += if_ath_pci.o
+wifi_2_0-objs += if_ath_ahb.o
+ifeq ($(VERSION), 4)
+ifeq ($(PATCHLEVEL), 4)
+EXTRA_CFLAGS += -Wno-format
+endif
+endif
+endif
+
+ifeq ($(strip ${QCA_PARTNER_MAKE_F_SUPPORT}),1)
+all: wifi_2_0.ko
+
+wifi_2_0.mod.o: wifi_2_0.mod.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} ${MOD_CFLAGS} $<
+
+wifi_2_0.o: ${wifi_2_0-objs}
+	$(LD) -m elf32btsmip -r -o wifi_2_0.o $(wifi_2_0-objs)
+	$(KERNELPATH)/scripts/mod/modpost wifi_2_0.o
+
+wifi_2_0.ko: wifi_2_0.o wifi_2_0.mod.o
+	$(LD) $(LDOPTS) -o wifi_2_0.ko wifi_2_0.o wifi_2_0.mod.o
+
+%.o: %.c
+	${CC} -c -o $@ ${EXTRA_CFLAGS} $<
+endif

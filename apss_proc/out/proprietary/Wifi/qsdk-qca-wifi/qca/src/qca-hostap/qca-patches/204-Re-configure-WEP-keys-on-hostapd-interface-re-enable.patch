@@ -1,0 +1,50 @@
+diff --git a/src/ap/drv_callbacks.c b/src/ap/drv_callbacks.c
+index 3994278..6ec82e5 100644
+--- a/src/ap/drv_callbacks.c
++++ b/src/ap/drv_callbacks.c
+@@ -1711,7 +1711,10 @@ void wpa_supplicant_event(void *ctx, enum wpa_event_type event,
+ 			 * Try to re-enable interface if the driver stopped it
+ 			 * when the interface got disabled.
+ 			 */
+-			wpa_auth_reconfig_group_keys(hapd->wpa_auth);
++			if (hapd->wpa_auth)
++				wpa_auth_reconfig_group_keys(hapd->wpa_auth);
++			else
++				hostapd_reconfig_encryption(hapd);
+ 			hapd->reenable_beacon = 1;
+ 			ieee802_11_set_beacon(hapd);
+ 		}
+diff --git a/src/ap/hostapd.c b/src/ap/hostapd.c
+index f095586..23d2720 100644
+--- a/src/ap/hostapd.c
++++ b/src/ap/hostapd.c
+@@ -78,6 +78,16 @@ int hostapd_for_each_interface(struct hapd_interfaces *interfaces,
+ }
+ 
+ 
++void hostapd_reconfig_encryption(struct hostapd_data *hapd)
++{
++	if (hapd->wpa_auth)
++		return;
++
++	hostapd_set_privacy(hapd, 0);
++	hostapd_setup_encryption(hapd->conf->iface, hapd);
++}
++
++
+ static void hostapd_reload_bss(struct hostapd_data *hapd)
+ {
+ 	struct hostapd_ssid *ssid;
+diff --git a/src/ap/hostapd.h b/src/ap/hostapd.h
+index 4129120..9a520f3 100644
+--- a/src/ap/hostapd.h
++++ b/src/ap/hostapd.h
+@@ -538,6 +538,7 @@ int hostapd_for_each_interface(struct hapd_interfaces *interfaces,
+ 			       int (*cb)(struct hostapd_iface *iface,
+ 					 void *ctx), void *ctx);
+ int hostapd_reload_config(struct hostapd_iface *iface);
++void hostapd_reconfig_encryption(struct hostapd_data *hapd);
+ struct hostapd_data *
+ hostapd_alloc_bss_data(struct hostapd_iface *hapd_iface,
+ 		       struct hostapd_config *conf,
+

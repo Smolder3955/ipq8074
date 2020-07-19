@@ -1,0 +1,95 @@
+#
+# Makes spectral apps
+#
+
+# Target is x86-64
+CC:=$(shell which gcc)
+AR:=$(shell which gcc-ar)
+LD:=$(shell which ld)
+
+TOP:= ../../../staging_dir
+STAGING_DIR:= $(shell find $(TOP) -type d -name "target-*_cortex*" -print -quit)
+
+ifeq ($(STAGING_DIR),)
+$(error No target related folder found in $(TOP) directory. Was full image never built in this workspace?)
+endif
+# Variables from the feed Makefile
+TARGET_CFLAGS += \
+        -I$(STAGING_DIR)/usr/include/libnl3
+
+TARGET_LDFLAGS += \
+        -lnl-3 -lnl-genl-3
+
+COPTS:="$(TARGET_CFLAGS) $(TARGET_LDFLAGS)"
+ATHEROSPATH:=$(STAGING_DIR)/usr/include
+ATH_SUPPORT_SPECTRAL:=1
+QSDK_SPECTRAL:=1
+
+ifeq ($(obj),)
+obj := .
+endif
+
+# Default OS is linux
+ifeq ($(OS),)
+OS := linux
+endif
+
+# Path defines...
+SPECTRAL_DRIVER_PATH	:= $(ATHEROSPATH)/lmac/spectral
+ADF_INC					:= ${ATHEROSPATH}/adf/include
+ADF_OS_INC				:= ${ATHEROSPATH}/adf/include/os
+ASF_INC					:= ${ATHEROSPATH}/asf/include
+ATH_DEV_INC				:= ${ATHEROSPATH}/lmac/ath_dev
+ATH_DFS_INC				:= ${ATHEROSPATH}/lmac/dfs
+UMAC_INC				:= ${ATHEROSPATH}/umac/include
+COMMON_INC				:= ./common
+HAL_INC					:= ${ATHEROSPATH}/hal
+CLASSIFIER_SRC			:= ./common
+CLASSIFIER_INC			:= ./common
+BINDIR					= /usr/local/bin
+DEPTH					:= ../../drivers/wlan
+TOOLS_HEADER_INC_PATH	:= ../../drivers/wlan_modules/os/linux/include
+WLAN_INC_PATH			:= ../../drivers/wlan_modules/include
+OL_WLAN_INC_PATH	    := $(ATHEROSPATH)/../firmware/include/
+OL_WLAN_HINC_PATH	    := $(ATHEROSPATH)/../firmware/host/include/
+
+# Spectral
+ifeq ($(strip ${ATH_SUPPORT_SPECTRAL}),1)
+ALL+= athssd
+endif
+
+all: ${ALL}
+
+# Add necessary include path
+INCS+= -I${COMMON_INC} -I$(ATHEROSPATH) -I${HAL}/${OS} -I${HAL_INC}
+INCS+= -I${CLASSIFIER_INC} -I${ADF_INC} -I${ADF_OS_INC} -I${ASF_INC}
+INCS+= -I${SPECTRAL_DRIVER_PATH} -I${ATH_DEV_INC} -I${ATH_DFS_INC} -I.
+INCS+= -I${TOOLS_HEADER_INC_PATH} -I${WLAN_INC_PATH} -I${OL_WLAN_INC_PATH} -I${OL_WLAN_HINC_PATH}
+
+# Update CFLAGS
+CFLAGS+= ${INCS} ${COPTS} -w
+
+ifeq (${BUILD_STATIC}, y)
+LDFLAGS= -static
+endif
+
+ifneq (${BUILD_NO_DEBUG}, y)
+CFLAGS+= -g
+endif
+
+ifeq (${BUILD_OPTIMIZED}, y)
+CFLAGS += -Os -pipe -mips32r2 -mtune=mips32r2 -funit-at-a-time
+endif
+
+ath_classifier.o: ath_classifier.c
+	@${CC} -c -o ath_classifier.o ${CFLAGS} ${LDFLAGS} ath_classifier.c
+
+athssd: ath_ssd.c ${CLASSIFIER_SRC}/classifier.c ath_ssd_cmds.c ath_classifier.o
+	@${CC} -o athssd ${CFLAGS} ${LDFLAGS} -O0 ath_ssd.c ath_ssd_cmds.c ath_classifier.o -lm -lbsd && \
+	echo "athssd application has been built in the current directory"
+
+clean:
+	@rm -rf athssd ath_classifier.o
+
+athssd_clean:
+	@rm -rf athssd

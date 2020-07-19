@@ -1,0 +1,8 @@
+ENTRY &ARG0
+
+
+IF ("&ARG0"=="None")
+(
+	&PRODUCT_FLAVOR="None"
+)
+ENDDO

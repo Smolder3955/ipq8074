@@ -1,0 +1,7 @@
+bdwlan.b210
+bdwlan.b211
+bdwlan.b290
+bdwlan.b291
+bdwlan.b292
+bdwlan.b293
+bdwlan.bin

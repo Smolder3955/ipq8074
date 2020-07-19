@@ -1,0 +1,1 @@
+Qualcomm Atheros, Inc. has chosen to take acfg subject to the BSD license and terms. 

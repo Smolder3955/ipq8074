@@ -1,0 +1,27 @@
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index c80a5ea..ed3a401 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -1908,7 +1908,21 @@ static int
+ atheros_commit(void *priv)
+ {
+ 	struct atheros_driver_data *drv = priv;
+-	return linux_set_iface_flags(drv->ioctl_sock, drv->iface, 1);
++    int count = 0;
++    int connected = 0;
++
++    wpa_printf(MSG_DEBUG, "%s enter ", __FUNCTION__);
++    while (!connected){
++        if(linux_set_iface_flags(drv->ioctl_sock, drv->iface, 1)){
++            connected = 0;
++            count++;
++            os_sleep(1, 0);
++        } else {
++            connected = 1;
++        }
++    }
++    wpa_printf(MSG_DEBUG, "%s: exit count=%d", __FUNCTION__, count);
++    return 0;
+ }
+ 
+ static int atheros_set_authmode(void *priv, int auth_algs)

@@ -1,0 +1,61 @@
+;
+; Copyright (c) 2017 Qualcomm Technologies, Inc.
+; All Rights Reserved.
+; Confidential and Proprietary - Qualcomm Technologies, Inc.
+;
+;****************************************************************
+;
+; ---           Semi-hosting Setup               ---
+;
+;****************************************************************
+
+
+
+;D.S 0x0B098004 %long 0x00020088
+;D.S 0x0B0A8004 %long 0x00020088
+;D.S 0x0B0B8004 %long 0x00020088
+
+SYS.mode.Nodebug
+
+local &cmm_dir &cur_dir
+
+SYStem.Reset
+SYStem.CPU CortexA7MPCore
+SYSTEM.JtagClock 10MHZ
+SYStem.CONFIG CORENUMBER 4
+CORE.ASSIGN 1 2 3 4
+SYStem.CONFIG SLAVE OFF
+&cur_dir=os.ppd()    	; directory where this script is running from
+; select CPU and options
+SYStem.Option EnReset OFF
+ntimescc  ; time out ignored only for debugging
+; BETA-5 Base Addresses
+SYStem.CONFIG COREBASE         	0x80040000	0x80042000	0x80044000	0x80046000
+SYStem.CONFIG CTIBASE		0x80051000	0x80052000	0x80053000	0x80054000
+SYStem.CONFIG CTICONFIG        	CORTEXV1
+SYStem.config AXIACCESSPORT 0
+
+
+
+;for R3PC
+SYStem.CONFIG MEMORYACCESSPORT 0.
+SYStem.CONFIG DEBUGACCESSPORT  1.
+SYStem.CONFIG DAPIRPRE 10.
+SYStem.CONFIG DAPDRPRE 2.
+SYStem.CONFIG DAPIRPOST 16.
+SYStem.CONFIG DAPDRPOST 2.
+;SYStem.CONFIG ETMBASE
+;SYStem.CONFIG ETMFUNNELPORT    	0, 1, 2, 3.
+;SYStem.config.funnelbase		0x80045000
+tronchip.SET FIQ OFF
+tronchip.SET IRQ OFF
+tronchip.SET DABORT OFF
+tronchip.SET PABORT OFF
+tronchip.SET UNDEF off
+tronchip.SET SWI OFF
+tronchip.SET RESET OFF
+SYS.attach
+;break
+
+enddo
+

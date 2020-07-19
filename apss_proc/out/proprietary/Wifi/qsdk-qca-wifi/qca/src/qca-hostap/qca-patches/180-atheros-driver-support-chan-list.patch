@@ -1,0 +1,274 @@
+diff --git a/src/drivers/driver.h b/src/drivers/driver.h
+index 556b8a0..d40a7a3 100644
+--- a/src/drivers/driver.h
++++ b/src/drivers/driver.h
+@@ -2420,6 +2420,19 @@ struct wpa_driver_ops {
+ 							 u16 *num_modes,
+ 							 u16 *flags, u8 *dfs);
+ 
++        /**
++         * get_hw_feature_data - Get hardware support data (channels and rates)
++         * @priv: Private driver interface data
++         * @num_modes: Variable for returning the number of returned modes
++         * flags: Variable for returning hardware feature flags
++         * @dfs: Variable for returning DFS region (HOSTAPD_DFS_REGION_*)
++         * Returns: Pointer to allocated hardware data on success or %NULL on
++         * failure. Caller is responsible for freeing this.
++         */
++        struct hostapd_hw_modes * (*get_hw_feature_data2)(void *priv,
++                                                         u16 *num_modes,
++                                                         u16 *flags, u8 *dfs);
++
+ 	/**
+ 	 * send_mlme - Send management frame from MLME
+ 	 * @priv: Private driver interface data
+diff --git a/src/drivers/driver_atheros.c b/src/drivers/driver_atheros.c
+index fff23f0..66a0a75 100644
+--- a/src/drivers/driver_atheros.c
++++ b/src/drivers/driver_atheros.c
+@@ -2260,6 +2260,237 @@ static int atheros_wnm_oper(void *priv, enum wnm_oper oper, const u8 *peer,
+ }
+ #endif /* CONFIG_WNM && IEEE80211_APPIE_FRAME_WNM */
+ 
++static struct hostapd_hw_modes * athr_add_11b(struct hostapd_hw_modes *modes,
++                                              u16 *num_modes)
++{
++        u16 m;
++        struct hostapd_hw_modes *mode11g = NULL, *nmodes, *mode;
++        int i, mode11g_idx = -1;
++
++        /* If only 802.11g mode is included, use it to construct matching
++         * 802.11b mode data. */
++
++        for (m = 0; m < *num_modes; m++) {
++                if (modes[m].mode == HOSTAPD_MODE_IEEE80211B)
++                        return modes; /* 802.11b already included */
++                if (modes[m].mode == HOSTAPD_MODE_IEEE80211G)
++                        mode11g_idx = m;
++        }
++
++        if (mode11g_idx < 0)
++                return modes; /* 2.4 GHz band not supported at all */
++
++        nmodes = os_realloc(modes, (*num_modes + 1) * sizeof(*nmodes));
++        if (nmodes == NULL)
++                return modes; /* Could not add 802.11b mode */
++
++        mode = &nmodes[*num_modes];
++        os_memset(mode, 0, sizeof(*mode));
++        (*num_modes)++;
++        modes = nmodes;
++
++        mode->mode = HOSTAPD_MODE_IEEE80211B;
++
++        mode11g = &modes[mode11g_idx];
++        mode->num_channels = mode11g->num_channels;
++        mode->channels = os_malloc(mode11g->num_channels *
++                                   sizeof(struct hostapd_channel_data));
++        if (mode->channels == NULL) {
++                (*num_modes)--;
++                return modes; /* Could not add 802.11b mode */
++        }
++        os_memcpy(mode->channels, mode11g->channels,
++                  mode11g->num_channels * sizeof(struct hostapd_channel_data));
++
++        mode->num_rates = 0;
++        mode->rates = os_malloc(4 * sizeof(int));
++        if (mode->rates == NULL) {
++                os_free(mode->channels);
++                (*num_modes)--;
++                return modes; /* Could not add 802.11b mode */
++        }
++
++        for (i = 0; i < mode11g->num_rates; i++) {
++                if (mode11g->rates[i] != 10 && mode11g->rates[i] != 20 &&
++                    mode11g->rates[i] != 55 && mode11g->rates[i] != 110)
++                        continue;
++                mode->rates[mode->num_rates] = mode11g->rates[i];
++                mode->num_rates++;
++                if (mode->num_rates == 4)
++                        break;
++        }
++
++        if (mode->num_rates == 0) {
++                os_free(mode->channels);
++                os_free(mode->rates);
++                (*num_modes)--;
++                return modes; /* No 802.11b rates */
++        }
++
++        wpa_printf(MSG_DEBUG, "athr: Added 802.11b mode based on 802.11g "
++                   "information");
++
++        return modes;
++}
++
++static struct hostapd_hw_modes * athr_get_hw_feature_data(void *priv,
++							  u16 *num_modes,
++							  u16 *flags, u8 *dfs)
++{
++	struct atheros_driver_data *drv = priv;
++	struct iwreq iwr;
++	struct ieee80211req_chaninfo chans;
++	struct ieee80211req_chanlist act;
++	unsigned int i;
++	struct hostapd_hw_modes *modes = NULL, *n, *mode;
++	struct hostapd_channel_data *nc;
++	int m24 = -1, m5 = -1;
++	int chanbw = 0;
++	int bw_div = 1;
++	*num_modes = 0;
++	*flags = 0; dfs=dfs;
++
++	os_memset(&chans, 0, sizeof(chans));
++	os_memset(&iwr, 0, sizeof(iwr));
++	os_strlcpy(iwr.ifr_name, drv->iface, IFNAMSIZ);
++	iwr.u.data.pointer = &chans;
++	iwr.u.data.length = sizeof(chans);
++
++	if (ioctl(drv->ioctl_sock, IEEE80211_IOCTL_GETCHANINFO, &iwr) < 0) {
++		wpa_printf(MSG_DEBUG, "athr: Failed to get channel info: %s",
++			   strerror(errno));
++		return NULL;
++	}
++
++	os_memset(&act, 0, sizeof(act));
++	os_memset(&iwr, 0, sizeof(iwr));
++	os_strlcpy(iwr.ifr_name, drv->iface, IFNAMSIZ);
++	iwr.u.data.pointer = &act;
++	iwr.u.data.length = sizeof(act);
++
++	if (ioctl(drv->ioctl_sock, IEEE80211_IOCTL_GETCHANLIST, &iwr) < 0) {
++		wpa_printf(MSG_DEBUG, "athr: Failed to get active channel "
++			   "list: %s", strerror(errno));
++		return NULL;
++	}
++	if (get80211param(drv, IEEE80211_PARAM_CHANBW,
++			  &chanbw) < 0) {
++		wpa_printf(MSG_DEBUG, "athr: Failed to get HALF/QUARTER mode "
++			   "list: %s", strerror(errno));
++		return NULL;
++	}
++
++	if(chanbw == 1) 
++		bw_div = 2;
++	else if(chanbw == 2) 
++                bw_div = 4;
++        wpa_printf(MSG_DEBUG, "athr: Channel list");
++        for (i = 0; i < chans.ic_nchans; i++) {
++                struct ieee80211_ath_channel *chan = &chans.ic_chans[i];
++                int active;
++                active = act.ic_channels[chan->ic_ieee / 8] &
++                        (1 << (chan->ic_ieee % 8));
++                wpa_printf(MSG_DEBUG, " * %u MHz chan=%d%s%s%s%s%s%s",
++                           chan->ic_freq, chan->ic_ieee,
++                           active ? "" : " [INACTIVE]",
++                           chan->ic_flags & IEEE80211_CHAN_PASSIVE ?
++                           " [PASSIVE]" : "",
++                           chan->ic_flagext & IEEE80211_CHAN_DISALLOW_ADHOC ?
++                           " [NO-IBSS]" : "",
++                           chan->ic_flagext & IEEE80211_CHAN_DFS ?
++                           " [DFS]" : "",
++                           chan->ic_flags & IEEE80211_CHAN_HT40PLUS ?
++                           " [HT40+]" : "",
++                           chan->ic_flags & IEEE80211_CHAN_HT40MINUS ?
++                           " [HT40-]" : "");
++
++                if (chan->ic_flags & IEEE80211_CHAN_5GHZ) {
++                        if (m5 < 0) {
++                                n = os_realloc(modes, (*num_modes + 1) *
++                                               sizeof(*mode));
++                                if (n == NULL)
++                                        continue;
++                                os_memset(&n[*num_modes], 0, sizeof(*mode));
++                                m5 = *num_modes;
++                                (*num_modes)++;
++                                modes = n;
++                                mode = &modes[m5];
++                                mode->mode = HOSTAPD_MODE_IEEE80211A;
++                                mode->num_rates = 8;
++                                mode->rates = os_zalloc(mode->num_rates *
++                                                        sizeof(int));
++                                if (mode->rates) {
++                                        mode->rates[0] = 60/bw_div;
++                                        mode->rates[1] = 90/bw_div;
++                                        mode->rates[2] = 120/bw_div;
++                                        mode->rates[3] = 180/bw_div;
++                                        mode->rates[4] = 240/bw_div;
++                                        mode->rates[5] = 360/bw_div;
++                                        mode->rates[6] = 480/bw_div;
++                                        mode->rates[7] = 540/bw_div;
++                                }
++                        }
++                        mode = &modes[m5];
++                } else if (chan->ic_flags & IEEE80211_CHAN_2GHZ) {
++                        if (m24 < 0) {
++                                n = os_realloc(modes, (*num_modes + 1) *
++                                               sizeof(*mode));
++                                if (n == NULL)
++                                        continue;
++                                os_memset(&n[*num_modes], 0, sizeof(*mode));
++                                m24 = *num_modes;
++                                (*num_modes)++;
++                                modes = n;
++                                mode = &modes[m24];
++                                mode->mode = HOSTAPD_MODE_IEEE80211G;
++                                mode->num_rates = 12;
++                                mode->rates = os_zalloc(mode->num_rates *
++                                                        sizeof(int));
++                                if (mode->rates) {
++                                        mode->rates[0] = 10;
++                                        mode->rates[1] = 20;
++                                        mode->rates[2] = 55;
++                                        mode->rates[3] = 110;
++                                        mode->rates[4] = 60;
++                                        mode->rates[5] = 90;
++                                        mode->rates[6] = 120;
++                                        mode->rates[7] = 180;
++                                        mode->rates[8] = 240;
++                                        mode->rates[9] = 360;
++                                        mode->rates[10] = 480;
++                                        mode->rates[11] = 540;
++                                }
++                        }
++                        mode = &modes[m24];
++                } else
++                        continue;
++
++                nc = os_realloc(mode->channels, (mode->num_channels + 1) *
++                                sizeof(*nc));
++                if (nc == NULL)
++                        continue;
++                mode->channels = nc;
++                nc = &mode->channels[mode->num_channels];
++                os_memset(nc, 0, sizeof(*nc));
++                mode->num_channels++;
++                nc->chan = chan->ic_ieee;
++                nc->freq = chan->ic_freq;
++                if (!active)
++                        nc->flag |= HOSTAPD_CHAN_DISABLED;
++                if (chan->ic_flags & IEEE80211_CHAN_PASSIVE)
++                        nc->flag |= HOSTAPD_CHAN_NO_IR;
++                if (chan->ic_flags & IEEE80211_CHAN_HT40PLUS)
++                        nc->flag |= HOSTAPD_CHAN_HT40 | HOSTAPD_CHAN_HT40PLUS;
++                if (chan->ic_flags & IEEE80211_CHAN_HT40MINUS)
++                        nc->flag |= HOSTAPD_CHAN_HT40 | HOSTAPD_CHAN_HT40MINUS;
++                if (chan->ic_flagext & IEEE80211_CHAN_DISALLOW_ADHOC)
++                        nc->flag |= HOSTAPD_CHAN_NO_IR;
++                if (chan->ic_flagext & IEEE80211_CHAN_DFS)
++                        nc->flag |= HOSTAPD_CHAN_RADAR;
++        }
++
++        return athr_add_11b(modes, num_modes);
++}
+ 
+ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.name			= "atheros",
+@@ -2282,6 +2513,7 @@ const struct wpa_driver_ops wpa_driver_atheros_ops = {
+ 	.sta_clear_stats	= atheros_sta_clear_stats,
+ 	.commit			= atheros_commit,
+ 	.set_ap_wps_ie		= atheros_set_ap_wps_ie,
++	.get_hw_feature_data2 = athr_get_hw_feature_data,
+ 	.set_authmode		= atheros_set_authmode,
+ 	.set_ap			= atheros_set_ap,
+ #if defined(CONFIG_IEEE80211R) || defined(CONFIG_IEEE80211W) || defined(CONFIG_FILS)

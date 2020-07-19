@@ -1,0 +1,231 @@
+diff --git a/src/drivers/driver_athr.c b/src/drivers/driver_athr.c
+index 19dd5c8..f4fb2fd 100644
+--- a/src/drivers/driver_athr.c
++++ b/src/drivers/driver_athr.c
+@@ -524,6 +524,71 @@ static int athr_get_freq(struct driver_atheros_data *drv, const char *ifname)
+ 	return iwr.u.freq.m / 100000;
+ }
+ 
++#ifdef CONFIG_SAE
++static int driver_atheros_send_external_auth_status(void *priv,
++						struct external_auth *params)
++{
++	struct driver_atheros_data *drv = priv;
++
++	wpa_printf(MSG_INFO, "External auth status:%u", params->status);
++	if (set80211param(drv, IEEE80211_PARAM_EXTERNAL_AUTH_STATUS, params->status, 1) < 0) {
++		wpa_printf(MSG_DEBUG, "Failed to send external auth status");
++		return -1;
++	}
++
++	return 0;
++}
++#endif
++
++static int driver_atheros_send_mgmt(void *priv, const u8 *frm, size_t data_len,
++			     int noack, unsigned int freq,
++			     const u16 *csa_offs, size_t csa_offs_len)
++{
++	struct driver_atheros_data *drv = priv;
++	u8 *buf, ret;
++	const struct ieee80211_mgmt *mgmt;
++	struct ieee80211req_mgmtbuf *mgmt_frm;
++	size_t buf_size;
++
++#ifndef MGMT_FRAME_MAX_SIZE
++#define MGMT_FRAME_MAX_SIZE 1500
++#endif
++	buf_size = MGMT_FRAME_MAX_SIZE + IEEE80211_ADDR_LEN + sizeof(uint32_t);
++	buf = os_malloc(buf_size);
++
++	if(buf == NULL) {
++		wpa_printf(MSG_DEBUG, "%s Unable to allocate memory", __func__);
++		return -1;
++	}
++
++	os_memset(buf, 0, buf_size);
++
++	mgmt = (const struct ieee80211_mgmt *) frm;
++
++	wpa_printf(MSG_DEBUG, "%s frmlen = %lu " MACSTR, __func__,
++		   (unsigned long) data_len, MAC2STR(mgmt->da));
++
++	mgmt_frm = (struct ieee80211req_mgmtbuf *) buf;
++	os_memcpy(mgmt_frm->macaddr, (u8 *)mgmt->da, IEEE80211_ADDR_LEN);
++	mgmt_frm->buflen = data_len;
++
++	if (&mgmt_frm->buf[0] + data_len > buf + buf_size) {
++		wpa_printf(MSG_INFO, "atheros: Too long frame for "
++			   "driver_atheros_send_mgmt (%u)", (unsigned int) data_len);
++		os_free(buf);
++		return -1;
++	}
++
++	os_memcpy(&mgmt_frm->buf[0], frm, data_len);
++
++	ret = set80211priv(drv, IEEE80211_IOCTL_SEND_MGMT, mgmt_frm,
++			    sizeof(struct ieee80211req_mgmtbuf) + data_len, 1);
++
++	os_free(buf);
++
++	return ret;
++}
++
+ 
+ static int athr_get_countrycode(struct driver_atheros_data *drv)
+ {
+@@ -550,6 +615,41 @@ static int athr_get_countrycode(struct driver_atheros_data *drv)
+ 	return 0;
+ }
+ 
++static void athr_raw_receive(struct driver_atheros_data *drv, const char *ev,
++                             size_t len)
++{
++	void *ctx = drv->ctx;
++	const struct ieee80211_mgmt *mgmt;
++	union wpa_event_data event;
++	u16 fc, stype;
++
++	if (len < IEEE80211_HDRLEN)
++		return;
++
++	mgmt = (const struct ieee80211_mgmt *) ev;
++
++	fc = le_to_host16(mgmt->frame_control);
++
++	if (WLAN_FC_GET_TYPE(fc) != WLAN_FC_TYPE_MGMT)
++		return;
++
++	stype = WLAN_FC_GET_STYPE(fc);
++
++	wpa_printf(MSG_DEBUG, "%s: subtype 0x%x len %d", __func__, stype, len);
++	if (stype == WLAN_FC_STYPE_AUTH) {
++		if (len < IEEE80211_HDRLEN + sizeof(mgmt->u.auth))
++			return;
++		os_memset(&event, 0, sizeof(event));
++#ifdef CONFIG_SAE
++		if (le_to_host16(mgmt->u.auth.auth_alg) == WLAN_AUTH_SAE)
++#endif
++		{
++			event.rx_mgmt.frame = (const u8 *)ev;
++			event.rx_mgmt.frame_len = len;
++			wpa_supplicant_event(ctx, EVENT_RX_MGMT, &event);
++		}
++	}
++}
+ 
+ static void
+ driver_atheros_event_wireless_custom(struct driver_atheros_data *drv,
+@@ -615,6 +715,34 @@ driver_atheros_event_wireless_custom(struct driver_atheros_data *drv,
+ 	done:
+ 		os_free(resp_ies);
+ 		os_free(req_ies);
++	} else if (os_strncmp(custom, "EXTERNAL_AUTH_INDICATION", 24) == 0) {
++		char *spos;
++		struct ev_sta_external_auth_params params;
++#define ETH_LEN 6
++#ifndef MGMT_FRAM_TAG_SIZE
++#define MGMT_FRAM_TAG_SIZE 30
++#endif
++		wpa_printf(MSG_DEBUG, "Received EXTERNAL_AUTH_INDICATION");
++
++		spos = custom + MGMT_FRAM_TAG_SIZE;
++
++		os_memcpy(&params, spos, sizeof(struct ev_sta_external_auth_params));
++
++		data.external_auth.action = params.action;
++		os_memcpy(data.external_auth.bssid, params.bssid, ETH_LEN);
++		data.external_auth.ssid_len = params.ssid_len;
++
++		if ( data.external_auth.ssid_len < SSID_MAX_LEN) {
++			os_memcpy(data.external_auth.ssid, params.ssid,
++					data.external_auth.ssid_len);
++		} else {
++			wpa_printf(MSG_DEBUG, "WEXT: Exceeding SSID "
++							"Max Length");
++			return;
++		}
++
++		data.external_auth.key_mgmt_suite = params.keymgmt_suite;
++		wpa_supplicant_event(ctx, EVENT_EXTERNAL_AUTH, &data);
+ #ifdef CONFIG_PEERKEY
+ 	} else if (os_strncmp(custom, "STKSTART.request=", 17) == 0) {
+                 if (hwaddr_aton(custom + 17, data.stkstart.peer)) {
+@@ -777,8 +905,21 @@ static int driver_atheros_event_wireless_assocreqie(
+ 
+ 		wpa_supplicant_event(drv->ctx, EVENT_TDLS, &data);
+ 		return 0;
+-	}
++	} else
+ #endif /* CONFIG_TDLS */
++	if (len >= 11 && os_strncmp(ev, "Manage.auth", 11) == 0) {
++#ifndef MGMT_FRAM_TAG_SIZE
++#define MGMT_FRAM_TAG_SIZE 30
++#endif
++		int length = atoi(ev + 11);
++		if (length < 0 || MGMT_FRAM_TAG_SIZE + length > len) {
++			wpa_printf(MSG_DEBUG,
++				   "Invalid Manage.auth event length %d", length);
++			return -1;
++		}
++		athr_raw_receive(drv, (const char*)((u8 *)ev + MGMT_FRAM_TAG_SIZE), length);
++		return 0;
++	}
+ 	os_free(drv->assoc_req_ies);
+ 	drv->assoc_req_ies = os_malloc(len);
+ 	if (drv->assoc_req_ies == NULL) {
+@@ -1610,6 +1751,9 @@ void * driver_atheros_init(void *ctx, const char *ifname)
+ 			WPA_DRIVER_FLAGS_P2P_CONCURRENT;
+ 
+ 	drv->capa.flags |= WPA_DRIVER_FLAGS_TDLS_SUPPORT;
++#ifdef CONFIG_SAE
++	drv->capa.flags |= WPA_DRIVER_FLAGS_SAE;
++#endif
+ 
+ 	driver_atheros_set_auth_param(drv, IW_AUTH_WPA_ENABLED, 1);
+ 
+@@ -2598,6 +2742,10 @@ static int driver_atheros_set_auth_alg(struct driver_atheros_data *drv,
+ 		authmode = IEEE80211_AUTH_AUTO;
+ 	else if (auth_alg & WPA_AUTH_ALG_SHARED)
+ 		authmode = IEEE80211_AUTH_SHARED;
++#ifdef CONFIG_SAE
++	else if (key_mgmt_suite == WPA_KEY_MGMT_SAE)
++		authmode = IEEE80211_AUTH_SAE;
++#endif
+ 	else
+ 		authmode = IEEE80211_AUTH_OPEN;
+ 
+@@ -2714,6 +2862,12 @@ driver_atheros_associate(void *priv,
+ 		      params->drop_unencrypted, 1);
+ 	if (privacy) {
+ 		if (params->key_mgmt_suite == WPA_KEY_MGMT_IEEE8021X ||
++#ifdef CONFIG_SAE
++		    params->key_mgmt_suite == WPA_KEY_MGMT_SAE ||
++#endif
++#ifdef CONFIG_OWE
++		    params->key_mgmt_suite == WPA_KEY_MGMT_OWE ||
++#endif
+ 		    params->key_mgmt_suite == WPA_KEY_MGMT_PSK) {
+ 			wpa_printf(MSG_DEBUG, " *** KEY MGMT is 2");
+ 		    if (params->wpa_ie_len &&
+@@ -2845,6 +2999,9 @@ int driver_atheros_get_capa(void *priv, struct wpa_driver_capa *capa)
+ 
+ 	drv->capa.flags |= WPA_DRIVER_FLAGS_AP;
+ 	drv->capa.flags |= WPA_DRIVER_FLAGS_SET_KEYS_AFTER_ASSOC_DONE;
++#ifdef CONFIG_SAE
++	drv->capa.flags |= WPA_DRIVER_FLAGS_SAE;
++#endif
+ 	os_memcpy(capa, &drv->capa, sizeof(*capa));
+ 	return 0;
+ }
+@@ -4247,6 +4404,10 @@ const struct wpa_driver_ops wpa_driver_athr_ops = {
+ 	.remain_on_channel = driver_atheros_remain_on_channel,
+ 	.cancel_remain_on_channel = driver_atheros_cancel_remain_on_channel,
+ 	.probe_req_report = driver_atheros_probe_req_report,
++	.send_mlme = driver_atheros_send_mgmt,
++#ifdef CONFIG_SAE
++	.send_external_auth_status = driver_atheros_send_external_auth_status,
++#endif
+ 	.sta_deauth = driver_atheros_hapd_sta_deauth,
+ 	.hapd_send_eapol = driver_atheros_hapd_send_eapol,
+ 	.if_add = driver_atheros_if_add,

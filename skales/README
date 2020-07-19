@@ -1,0 +1,131 @@
+Skales
+-----------
+
+These are the scripts which I use to build the kernel on a day-to-day
+basis. They mostly deal with building the kernel and packaging it up
+into a format that Android bootloaders are happy to deal with. The scripts
+are designed with the 'do one thing, and do it well' mantra in mind.
+Therefore there are separate scripts to setup, compile, package the
+kernel, etc. and they're all assembled into a 'toolbox' that goes in
+your $PATH.
+
+Prerequisites
+-------------
+
+To use dtbTool you should have libfdt installed.
+
+ libfdt-dev (debian)
+ libfdt-devel (redhat)
+ sys-apps/dtc (gentoo)
+
+Background
+----------
+
+Cloning skales should give you a collection of scripts and some
+directories:
+
+ skales $ ls
+ README atag-fix boards dtbTool init-branch
+ initrds make-arm mkbootimg package source-me
+
+ 'README' - This file
+
+ 'atag-fix' - Contains the atag fixup hack for broken bootloaders
+
+ 'boards' - Directory of board configuration files
+
+ 'dtbTool' - Clone of dtbTool from Android (creates a QCDT image)
+
+ 'init-branch' - Command to initialize a new working tree based off a
+                 particular branch.
+
+ 'initrds' - Directory containing initrds to use as ramdisks (user supplied)
+
+ 'make-arm' - Simple Makefile wrapper to build an ARM kernel
+
+ 'mkbootimg' - Clone of mkbootimg from Android (creates a boot.img for booting)
+
+ 'package' - Creates a boot.img with the correct parameters for a particular
+             machine
+
+ 'source-me' - Environment setup script to put these scripts into the $PATH.
+
+Getting Started
+---------------
+
+A simple workflow:
+
+ 1. Clone skales
+
+        $ git clone skales.git
+
+ 1.1  Add skales to your path
+
+        $ . source-me
+
+ 1.2. Copy the config.sh.example to config.sh
+
+        $ cp config.sh.example config.sh
+
+ 1.3. Edit the config file to set options like cross-compiler,
+      defconfig, etc. Note that these options will be global and
+      can be overriden by modifying the per-kernel options
+      described in section 2.1.
+
+ 2. Checkout or clone a kernel
+
+        $ git clone git://git.kernel.org/... kernel
+
+ 2.1. Configure per-kernel options to override the global options
+      in .skales/config for this kernel source tree.
+
+        $ mkdir .skales
+        $ cp /skales/config.sh.example .skales/config
+        $ <edit options>
+
+ 3. Build the kernel
+
+        $ cd kernel
+        $ make-arm -j 16   ...
+
+ 4. Package the kernel up into a boot.img
+
+        $ package 8960dt initrd.gz --cmdline="console=ttyMSM0,115200,n8"
+        Packaged /usr/src/linux/b/my-branch/boot.img
+
+    The boot.img will be placed one level above the kernel directory
+
+        $ ls ../
+        boot.img kernel kobj
+
+5. Boot the kernel
+
+        $ fastboot boot /usr/src/linux/b/my-branch/boot.img
+
+Skales also contains a script, called init-branch, which uses the
+git-new-workdir utility to help work with multiple git trees that
+share history[1].
+
+Most steps are similar to above, but the kernel can be managed with
+these steps:
+
+ 1. Initialize a new working branch (b/ is not necessary but default ignored)
+    with an optional defconfig (in this example we'll use no defconfig)
+
+        $ mkdir -p b/my-branch
+        $ cd b/my-branch
+        $ init-branch my-branch
+        $ ls
+        kernel kobj
+
+    The 'kernel' directory contains the sources of the kernel tree checked out
+    to the branch that was specified (in this case my-branch). The 'kobj'
+    directory contains any object files and build products.
+
+ 2. Enter the kernel directory and configure your kernel
+
+        $ cd kernel
+        $ make-arm menuconfig
+        <configure things>
+
+Continue at step 3 listed above in the simple workflow.

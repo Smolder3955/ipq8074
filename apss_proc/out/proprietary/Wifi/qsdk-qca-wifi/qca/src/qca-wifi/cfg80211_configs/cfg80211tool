@@ -1,0 +1,35 @@
+#Copyright (c) 2016,2017 Qualcomm Innovation Center, Inc.
+#All Rights Reserved.
+#Confidential and Proprietary – Qualcomm Innovation Center, Inc
+#2016 Qualcomm Atheros, Inc.
+#All Rights Reserved.
+#Qualcomm Atheros Confidential and Proprietary.
+
+if [ -z "$3" ]
+  then 
+   val=0
+  else
+   val=$3
+fi
+
+#echo "number of arguments: $# -> $0 $1 $2 $3 $4 $5"
+# Adjust command based on inputs
+
+if [ "$#" -eq 1 ] ; then
+cfg80211tool.1 -i $1 -h list
+fi
+if [ "$#" -eq 2 ] ; then
+cfg80211tool.1 -i $1 -h none --START_CMD --$2 --RESPONSE --$2 --END_CMD
+fi
+if [ "$#" -eq 3 ] ; then
+cfg80211tool.1 -i $1 -h none --START_CMD --$2 --value0 $val --RESPONSE --$2 --END_CMD
+fi
+if [ "$#" -eq 4 ] ; then
+cfg80211tool.1 -i $1 -h none --START_CMD --$2 --value0 $val --value1 $4 --RESPONSE --$2 --END_CMD
+fi
+if [ "$#" -eq 5 ] ; then
+cfg80211tool.1 -i $1 -h none --START_CMD --$2 --value0 $val --value1 $4 --value2 $5 --RESPONSE --$2 --END_CMD
+fi
+if [ "$#" -eq 6 ] ; then
+cfg80211tool.1 -i $1 -h none --START_CMD --$2 --value0 $val --value1 $4 --value2 $5 --value3 $6 --RESPONSE --$2 --END_CMD
+fi

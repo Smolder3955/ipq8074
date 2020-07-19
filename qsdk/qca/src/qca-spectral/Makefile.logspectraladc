@@ -1,0 +1,76 @@
+# 
+# Makes logspectral and logadc tools
+#
+
+ifeq ($(obj),)
+obj := $(shell pwd)
+endif
+
+DEPTH := ../../drivers/wlan_modules
+WLANDRIVER=../../drivers/wlan_modules
+PERF_PWR_OFFLOAD=$(WLANDRIVER)/firmware
+
+ifeq ($(BINDIR),)
+BINDIR=/usr/local/bin
+endif
+
+include $(obj)/${WLANDRIVER}/os/linux/Makefile.inc
+
+ALL=  logspectral logadc
+
+all:	${ALL}
+
+# The following are added to compile spectraltool for x86
+# platform
+OS_VERSION:=$(shell uname -r)
+AUTOCONF_PATH:=/usr/src/linux-headers-$(OS_VERSION)/include/
+INCS += -I$(AUTOCONF_PATH)
+
+ifdef ATHEROSPATH
+INCS+= -I$(ATHEROSPATH)
+endif
+INCS+= -I${HAL} -I${HAL}/${OS} -I${ATH_HAL} -I${obj}/${WLANDRIVER} -I${COMMON} -I${ATH_RATE} -I${ATH} -I${WLAN} -I${PERF_PWR_OFFLOAD} -I${PERF_PWR_OFFLOAD}/host/include/ -I${PERF_PWR_OFFLOAD}/include/
+CFLAGS+= ${INCS} ${COPTS} -g
+
+
+ifeq (${BUILD_STATIC}, y)
+LDFLAGS= -static
+endif
+
+# Diagtools
+ifeq ($(ATH_TGT_TYPE),AR900B)
+CFLAGS+= -DCONFIG_AR900B_SUPPORT -DWLAN_HEADERS
+endif
+
+ifeq ($(ATH_CONFIG_NVRAM), 1)
+CFLAGS += -DCONFIG_NVRAM=1
+endif
+
+ifneq ($(ATH_CARR_DIR), )
+CFLAGS += -DCONFIG_LOCALPC=1 -DCONFIG_DATA_AT_ROOT=1
+endif
+
+ifeq ($(BUILD_OPTIMIZED),y)
+ifeq ($(KERNELARCH),mips)
+CFLAGS += -Os -pipe -mips32r2 -mtune=mips32r2 -funit-at-a-time
+else
+CFLAGS += -Os -pipe -funit-at-a-time
+endif
+endif
+
+ifeq ($(BIG_ENDIAN_HOST),1)
+CFLAGS += -DBIG_ENDIAN_HOST
+endif
+
+logspectral: logspectral.c reg_utils.c spectral_process_tlv.c
+	${CC} -o logspectral ${CFLAGS} ${LDFLAGS} logspectral.c reg_utils.c spectral_process_tlv.c
+
+logadc: logadc.c reg_utils.c spectral_process_tlv.c
+	${CC} -o logadc ${CFLAGS} ${LDFLAGS} logadc.c reg_utils.c spectral_process_tlv.c
+
+install: ${ALL}
+	cp logspectral /usr/local/bin
+	cp logadc /usr/local/bin
+
+clean:
+	rm -f ${ALL} logspectral logadc *.o

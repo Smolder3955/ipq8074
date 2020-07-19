@@ -1,21 +1,11 @@
-QSDK supports the premium profile for Linux kernel 4.4.60 support. The QSDK framework is
-developed using Ubuntu (from version 12.04 to version 16.04) and Debian. However, QSDK
-framework regenerates critical tools required to compile firmware at build time. Thus, the framework
-is independent from the host environment. Although it is developed using the listed distributions, it is
-expected to work on others such as Red Hat, Mint, or Fedora.
+QSDK supports the premium profile for Linux kernel 4.4.60 support. The QSDK framework is developed using Ubuntu (from version 12.04 to version 16.04) and Debian. However, QSDK
+framework regenerates critical tools required to compile firmware at build time. Thus, the framework is independent from the host environment. Although it is developed using the listed distributions, it is expected to work on others such as Red Hat, Mint, or Fedora.
 
 This command is for older/32-bit Debian/Ubuntu releases; customize it for other distributions:
-$ sudo apt-get install gcc g++ binutils patch bzip2 flex make gettext \
-pkg-config unzip zlib1g-dev libc6-dev subversion libncurses5-dev gawk \
-sharutils curl libxml-parser-perl ocaml-nox ocaml-nox ocaml ocaml-findlib \
-libpcre3-dev binutils-gold python-yaml libgl1-mesa-dri:i386 \
-ia32-libs-multiarch:i386 libgd2-xpm:i386 ia32-libs-multiarch ia32-libs
+$ sudo apt-get install gcc g++ binutils patch bzip2 flex make gettext pkg-config unzip zlib1g-dev libc6-dev subversion libncurses5-dev gawk sharutils curl libxml-parser-perl ocaml-nox ocaml-nox ocaml ocaml-findlib libpcre3-dev binutils-gold python-yaml libgl1-mesa-dri:i386 ia32-libs-multiarch:i386 libgd2-xpm:i386 ia32-libs-multiarch ia32-libs
 
 This command is for Ubuntu 16.04.3 64-bit build hosts:
-$ sudo apt-get install gcc g++ binutils patch bzip2 flex make gettext pkg-config unzip
-zlib1g-dev libc6-dev subversion libncurses5-dev gawk sharutils curl libxml-
-parser-perl ocaml-nox ocaml ocaml-findlib libpcre3-dev binutils-gold python-yaml
-libgl1-mesa-dri:i386 libgd-dev multiarch-support lib32ncurses5 lib32z1 libssl-dev
+$ sudo apt-get install gcc g++ binutils patch bzip2 flex make gettext pkg-config unzip zlib1g-dev libc6-dev subversion libncurses5-dev gawk sharutils curl libxml-parser-perl ocaml-nox ocaml ocaml-findlib libpcre3-dev binutils-gold python-yaml libgl1-mesa-dri:i386 libgd-dev multiarch-support lib32ncurses5 lib32z1 libssl-dev
 
 
 $sudo apt-get install device-tree-compiler u-boot-tools
@@ -39,7 +29,7 @@ make defconfig
 sed -i -e "/CONFIG_PACKAGE_qca-wifi-fw-hw5-10.4-asic/d" .config
 make V=99
 
-2. Generate a complete firmware image
+2 Generate a complete firmware image
 Install mkimage: sudo apt-get install uboot-mkimage
 Install DTC: sudo apt-get install device-tree-compiler
 Install libfdt: sudo apt-get install libfdt-dev

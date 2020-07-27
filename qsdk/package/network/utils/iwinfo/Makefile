@@ -7,13 +7,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libiwinfo
-PKG_VERSION:=2018-11-26
+PKG_VERSION:=2018-12-25
 PKG_RELEASE=$(PKG_SOURCE_VERSION)
 
 PKG_SOURCE_PROTO:=git
 PKG_SOURCE_URL:=http://git.openwrt.org/project/iwinfo.git
 PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-PKG_SOURCE_VERSION:=5aa8c5496cd86a1b092d192ffc2364c7a23df25f
+PKG_SOURCE_VERSION:=dd508af4
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
 PKG_MAINTAINER:=Jo-Philipp Wich <jow@openwrt.org>
 PKG_LICENSE:=GPL-2.0
@@ -25,11 +25,13 @@ PKG_CONFIG_DEPENDS := \
 	CONFIG_PACKAGE_kmod-madwifi \
 	CONFIG_PACKAGE_kmod-cfg80211 \
 	CONFIG_PACKAGE_kmod-qca-wifi-unified-profile \
+	CONFIG_PACKAGE_kmod-qca-wifi-custc-profile \
 	CONFIG_PACKAGE_kmod-qca-wifi-unified-perf
 
 PKG_BUILD_DEPENDS := \
 	PACKAGE_kmod-qca-wifi:kmod-qca-wifi \
 	PACKAGE_kmod-qca-wifi-unified-profile:kmod-qca-wifi-unified-profile \
+	PACKAGE_kmod-qca-wifi-custc-profile:kmod-qca-wifi-custc-profile \
 	PACKAGE_kmod-qca-wifi-unified-perf:kmod-qca-wifi-unified-perf
 include $(INCLUDE_DIR)/package.mk
 
@@ -84,6 +86,7 @@ IWINFO_BACKENDS := \
 	$(if $(CONFIG_PACKAGE_kmod-madwifi),madwifi) \
 	$(if $(CONFIG_PACKAGE_kmod-cfg80211),nl80211) \
 	$(if $(CONFIG_PACKAGE_kmod-qca-wifi-unified-profile),qcawifi) \
+	$(if $(CONFIG_PACKAGE_kmod-qca-wifi-custc-profile),qcawifi) \
 	$(if $(CONFIG_PACKAGE_kmod-qca-wifi-unified-perf),qcawifi)
 
 TARGET_CFLAGS += \

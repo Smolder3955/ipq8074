@@ -1,6 +1,6 @@
 --- a/hostapd/config_file.c
 +++ b/hostapd/config_file.c
-@@ -2422,6 +2422,8 @@ static int hostapd_config_fill(struct ho
+@@ -2478,6 +2478,8 @@ static int hostapd_config_fill(struct ho
  		conf->ieee80211d = atoi(pos);
  	} else if (os_strcmp(buf, "ieee80211h") == 0) {
  		conf->ieee80211h = atoi(pos);
@@ -11,7 +11,7 @@
  	} else if (os_strcmp(buf, "eapol_version") == 0) {
 --- a/src/ap/ap_config.h
 +++ b/src/ap/ap_config.h
-@@ -751,6 +751,7 @@ struct hostapd_config {
+@@ -915,6 +915,7 @@ struct hostapd_config {
  	int ieee80211d;
  
  	int ieee80211h; /* DFS */
@@ -30,7 +30,7 @@
  
  
  static int dfs_get_used_n_chans(struct hostapd_iface *iface, int *seg1)
-@@ -865,6 +867,73 @@ static int hostapd_dfs_start_channel_swi
+@@ -877,6 +879,73 @@ static int hostapd_dfs_start_channel_swi
  	return err;
  }
  
@@ -104,7 +104,7 @@
  
  static int hostapd_dfs_start_channel_switch(struct hostapd_iface *iface)
  {
-@@ -896,6 +965,9 @@ static int hostapd_dfs_start_channel_swi
+@@ -909,6 +978,9 @@ static int hostapd_dfs_start_channel_swi
  	if (iface->dfs_domain == HOSTAPD_DFS_REGION_ETSI)
  		skip_radar = 0;
  
@@ -113,8 +113,8 @@
 +
  	/* Perform channel switch/CSA */
  	channel = dfs_get_valid_channel(iface, &secondary_channel,
- 					&vht_oper_centr_freq_seg0_idx,
-@@ -1012,6 +1084,12 @@ int hostapd_dfs_radar_detected(struct ho
+ 					&oper_centr_freq_seg0_idx,
+@@ -1029,6 +1101,12 @@ int hostapd_dfs_radar_detected(struct ho
  	set_dfs_state(iface, freq, ht_enabled, chan_offset, chan_width,
  		      cf1, cf2, HOSTAPD_CHAN_DFS_UNAVAILABLE);
  
@@ -143,9 +143,9 @@
  int hostapd_dfs_complete_cac(struct hostapd_iface *iface, int success, int freq,
 --- a/src/ap/hostapd.c
 +++ b/src/ap/hostapd.c
-@@ -2616,6 +2616,7 @@ int hostapd_disable_iface(struct hostapd
- 		!!(hapd_iface->drv_flags &
- 		   WPA_DRIVER_FLAGS_AP_TEARDOWN_SUPPORT);
+@@ -2655,6 +2655,7 @@ int hostapd_disable_iface(struct hostapd
+ 		hostapd_cleanup_cs_params(hapd_iface->bss[j]);
+ #endif /* NEED_AP_MLME */
  
 +	eloop_cancel_timeout(hostapd_dfs_test_mode_csa_timeout, hapd_iface, NULL);
  	/* same as hostapd_interface_deinit without deinitializing ctrl-iface */

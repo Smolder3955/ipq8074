@@ -22,7 +22,7 @@ check_if_mape_exist(){
 	local type
 	local zone
 	config_get proto "$config" proto
-	config_get type "$config" type
+	config_get type "$config" type 'map-e'
 	config_get zone "$config" zone 'wan'
         [ "$proto" = "map" ] && [ "$type" = "map-e" ] && [ "$zone" != "wan" ] && iptables -t nat -I zone_${zone}_postrouting -j QUEUE
 }

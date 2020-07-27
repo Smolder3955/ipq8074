@@ -1,15 +1,13 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=libunwind
-PKG_VERSION:=2015-07-04
-PKG_RELEASE:=$(PKG_SOURCE_VERSION)
+PKG_VERSION:=1.2.1
+PKG_RELEASE:=2
 
-PKG_SOURCE_PROTO:=git
-PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION)-$(PKG_SOURCE_VERSION).tar.gz
-PKG_SOURCE_URL:=git://git.debian.org/git/collab-maint/libunwind.git
-PKG_SOURCE_VERSION:=6bbcd10591d9aac11beb9fa526b6bf69ddbab437
-PKG_SOURCE_SUBDIR:=$(PKG_NAME)-$(PKG_VERSION)
-
+PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=http://download.savannah.gnu.org/releases/libunwind
+PKG_MD5SUM:=06ba9e60d92fd6f55cd9dadb084df19e
+PKG_FIXUP:=autoreconf
 PKG_INSTALL:=1
 PKG_BUILD_PARALLEL:=1
 
@@ -21,6 +19,7 @@ define Package/libunwind
   SECTION:=libs
   CATEGORY:=Libraries
   TITLE:=portable, efficient C(API) to determine call-chain
+  DEPENDS:=+liblzma
 endef
 
 define Package/libunwind-dev/description
@@ -30,6 +29,10 @@ endef
 
 CONFIGURE_ARGS += \
 	--enable-shared
+
+TARGET_LDFLAGS += \
+	-L$(STAGING_DIR)/usr/lib \
+	-llzma
 
 define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/* $(1)/

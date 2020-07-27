@@ -1,6 +1,6 @@
 --- a/hostapd/ctrl_iface.c
 +++ b/hostapd/ctrl_iface.c
-@@ -2700,6 +2700,92 @@ set:
+@@ -2779,6 +2779,92 @@ set:
  	return ret;
  }
  
@@ -93,7 +93,7 @@
  
  static int hostapd_ctrl_iface_remove_neighbor(struct hostapd_data *hapd,
  					      char *buf)
-@@ -3300,6 +3386,10 @@ static int hostapd_ctrl_iface_receive_process(struct hostapd_data *hapd,
+@@ -3414,6 +3500,10 @@ static int hostapd_ctrl_iface_receive_pr
  	} else if (os_strncmp(buf, "SIGNAL_TXRATE", 13) == 0) {
  		if (hostapd_ctrl_iface_signal_txrate(hapd, buf + 13))
  			reply_len = -1;
@@ -101,12 +101,12 @@
 +		reply_len = hostapd_ctrl_iface_ht40_allow_map(hapd->iface,
 +							      reply,
 +							      reply_size);
- 	} else {
- 		os_memcpy(reply, "UNKNOWN COMMAND\n", 16);
- 		reply_len = 16;
+ 	} else if (os_strncmp(buf, "GET_CAPABILITY ", 15) == 0) {
+ 		reply_len = hostapd_ctrl_iface_get_capability(
+ 			hapd, buf + 15, reply, reply_size);
 --- a/hostapd/hostapd_cli.c
 +++ b/hostapd/hostapd_cli.c
-@@ -1361,6 +1361,12 @@ static int hostapd_cli_cmd_driver_flags(struct wpa_ctrl *ctrl, int argc,
+@@ -1366,6 +1366,12 @@ static int hostapd_cli_cmd_driver_flags(
  	return wpa_ctrl_command(ctrl, "DRIVER_FLAGS");
  }
  
@@ -119,12 +119,12 @@
  
  #ifdef CONFIG_DPP
  
-@@ -1663,6 +1669,8 @@ static const struct hostapd_cli_cmd hostapd_cli_commands[] = {
+@@ -1691,6 +1697,8 @@ static const struct hostapd_cli_cmd host
  	{ "signal_txrate", hostapd_cli_cmd_signal_txrate, NULL,
  	  "= set signal tx rate parameters: signal_txrate "
  	  "LOW=<> HIGH=<>" },
 +	{ "ht40_allow_map", hostapd_cli_cmd_ht40_allow_map, NULL,
 +	  "= show ht40 allow map status" },
- 	{ NULL, NULL, NULL, NULL }
- };
- 
+ 	{ "req_beacon", hostapd_cli_cmd_req_beacon, NULL,
+ 	  "<addr> [req_mode=] <measurement request hexdump>  = send a Beacon report request to a station" },
+ 	{ "reload_wpa_psk", hostapd_cli_cmd_reload_wpa_psk, NULL,

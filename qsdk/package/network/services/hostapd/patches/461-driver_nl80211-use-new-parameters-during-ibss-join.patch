@@ -10,7 +10,7 @@ Signed-hostap: Antonio Quartulli <ordex@autistici.org>
 
 --- a/src/drivers/driver_nl80211.c
 +++ b/src/drivers/driver_nl80211.c
-@@ -5093,7 +5093,7 @@ static int wpa_driver_nl80211_ibss(struc
+@@ -5377,7 +5377,7 @@ static int wpa_driver_nl80211_ibss(struc
  				   struct wpa_driver_associate_params *params)
  {
  	struct nl_msg *msg;
@@ -19,7 +19,7 @@ Signed-hostap: Antonio Quartulli <ordex@autistici.org>
  	int count = 0;
  
  	wpa_printf(MSG_DEBUG, "nl80211: Join IBSS (ifindex=%d)", drv->ifindex);
-@@ -5120,6 +5120,37 @@ retry:
+@@ -5404,6 +5404,37 @@ retry:
  	    nl80211_put_beacon_int(msg, params->beacon_int))
  		goto fail;
  

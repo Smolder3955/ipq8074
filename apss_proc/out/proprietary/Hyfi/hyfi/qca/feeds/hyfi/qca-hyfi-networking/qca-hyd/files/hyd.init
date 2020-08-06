@@ -32,6 +32,7 @@ ieee1905managed_bridge2=
 . /lib/functions/hyfi-iface.sh
 . /lib/functions/hyfi-network.sh
 . /lib/functions/whc-iface.sh
+. /lib/functions.sh
 
 if [ -f /lib/functions/lbd-config.sh ]; then
     . /lib/functions/lbd-config.sh

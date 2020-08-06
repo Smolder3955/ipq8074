@@ -8,7 +8,7 @@
  
  #ifdef ANDROID
  #include <sys/capability.h>
-@@ -183,58 +184,45 @@ int os_gmtime(os_time_t t, struct os_tm
+@@ -189,58 +190,45 @@ int os_gmtime(os_time_t t, struct os_tm
  }
  
  

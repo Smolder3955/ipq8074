@@ -123,7 +123,7 @@ _wifi_updown() {
 		config_get iftype "$device" type
 		if eval "type ${1}_$iftype" 2>/dev/null >/dev/null; then
 			eval "scan_$iftype '$device'"
-			eval "${1}_$iftype '$device'" || echo "$device($iftype): ${1} failed"
+			eval "${1}_$iftype '$device' '$3'" || echo "$device($iftype): ${1} failed"
 		elif [ ! -f /lib/netifd/wireless/$iftype.sh ]; then
 			echo "$device($iftype): Interface type not supported"
 		fi
@@ -139,7 +139,7 @@ _wifi_updown() {
 wifi_updown() {
 	cmd=down
 	[ enable = "$1" ] && {
-		_wifi_updown disable "$2"
+		_wifi_updown disable "$2" "$3"
 		ubus_wifi_cmd "$cmd" "$2"
 		scan_wifi
 		cmd=up
@@ -149,8 +149,8 @@ wifi_updown() {
 }
 
 wifi_recover() {
-	_wifi_updown disable_recover
-	_wifi_updown enable_recover
+	_wifi_updown disable_recover "$1"
+	_wifi_updown enable_recover "$1"
 }
 
 wifi_reload_legacy() {
@@ -278,7 +278,7 @@ scan_wifi
 trap 'wifi_trap; exit' INT TERM ABRT QUIT ALRM
 
 case "$1" in
-	down) wifi_updown "disable" "$2";;
+	down) wifi_updown "disable" "$2" "$3";;
 	detect) wifi_detect "$2";;
 	status) ubus_wifi_cmd "status" "$2";;
 	reload) wifi_reload "$2";;
@@ -287,5 +287,5 @@ case "$1" in
 	unload) wifi_unload "$2";;
 	recover) wifi_recover "$2";;
 	--help|help) usage;;
-	*) ubus call network reload; wifi_updown "enable" "$2";;
+	*) ubus call network reload; wifi_updown "enable" "$2" "$3";;
 esac

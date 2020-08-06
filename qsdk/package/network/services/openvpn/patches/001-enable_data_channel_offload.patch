@@ -1,6 +1,8 @@
---- a/configure.ac
-+++ b/configure.ac
-@@ -89,6 +89,12 @@ AC_ARG_ENABLE(
+Index: openvpn-2.4.7/configure.ac
+===================================================================
+--- openvpn-2.4.7.orig/configure.ac
++++ openvpn-2.4.7/configure.ac
+@@ -92,6 +92,12 @@ AC_ARG_ENABLE(
  )
  
  AC_ARG_ENABLE(
@@ -13,22 +15,24 @@
  	[x509-alt-username],
  	[AS_HELP_STRING([--enable-x509-alt-username], [enable the --x509-username-field feature @<:@default=no@:>@])],
  	,
-@@ -1000,6 +1006,10 @@ if test "${enable_ssl}" = "yes"; then
- 	AC_DEFINE([ENABLE_SSL], [1], [Enable ssl library])
- fi
+@@ -1174,6 +1180,10 @@ test "${enable_def_auth}" = "yes" && AC_
+ test "${enable_pf}" = "yes" && AC_DEFINE([ENABLE_PF], [1], [Enable internal packet filter])
+ test "${enable_strict_options}" = "yes" && AC_DEFINE([ENABLE_STRICT_OPTIONS_CHECK], [1], [Enable strict options check between peers])
  
 +if test "${enable_dca}" = "yes"; then
 +	AC_DEFINE([ENABLE_DCA], [1], [Enable data channel acceleration])
 +fi
 +
  if test "${enable_crypto}" = "yes"; then
- 	test "${have_crypto_crypto}" != "yes" && AC_MSG_ERROR([${with_crypto_library} crypto is required but missing])
+ 	test "${have_crypto}" != "yes" && AC_MSG_ERROR([${with_crypto_library} crypto is required but missing])
  	test "${enable_crypto_ofb_cfb}" = "yes" && AC_DEFINE([ENABLE_OFB_CFB_MODE], [1], [Enable OFB and CFB cipher modes])
---- a/src/openvpn/Makefile.am
-+++ b/src/openvpn/Makefile.am
+Index: openvpn-2.4.7/src/openvpn/Makefile.am
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/Makefile.am
++++ openvpn-2.4.7/src/openvpn/Makefile.am
 @@ -20,7 +20,10 @@ EXTRA_DIST = \
  
- INCLUDES = \
+ AM_CPPFLAGS = \
  	-I$(top_srcdir)/include \
 -	-I$(top_srcdir)/src/compat
 +	-I$(top_srcdir)/src/compat \
@@ -38,53 +42,44 @@
  
  AM_CFLAGS = \
  	$(TAP_CFLAGS) \
-@@ -111,7 +114,8 @@ openvpn_SOURCES = \
- 	syshead.h \
+@@ -119,7 +122,8 @@ openvpn_SOURCES = \
+ 	tls_crypt.c tls_crypt.h \
  	tun.c tun.h \
- 	win32.h win32_wfp.h win32.c \
+ 	win32.h win32.c \
 -	cryptoapi.h cryptoapi.c
 +	cryptoapi.h cryptoapi.c dca.h dca.c \
 +	dca_crypto.c dca_route.c
  openvpn_LDADD = \
  	$(top_builddir)/src/compat/libcompat.la \
  	$(SOCKETS_LIBS) \
---- a/src/openvpn/crypto.c
-+++ b/src/openvpn/crypto.c
-@@ -485,7 +485,20 @@ init_key_ctx (struct key_ctx *ctx, struc
- 	      const char *prefix)
+Index: openvpn-2.4.7/src/openvpn/crypto.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/crypto.c
++++ openvpn-2.4.7/src/openvpn/crypto.c
+@@ -847,7 +847,19 @@ init_key_ctx(struct key_ctx *ctx, const
+              const char *prefix)
  {
-   struct gc_arena gc = gc_new ();
+     struct gc_arena gc = gc_new();
 +#ifdef ENABLE_DCA
-+  void *dca_crypto_ctx = ctx->dca_crypto_ctx;
++    void *dca_crypto_ctx = ctx->dca_crypto_ctx;
 +
-+  if (!dca_crypto_ctx_init(ctx, key, kt, enc))
-+      dmsg (D_DCA_INFO, "Successfully Initialized data path crypto Ctx\n");
-+  else
-+      dmsg (D_DCA_INFO, "Couldn't Initialized data path crypto Ctx\n");
++    if (!dca_crypto_ctx_init(ctx, key, kt, enc))
++        dmsg (D_DCA_INFO, "Successfully Initialized data path crypto Ctx\n");
++    else
++        dmsg (D_DCA_INFO, "Couldn't Initialized data path crypto Ctx\n");
 +#endif
 +
-   CLEAR (*ctx);
+     CLEAR(*ctx);
 +#ifdef ENABLE_DCA
-+  ctx->dca_crypto_ctx = dca_crypto_ctx;
++    ctx->dca_crypto_ctx = dca_crypto_ctx;
 +#endif
-+
-   if (kt->cipher && kt->cipher_length > 0)
+     if (kt->cipher && kt->cipher_length > 0)
      {
  
---- a/src/openvpn/crypto.h
-+++ b/src/openvpn/crypto.h
-@@ -140,6 +140,9 @@ struct key_ctx
- {
-   cipher_ctx_t *cipher;      	/**< Generic cipher %context. */
-   hmac_ctx_t *hmac;               /**< Generic HMAC %context. */
-+#ifdef ENABLE_DCA
-+  void *dca_crypto_ctx;
-+#endif
- };
- 
- #define KEY_DIRECTION_BIDIRECTIONAL 0 /* same keys for both directions */
---- a/src/openvpn/forward.c
-+++ b/src/openvpn/forward.c
+Index: openvpn-2.4.7/src/openvpn/forward.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/forward.c
++++ openvpn-2.4.7/src/openvpn/forward.c
 @@ -46,6 +46,9 @@
  #include "occ-inline.h"
  #include "ping-inline.h"
@@ -95,9 +90,9 @@
  
  counter_type link_read_bytes_global;  /* GLOBAL */
  counter_type link_write_bytes_global; /* GLOBAL */
-@@ -442,6 +445,17 @@ encrypt_sign (struct context *c, bool co
-   if (c->c2.context_auth != CAS_SUCCEEDED)
-     c->c2.buf.len = 0;
+@@ -467,6 +470,17 @@ encrypt_sign(struct context *c, bool com
+         c->c2.buf.len = 0;
+     }
  #endif
 +#ifdef ENABLE_DCA
 +  /* Below changes are to handle data packet offload support */
@@ -111,14 +106,14 @@
 +    }
 +#endif
  
-   if (comp_frag)
+     if (comp_frag)
      {
-@@ -743,6 +757,21 @@ process_incoming_link (struct context *c
+@@ -787,6 +801,21 @@ process_incoming_link_part1(struct conte
  
-   if (c->c2.buf.len > 0)
+     if (c->c2.buf.len > 0)
      {
 +#ifdef ENABLE_DCA
-+  /* Below changes are to handle data packet offload support */
++    /* Below changes are to handle data packet offload support */
 +      if (c->c2.dca_ctx)
 +        {
 +          int ret;
@@ -132,11 +127,11 @@
 +            }
 +        }
 +#endif
-       c->c2.link_read_bytes += c->c2.buf.len;
-       link_read_bytes_global += c->c2.buf.len;
+         c->c2.link_read_bytes += c->c2.buf.len;
+         link_read_bytes_global += c->c2.buf.len;
  #ifdef ENABLE_MEMSTATS
-@@ -1415,6 +1444,11 @@ pre_select (struct context *c)
-   check_send_occ_msg (c);
+@@ -1598,6 +1627,11 @@ pre_select(struct context *c)
+     check_send_occ_msg(c);
  #endif
  
 +#ifdef ENABLE_DCA
@@ -145,29 +140,30 @@
 +#endif
 +
  #ifdef ENABLE_FRAGMENT
-   /* Should we deliver a datagram fragment to remote? */
-   check_fragment (c);
-@@ -1444,6 +1478,9 @@ io_wait_dowork (struct context *c, const
- #ifdef ENABLE_MANAGEMENT
-   static int management_shift = 6; /* depends on MANAGEMENT_READ and MANAGEMENT_WRITE */
+     /* Should we deliver a datagram fragment to remote? */
+     check_fragment(c);
+@@ -1630,6 +1664,9 @@ io_wait_dowork(struct context *c, const
+ #ifdef ENABLE_ASYNC_PUSH
+     static int file_shift = 8;     /* listening inotify events */
  #endif
 +#ifdef ENABLE_DCA
 +  static int dca_shift = 8; /* depends on DCA_SOCKET_READ */
 +#endif
  
-   /*
-    * Decide what kind of events we want to wait for.
-@@ -1538,6 +1575,9 @@ io_wait_dowork (struct context *c, const
-     management_socket_set (management, c->c2.event_set, (void*)&management_shift, NULL);
+     /*
+      * Decide what kind of events we want to wait for.
+@@ -1738,6 +1775,10 @@ io_wait_dowork(struct context *c, const
+     }
  #endif
  
 +#ifdef ENABLE_DCA
 +  dca_socket_set (c->c2.event_set, EVENT_READ, (void*)&dca_shift);
 +#endif
-   /*
-    * Possible scenarios:
-    *  (1) tcp/udp port has data available to read
-@@ -1612,6 +1652,11 @@ process_io (struct context *c)
++
+ #ifdef ENABLE_ASYNC_PUSH
+     /* arm inotify watcher */
+     if (c->options.mode == MODE_SERVER)
+@@ -1824,6 +1865,11 @@ process_io(struct context *c)
      }
  #endif
  
@@ -176,95 +172,14 @@
 +    dca_recv(c);
 +#endif
 +
-   /* TCP/UDP port ready to accept write */
-   if (status & SOCKET_WRITE)
+     /* TCP/UDP port ready to accept write */
+     if (status & SOCKET_WRITE)
      {
---- a/src/openvpn/init.c
-+++ b/src/openvpn/init.c
-@@ -1746,7 +1746,10 @@ do_up (struct context *c, bool pulled_op
- #if P2MP
- 	  save_pulled_options_digest (c, &c->c2.pulled_options_digest);
- #endif
--
-+#ifdef ENABLE_DCA
-+      if (c->options.enable_dca)
-+        dca_tun_up(c);
-+#endif
- 	  /* if --route-delay was specified, start timer */
- 	  if (c->options.route_delay_defined)
- 	    {
-@@ -3569,6 +3572,12 @@ init_instance (struct context *c, const
-     pf_init_context (c);
- #endif
- 
-+#ifdef ENABLE_DCA
-+  /* Initialize Data Plane */
-+  if (options->enable_dca && (c->mode == CM_P2P || c->mode == CM_CHILD_UDP))
-+    dca_tun_alloc(c);
-+#endif
-+
-   /* Check for signals */
-   if (IS_SIG (c))
-     goto sig;
-@@ -3598,6 +3607,19 @@ close_instance (struct context *c)
-       {
- 	/* if xinetd/inetd mode, don't allow restart */
- 	do_close_check_if_restart_permitted (c);
-+#ifdef ENABLE_DCA
-+        if (c->c2.dca_ctx)
-+          {
-+            if (c->mode == CM_P2P)
-+              {
-+                dca_tun_down(c);
-+                dca_tun_free(c);
-+              }
-+          }
-+
-+        if ((c->mode == CM_TOP) || (c->mode == CM_P2P))
-+          dca_uninit(c);
-+#endif
- 
- #ifdef ENABLE_LZO
- 	if (lzo_defined (&c->c2.lzo_compwork))
---- a/src/openvpn/mudp.c
-+++ b/src/openvpn/mudp.c
-@@ -143,6 +143,10 @@ multi_process_io_udp (struct multi_conte
-     strcat (buf, "TR/");
-   else if (status & TUN_WRITE)
-     strcat (buf, "TW/");
-+#ifdef ENABLE_DCA
-+  else if (status & DCA_SOCKET_READ)
-+    strcat (buf, "DR/");
-+#endif
-   printf ("IO %s\n", buf);
- #endif
- 
-@@ -154,6 +158,11 @@ multi_process_io_udp (struct multi_conte
-     }
- #endif
- 
-+#ifdef ENABLE_DCA
-+  if (status & DCA_SOCKET_READ)
-+    dca_recv(m->top);
-+#endif
-+
-   /* UDP port ready to accept write */
-   if (status & SOCKET_WRITE)
-     {
-@@ -239,6 +248,10 @@ tunnel_server_udp_single_threaded (struc
- 
-   /* finished with initialization */
-   initialization_sequence_completed (top, ISC_SERVER); /* --mode server --proto udp */
-+#ifdef ENABLE_DCA
-+    if (top->options.enable_dca)
-+      dca_init(top);
-+#endif
- 
-   /* per-packet event loop */
-   while (true)
---- a/src/openvpn/multi.c
-+++ b/src/openvpn/multi.c
-@@ -43,6 +43,9 @@
+Index: openvpn-2.4.7/src/openvpn/multi.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/multi.c
++++ openvpn-2.4.7/src/openvpn/multi.c
+@@ -49,6 +49,9 @@
  
  #include "forward-inline.h"
  #include "pf-inline.h"
@@ -274,18 +189,18 @@
  
  /*#define MULTI_DEBUG_EVENT_LOOP*/
  
-@@ -171,6 +174,9 @@ multi_reap_range (const struct multi_con
- 	  dmsg (D_MULTI_DEBUG, "MULTI: REAP DEL %s",
- 	       mroute_addr_print (&r->addr, &gc));
- 	  learn_address_script (m, NULL, "delete", &r->addr);
+@@ -197,6 +200,9 @@ multi_reap_range(const struct multi_cont
+             dmsg(D_MULTI_DEBUG, "MULTI: REAP DEL %s",
+                  mroute_addr_print(&r->addr, &gc));
+             learn_address_script(m, NULL, "delete", &r->addr);
 +#ifdef ENABLE_DCA
-+	  dca_route_del(r);
++     dca_route_del(r);
 +#endif
- 	  multi_route_del (r);
- 	  hash_iterator_delete_element (&hi);
- 	}
-@@ -572,6 +578,14 @@ multi_close_instance (struct multi_conte
-   set_cc_config (mi, NULL);
+             multi_route_del(r);
+             hash_iterator_delete_element(&hi);
+         }
+@@ -685,6 +691,14 @@ multi_close_instance(struct multi_contex
+     set_cc_config(mi, NULL);
  #endif
  
 +#ifdef ENABLE_DCA
@@ -296,68 +211,44 @@
 +    }
 +#endif
 +
-   multi_client_disconnect_script (m, mi);
+     multi_client_disconnect_script(m, mi);
  
-   if (mi->did_open_context)
-@@ -651,6 +665,7 @@ multi_create_instance (struct multi_cont
+     if (mi->did_open_context)
+@@ -773,6 +787,7 @@ multi_create_instance(struct multi_conte
  
-   perf_push (PERF_MULTI_CREATE_INSTANCE);
+     perf_push(PERF_MULTI_CREATE_INSTANCE);
  
-+  msg (M_INFO, "MULTI: multi_create_instance called");
-   msg (D_MULTI_MEDIUM, "MULTI: multi_create_instance called");
++    msg(M_INFO, "MULTI: multi_create_instance called");
+     msg(D_MULTI_MEDIUM, "MULTI: multi_create_instance called");
  
-   ALLOC_OBJ_CLEAR (mi, struct multi_instance);
-@@ -970,12 +985,11 @@ multi_learn_addr (struct multi_context *
- 	      owner = mi;
- 	      multi_instance_inc_refcount (mi);
- 	      route_quota_inc (mi);
--
- 	      /* add new route */
- 	      hash_add_fast (m->vhash, bucket, &newroute->addr, hv, newroute);
- 	    }
- 	}
--      
-+
-       msg (D_MULTI_LOW, "MULTI: Learn%s: %s -> %s",
- 	   learn_succeeded ? "" : " FAILED",
- 	   mroute_addr_print (&newroute->addr, &gc),
-@@ -986,7 +1000,6 @@ multi_learn_addr (struct multi_context *
- 
-       gc_free (&gc);
+     ALLOC_OBJ_CLEAR(mi, struct multi_instance);
+@@ -1210,6 +1225,11 @@ multi_get_instance_by_virtual_addr(struc
+         }
      }
--
-   return owner;
- }
  
-@@ -1041,7 +1054,12 @@ multi_get_instance_by_virtual_addr (stru
- 	    }
- 	}
-     }
--  
-+
 +#ifdef ENABLE_DCA
 +  if (ret)
 +    dca_route_add(route);
 +#endif
 +
  #ifdef ENABLE_DEBUG
-   if (check_debug_level (D_MULTI_DEBUG))
+     if (check_debug_level(D_MULTI_DEBUG))
      {
-@@ -1880,7 +1898,10 @@ multi_connection_established (struct mul
+@@ -2085,7 +2105,10 @@ script_failed:
  
-       /* set flag so we don't get called again */
-       mi->connection_established_flag = true;
+         /* set flag so we don't get called again */
+         mi->connection_established_flag = true;
 -
 +#ifdef ENABLE_DCA
 +      if (mi->context.c2.dca_ctx)
 +        dca_tun_up(&mi->context);
 +#endif
-       /* increment number of current authenticated clients */
-       ++m->n_clients;
-       update_mstat_n_clients(m->n_clients);
-@@ -2568,6 +2589,13 @@ stale_route_check_trigger (struct multi_
+         /* increment number of current authenticated clients */
+         ++m->n_clients;
+         update_mstat_n_clients(m->n_clients);
+@@ -2979,6 +3002,13 @@ stale_route_check_trigger(struct multi_c
  void
- multi_process_per_second_timers_dowork (struct multi_context *m)
+ multi_process_per_second_timers_dowork(struct multi_context *m)
  {
 +#ifdef ENABLE_DCA
 +  if (m->top.options.enable_dca)
@@ -366,38 +257,52 @@
 +      dca_routes_update(m);
 +    }
 +#endif
-   /* possibly reap instances/routes in vhash */
-   multi_reap_process (m);
+     /* possibly reap instances/routes in vhash */
+     multi_reap_process(m);
  
---- a/src/openvpn/openvpn.c
-+++ b/src/openvpn/openvpn.c
-@@ -66,6 +66,11 @@ tunnel_point_to_point (struct context *c
-   /* set point-to-point mode */
-   c->mode = CM_P2P;
+Index: openvpn-2.4.7/src/openvpn/openvpn.h
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/openvpn.h
++++ openvpn-2.4.7/src/openvpn/openvpn.h
+@@ -237,19 +237,22 @@ struct context_2
+     bool event_set_owned;
  
-+#ifdef ENABLE_DCA
-+  if (c->options.enable_dca)
-+    dca_init(c);
-+#endif
-+
-   /* initialize tunnel instance */
-   init_instance_handle_signals (c, c->es, CC_HARD_USR1_TO_HUP);
-   if (IS_SIG (c))
---- a/src/openvpn/openvpn.h
-+++ b/src/openvpn/openvpn.h
-@@ -247,6 +247,9 @@ struct context_2
- #  define MANAGEMENT_READ  (1<<6)
- #  define MANAGEMENT_WRITE (1<<7)
- # endif
+     /* event flags returned by io_wait */
+-#define SOCKET_READ       (1<<0)
+-#define SOCKET_WRITE      (1<<1)
+-#define TUN_READ          (1<<2)
+-#define TUN_WRITE         (1<<3)
+-#define ES_ERROR          (1<<4)
+-#define ES_TIMEOUT        (1<<5)
+-#ifdef ENABLE_MANAGEMENT
+-#define MANAGEMENT_READ  (1<<6)
+-#define MANAGEMENT_WRITE (1<<7)
+-#endif
+-#ifdef ENABLE_ASYNC_PUSH
+-#define FILE_CLOSED       (1<<8)
+-#endif
++# define SOCKET_READ       (1<<0)
++# define SOCKET_WRITE      (1<<1)
++# define TUN_READ          (1<<2)
++# define TUN_WRITE         (1<<3)
++# define ES_ERROR          (1<<4)
++# define ES_TIMEOUT        (1<<5)
++# ifdef ENABLE_MANAGEMENT
++#  define MANAGEMENT_READ  (1<<6)
++#  define MANAGEMENT_WRITE (1<<7)
++# endif
++# ifdef ENABLE_ASYNC_PUSH
++#  define FILE_CLOSED       (1<<8)
++# endif
 +# ifdef ENABLE_DCA
-+#  define DCA_SOCKET_READ  (1<<8)
-+#endif
++#  define DCA_SOCKET_READ  (1<<9)
++# endif
  
-   unsigned int event_set_status;
+     unsigned int event_set_status;
  
 @@ -491,6 +494,9 @@ struct context_2
- #ifdef MANAGEMENT_DEF_AUTH
-   struct man_def_auth_context mda_context;
+ #ifdef ENABLE_ASYNC_PUSH
+     int inotify_fd; /* descriptor for monitoring file changes */
  #endif
 +#ifdef ENABLE_DCA
 +  void *dca_ctx;
@@ -405,52 +310,54 @@
  };
  
  
---- a/src/openvpn/options.c
-+++ b/src/openvpn/options.c
-@@ -757,6 +757,9 @@ static const char usage_message[] =
+Index: openvpn-2.4.7/src/openvpn/options.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/options.c
++++ openvpn-2.4.7/src/openvpn/options.c
+@@ -771,6 +771,9 @@ static const char usage_message[] =
  #ifdef ENABLE_DEBUG
-   "--show-gateway : Show info about default gateway.\n"
+     "--show-gateway : Show info about default gateway.\n"
  #endif
 +#ifdef ENABLE_DCA
 +  "--enable-dca : Enable data channel acceleration (dca).\n"
 +#endif
-  ;
+ ;
  
  #endif /* !ENABLE_SMALL */
-@@ -878,6 +881,9 @@ init_options (struct options *o, const b
-   }
- #endif /* WIN32 */
+@@ -901,6 +904,9 @@ init_options(struct options *o, const bo
+     }
+ #endif /* _WIN32 */
  #endif /* P2MP_SERVER */
 +#ifdef ENABLE_DCA
 +  o->enable_dca = false;
 +#endif
-   o->allow_recursive_routing = false;
+     o->allow_recursive_routing = false;
  }
  
-@@ -1687,6 +1693,9 @@ show_settings (const struct options *o)
-   SHOW_BOOL (block_outside_dns);
-   show_tuntap_options (&o->tuntap_options);
+@@ -1788,6 +1794,9 @@ show_settings(const struct options *o)
+     SHOW_BOOL(block_outside_dns);
+     show_tuntap_options(&o->tuntap_options);
  #endif
 +#ifdef ENABLE_DCA
 +  SHOW_BOOL (enable_dca);
 +#endif
- #endif
+ #endif /* ifndef ENABLE_SMALL */
  }
  
-@@ -2374,6 +2383,10 @@ options_postprocess_verify_ce (const str
-   if (options->auth_user_pass_file && !options->pull)
-     msg (M_USAGE, "--auth-user-pass requires --pull");
+@@ -2766,6 +2775,10 @@ options_postprocess_verify_ce(const stru
+         msg(M_USAGE, "--auth-user-pass requires --pull");
+     }
  #endif
 +#ifdef ENABLE_DCA
 +  if (options->enable_dca)
 +    dca_validate_options(options, ce);
 +#endif
  
-   uninit_options (&defaults);
+     uninit_options(&defaults);
  }
-@@ -7142,6 +7155,13 @@ add_option (struct options *options,
-       VERIFY_PERMISSION (OPT_P_GENERAL);
-       options->allow_recursive_routing = true;
+@@ -8243,6 +8256,13 @@ add_option(struct options *options,
+         VERIFY_PERMISSION(OPT_P_GENERAL);
+         options->allow_recursive_routing = true;
      }
 +#ifdef ENABLE_DCA
 +  else if (streq (p[0], "enable-dca") && !p[1])
@@ -459,125 +366,14 @@
 +      options->enable_dca = true;
 +    }
 +#endif
-   else
+     else
      {
-       int i;
---- a/src/openvpn/options.h
-+++ b/src/openvpn/options.h
-@@ -602,6 +602,9 @@ struct options
-   /* Useful when packets sent by openvpn itself are not subject
-      to the routing tables that would move packets into the tunnel. */
-   bool allow_recursive_routing;
-+#ifdef ENABLE_DCA
-+  bool enable_dca;
-+#endif
- };
- 
- #define streq(x, y) (!strcmp((x), (y)))
---- a/src/openvpn/ssl.c
-+++ b/src/openvpn/ssl.c
-@@ -752,10 +752,17 @@ is_hard_reset (int op, int key_method)
- static void
- key_state_init (struct tls_session *session, struct key_state *ks)
- {
-+#ifdef ENABLE_DCA
-+  void *dca_crypto_ctx = ks->key.encrypt.dca_crypto_ctx;
-+#endif
-   update_time ();
- 
-   CLEAR (*ks);
- 
-+#ifdef ENABLE_DCA
-+  ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
-+  ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
-+#endif
-   /*
-    * Build TLS object that reads/writes ciphertext
-    * to/from memory BIOs.
-@@ -827,6 +834,12 @@ key_state_init (struct tls_session *sess
- static void
- key_state_free (struct key_state *ks, bool clear)
- {
-+#ifdef ENABLE_DCA
-+  void *dca_crypto_ctx = ks->key.encrypt.dca_crypto_ctx;
-+
-+  if (dca_crypto_ctx)
-+    dca_crypto_key_del(ks);
-+#endif
-   ks->state = S_UNDEF;
- 
-   key_state_ssl_free(&ks->ks_ssl);
-@@ -863,6 +876,10 @@ key_state_free (struct key_state *ks, bo
- 
-   if (clear)
-     CLEAR (*ks);
-+#ifdef ENABLE_DCA
-+  ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
-+  ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
-+#endif
- }
- 
- /** @} name Functions for initialization and cleanup of key_state structures */
-@@ -902,11 +919,24 @@ static void
- tls_session_init (struct tls_multi *multi, struct tls_session *session)
- {
-   struct gc_arena gc = gc_new ();
-+#ifdef ENABLE_DCA
-+  void *dca_crypto_ctx = session->key[KS_PRIMARY].key.encrypt.dca_crypto_ctx;
-+  int j;
-+#endif
- 
-   dmsg (D_TLS_DEBUG, "TLS: tls_session_init: entry");
- 
-   CLEAR (*session);
- 
-+#ifdef ENABLE_DCA
-+  for (j = 0; j < KS_SIZE; j++)
-+    {
-+      struct key_state *ks = &session->key[j];
-+      ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
-+      ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
-+    }
-+#endif
-+
-   /* Set options data to point to parent's option structure */
-   session->opt = &multi->opt;
-   
-@@ -991,7 +1021,7 @@ tls_session_free (struct tls_session *se
- static void
- move_session (struct tls_multi* multi, int dest, int src, bool reinit_src)
- {
--  msg (D_TLS_DEBUG_LOW, "TLS: move_session: dest=%s src=%s reinit_src=%d",
-+  msg (M_INFO, "TLS: move_session: dest=%s src=%s reinit_src=%d",
-        session_index_name(dest),
-        session_index_name(src),
-        reinit_src);
-@@ -1078,6 +1108,7 @@ tls_multi_init (struct tls_options *tls_
- 
-   ALLOC_OBJ_CLEAR (ret, struct tls_multi);
- 
-+
-   /* get command line derived options */
-   ret->opt = *tls_options;
- 
-@@ -2376,6 +2407,14 @@ tls_process (struct tls_multi *multi,
- 		    print_details (&ks->ks_ssl, "Control Channel:");
- 		  state_change = true;
- 		  ks->state = S_ACTIVE;
-+#ifdef ENABLE_DCA
-+                  if (ks->key.encrypt.dca_crypto_ctx)
-+                    if (dca_crypto_key_add(ks))
-+                      {
-+		        dmsg (D_DCA_ERRORS, "DCA Error: Couldn't add key, deleting tunnel");
-+		        goto error;
-+		      }
-+#endif
- 		  INCR_SUCCESS;
- 
- 		  /* Set outgoing address for data channel packets */
---- a/src/openvpn/errlevel.h
-+++ b/src/openvpn/errlevel.h
-@@ -69,6 +69,7 @@
+         int i;
+Index: openvpn-2.4.7/src/openvpn/errlevel.h
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/errlevel.h
++++ openvpn-2.4.7/src/openvpn/errlevel.h
+@@ -68,6 +68,7 @@
  #define D_PID_PERSIST        LOGLEV(1, 12, M_NONFATAL)   /* show packet_id persist errors */
  #define D_FRAG_ERRORS        LOGLEV(1, 13, M_NONFATAL)   /* show fragmentation errors */
  #define D_ALIGN_ERRORS       LOGLEV(1, 14, M_NONFATAL)   /* show bad struct alignments */
@@ -585,7 +381,7 @@
  
  #define D_HANDSHAKE          LOGLEV(2, 20, 0)        /* show data & control channel handshakes */
  #define D_CLOSE              LOGLEV(2, 22, 0)        /* show socket and TUN/TAP close */
-@@ -92,6 +93,7 @@
+@@ -91,6 +92,7 @@
  #define D_OSBUF              LOGLEV(3, 43, 0)        /* show socket/tun/tap buffer sizes */
  #define D_PS_PROXY           LOGLEV(3, 44, 0)        /* messages related to --port-share option */
  #define D_PF_INFO            LOGLEV(3, 45, 0)        /* packet filter informational messages */
@@ -593,8 +389,10 @@
  
  #define D_SHOW_PARMS         LOGLEV(4, 50, 0)        /* show all parameters on program initiation */
  #define D_SHOW_OCC           LOGLEV(4, 51, 0)        /* show options compatibility string */
+Index: openvpn-2.4.7/src/openvpn/dca.c
+===================================================================
 --- /dev/null
-+++ b/src/openvpn/dca.c
++++ openvpn-2.4.7/src/openvpn/dca.c
 @@ -0,0 +1,962 @@
 +/*
 + **************************************************************************
@@ -1558,8 +1356,10 @@
 +{
 +}
 +#endif /* ENABLE_DCA */
+Index: openvpn-2.4.7/src/openvpn/dca.h
+===================================================================
 --- /dev/null
-+++ b/src/openvpn/dca.h
++++ openvpn-2.4.7/src/openvpn/dca.h
 @@ -0,0 +1,121 @@
 +/*
 + **************************************************************************
@@ -1682,8 +1482,10 @@
 +void dca_tun_down(struct context *c);
 +
 +#endif  /* __DCA_H__ */
+Index: openvpn-2.4.7/src/openvpn/dca_crypto.c
+===================================================================
 --- /dev/null
-+++ b/src/openvpn/dca_crypto.c
++++ openvpn-2.4.7/src/openvpn/dca_crypto.c
 @@ -0,0 +1,324 @@
 +/*
 + **************************************************************************
@@ -2009,8 +1811,10 @@
 +{
 +}
 +#endif /* ENABLE_DCA */
+Index: openvpn-2.4.7/src/openvpn/dca_route.c
+===================================================================
 --- /dev/null
-+++ b/src/openvpn/dca_route.c
++++ openvpn-2.4.7/src/openvpn/dca_route.c
 @@ -0,0 +1,256 @@
 +/*
 + **************************************************************************
@@ -2268,3 +2072,227 @@
 +{
 +}
 +#endif /* ENABLE_DCA */
+Index: openvpn-2.4.7/src/openvpn/crypto.h
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/crypto.h
++++ openvpn-2.4.7/src/openvpn/crypto.h
+@@ -168,6 +168,9 @@ struct key_ctx
+ {
+     cipher_ctx_t *cipher;       /**< Generic cipher %context. */
+     hmac_ctx_t *hmac;           /**< Generic HMAC %context. */
++#ifdef ENABLE_DCA
++    void *dca_crypto_ctx;
++#endif
+     uint8_t implicit_iv[OPENVPN_MAX_IV_LENGTH];
+     /**< The implicit part of the IV */
+     size_t implicit_iv_len;     /**< The length of implicit_iv */
+Index: openvpn-2.4.7/src/openvpn/init.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/init.c
++++ openvpn-2.4.7/src/openvpn/init.c
+@@ -2115,6 +2115,10 @@ do_up(struct context *c, bool pulled_opt
+             c->c1.pulled_options_digest_save = c->c2.pulled_options_digest;
+ #endif
+ 
++#ifdef ENABLE_DCA
++      if (c->options.enable_dca)
++        dca_tun_up(c);
++#endif
+             /* if --route-delay was specified, start timer */
+             if ((route_order() == ROUTE_AFTER_TUN) && c->options.route_delay_defined)
+             {
+@@ -4288,6 +4292,12 @@ init_instance(struct context *c, const s
+     }
+ #endif
+ 
++#ifdef ENABLE_DCA
++  /* Initialize Data Plane */
++  if (options->enable_dca && (c->mode == CM_P2P || c->mode == CM_CHILD_UDP))
++    dca_tun_alloc(c);
++#endif
++
+     /* Check for signals */
+     if (IS_SIG(c))
+     {
+@@ -4322,6 +4332,20 @@ close_instance(struct context *c)
+         /* if xinetd/inetd mode, don't allow restart */
+         do_close_check_if_restart_permitted(c);
+ 
++#ifdef ENABLE_DCA
++        if (c->c2.dca_ctx)
++          {
++            if (c->mode == CM_P2P)
++              {
++                dca_tun_down(c);
++                dca_tun_free(c);
++              }
++          }
++
++        if ((c->mode == CM_TOP) || (c->mode == CM_P2P))
++          dca_uninit(c);
++#endif
++
+ #ifdef USE_COMP
+         if (c->c2.comp_context)
+         {
+Index: openvpn-2.4.7/src/openvpn/mudp.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/mudp.c
++++ openvpn-2.4.7/src/openvpn/mudp.c
+@@ -197,6 +197,10 @@ multi_process_io_udp(struct multi_contex
+     {
+         strcat(buf, "TW/");
+     }
++#ifdef ENABLE_DCA
++  else if (status & DCA_SOCKET_READ)
++    strcat (buf, "DR/");
++#endif
+ #ifdef ENABLE_ASYNC_PUSH
+     else if (status & FILE_CLOSED)
+     {
+@@ -214,6 +218,11 @@ multi_process_io_udp(struct multi_contex
+     }
+ #endif
+ 
++#ifdef ENABLE_DCA
++  if (status & DCA_SOCKET_READ)
++    dca_recv(m->top);
++#endif
++
+     /* UDP port ready to accept write */
+     if (status & SOCKET_WRITE)
+     {
+@@ -320,6 +329,10 @@ tunnel_server_udp_single_threaded(struct
+ 
+     /* finished with initialization */
+     initialization_sequence_completed(top, ISC_SERVER); /* --mode server --proto udp */
++#ifdef ENABLE_DCA
++    if (top->options.enable_dca)
++      dca_init(top);
++#endif
+ 
+ #ifdef ENABLE_ASYNC_PUSH
+     multi.top.c2.inotify_fd = inotify_init();
+Index: openvpn-2.4.7/src/openvpn/openvpn.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/openvpn.c
++++ openvpn-2.4.7/src/openvpn/openvpn.c
+@@ -87,6 +87,11 @@ tunnel_point_to_point(struct context *c)
+     /* set point-to-point mode */
+     c->mode = CM_P2P;
+ 
++#ifdef ENABLE_DCA
++  if (c->options.enable_dca)
++    dca_init(c);
++#endif
++
+     /* initialize tunnel instance */
+     init_instance_handle_signals(c, c->es, CC_HARD_USR1_TO_HUP);
+     if (IS_SIG(c))
+Index: openvpn-2.4.7/src/openvpn/options.h
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/options.h
++++ openvpn-2.4.7/src/openvpn/options.h
+@@ -611,6 +611,9 @@ struct options
+     /* Useful when packets sent by openvpn itself are not subject
+      * to the routing tables that would move packets into the tunnel. */
+     bool allow_recursive_routing;
++#ifdef ENABLE_DCA
++  bool enable_dca;
++#endif
+ };
+ 
+ #define streq(x, y) (!strcmp((x), (y)))
+Index: openvpn-2.4.7/src/openvpn/ssl.c
+===================================================================
+--- openvpn-2.4.7.orig/src/openvpn/ssl.c
++++ openvpn-2.4.7/src/openvpn/ssl.c
+@@ -906,10 +906,17 @@ is_hard_reset(int op, int key_method)
+ static void
+ key_state_init(struct tls_session *session, struct key_state *ks)
+ {
++#ifdef ENABLE_DCA
++  void *dca_crypto_ctx = ks->key.encrypt.dca_crypto_ctx;
++#endif
+     update_time();
+ 
+     CLEAR(*ks);
+ 
++#ifdef ENABLE_DCA
++  ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
++  ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
++#endif
+     /*
+      * Build TLS object that reads/writes ciphertext
+      * to/from memory BIOs.
+@@ -986,6 +993,12 @@ key_state_init(struct tls_session *sessi
+ static void
+ key_state_free(struct key_state *ks, bool clear)
+ {
++#ifdef ENABLE_DCA
++  void *dca_crypto_ctx = ks->key.encrypt.dca_crypto_ctx;
++
++  if (dca_crypto_ctx)
++    dca_crypto_key_del(ks);
++#endif
+     ks->state = S_UNDEF;
+ 
+     key_state_ssl_free(&ks->ks_ssl);
+@@ -1028,6 +1041,10 @@ key_state_free(struct key_state *ks, boo
+     {
+         secure_memzero(ks, sizeof(*ks));
+     }
++#ifdef ENABLE_DCA
++  ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
++  ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
++#endif
+ }
+ 
+ /** @} name Functions for initialization and cleanup of key_state structures */
+@@ -1079,10 +1096,22 @@ static void
+ tls_session_init(struct tls_multi *multi, struct tls_session *session)
+ {
+     struct gc_arena gc = gc_new();
++#ifdef ENABLE_DCA
++  void *dca_crypto_ctx = session->key[KS_PRIMARY].key.encrypt.dca_crypto_ctx;
++  int j;
++#endif
+ 
+     dmsg(D_TLS_DEBUG, "TLS: tls_session_init: entry");
+ 
+     CLEAR(*session);
++#ifdef ENABLE_DCA
++  for (j = 0; j < KS_SIZE; j++)
++    {
++      struct key_state *ks = &session->key[j];
++      ks->key.encrypt.dca_crypto_ctx = dca_crypto_ctx;
++      ks->key.decrypt.dca_crypto_ctx = dca_crypto_ctx;
++    }
++#endif
+ 
+     /* Set options data to point to parent's option structure */
+     session->opt = &multi->opt;
+@@ -1178,7 +1207,7 @@ tls_session_free(struct tls_session *ses
+ static void
+ move_session(struct tls_multi *multi, int dest, int src, bool reinit_src)
+ {
+-    msg(D_TLS_DEBUG_LOW, "TLS: move_session: dest=%s src=%s reinit_src=%d",
++    msg (M_INFO, "TLS: move_session: dest=%s src=%s reinit_src=%d",
+         session_index_name(dest),
+         session_index_name(src),
+         reinit_src);
+@@ -2878,6 +2907,14 @@ tls_process(struct tls_multi *multi,
+                 }
+                 state_change = true;
+                 ks->state = S_ACTIVE;
++#ifdef ENABLE_DCA
++                if (ks->key.encrypt.dca_crypto_ctx)
++                    if (dca_crypto_key_add(ks))
++                    {
++			dmsg (D_DCA_ERRORS, "DCA Error: Couldn't add key, deleting tunnel");
++			goto error;
++		    }
++#endif
+                 INCR_SUCCESS;
+ 
+                 /* Set outgoing address for data channel packets */

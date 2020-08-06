@@ -144,24 +144,11 @@ local nsantenna = wdev:get("antenna")
 -- if yes, lock the channel choice as these stations will dicatate the freq
 local found_sta = nil
 local _, net
-if wnet:mode() ~= "sta" then
-	for _, net in ipairs(wdev:get_wifinets()) do
-		if net:mode() == "sta" and net:get("disabled") ~= "1" then
-			if not found_sta then
-				found_sta = {}
-				found_sta.channel = net:channel()
-				found_sta.names = {}
-			end
-			found_sta.names[#found_sta.names+1] = net:shortname()
-		end
-	end
-end
-
-if found_sta then
-	if found_sta:is_up() and found_sta:channel()~=nil then
+if has_sta then
+	if has_sta:is_up() and has_sta:channel()~=nil then
 		ch = s:taboption("general", DummyValue, "choice", translate("Channel"))
 		ch.value = translatef("Locked to channel %d used by %s",
-			found_sta:channel(), found_sta:shortname())
+			has_sta:channel(), has_sta:shortname())
 	else
 		ch = s:taboption("general", Value, "channel", translate("Channel"))
 		ch:value("auto", translate("auto"))
@@ -172,31 +159,12 @@ if found_sta then
 		end
 	end
 else
-	ch = s:taboption("general", Value, "_mode_freq", '<br />'..translate("Operating frequency"))
-	ch.hwmodes = hw_modes
-	ch.freqlist = iw.freqlist
-	ch.template = "cbi/wireless_modefreq"
-
-	function ch.cfgvalue(self, section)
-		return {
-			m:get(section, "hwmode") or "",
-			m:get(section, "channel") or "auto",
-			m:get(section, "htmode") or ""
-		}
-	end
-
-	function ch.formvalue(self, section)
-		return {
-			(hw_modes.ad and "11ad") or (m:formvalue(self:cbid(section) .. ".band") or (hw_modes.g and "11g" or "11a")),
-			m:formvalue(self:cbid(section) .. ".channel") or "auto",
-			m:formvalue(self:cbid(section) .. ".htmode") or ""
-		}
-	end
-
-	function ch.write(self, section, value)
-		m:set(section, "hwmode", value[1])
-		m:set(section, "channel", value[2])
-		m:set(section, "htmode", value[3])
+	ch = s:taboption("general", Value, "channel", translate("Channel"))
+	ch:value("auto", translate("auto"))
+	for _, f in ipairs(iw and iw.freqlist or { }) do
+		if not f.restricted then
+			ch:value(f.channel, "%i (%.3f GHz)" %{ f.channel, f.mhz / 1000 })
+		end
 	end
 end
 
@@ -251,25 +219,140 @@ end
 ------------------- qcawifi Device ------------------
 
 if hwtype == "qcawifi" then
-	if #tx_power_list > 1 then
-		tp = s:taboption("general", ListValue,
-			"txpower", translate("Transmit Power"), "dBm")
-		tp.rmempty = true
-		tp.default = tx_power_cur
-		function tp.cfgvalue(...)
-			return txpower_current(Value.cfgvalue(...), tx_power_list)
-		end
 
-	for _, p in ipairs(tx_power_list) do
-		tp:value(p.driver_dbm, "%i dBm (%i mW)"
-			%{ p.display_dbm, p.display_mw })
+	mode = s:taboption("general", ListValue, "hwmode", translate("Hwmode"))
+	htmode = s:taboption("general", ListValue, "htmode", translate("Band"))
+	
+	if hw_modes.n then
+		if hw_modes.g then
+			mode:value("11axg", "2.4GHz (11AXG)")		
+	                htmode:depends("hwmode", "11axg")
+	                htmode:value("HT20", "20MHz")
+	                htmode:value("HT40", "40MHz")
+                end
+	end
+
+	if hw_modes.ac then	
+		if hw_modes.ac then
+			mode:value("11axa", "5GHz (11AXA)")
+	                htmode:depends("hwmode", "11axa")
+	                htmode:value("HT20", "20MHz")
+	                htmode:value("HT40", "40MHz")
+	                htmode:value("HT80", "80MHz")
+	                htmode:value("HT160", "160MHz")
+                        htmode:value("HT80_80", "80_80MHz")
+                end
+	end
+
+	ch = s:taboption("general", Value, "channel", translate("Channel"))
+	ch:value("auto", translate("auto"))
+	for _, f in ipairs(iw and iw.freqlist or { }) do
+		if not f.restricted then
+			ch:value(f.channel, "%i (%.3f GHz)" %{ f.channel, f.mhz / 1000 })
 		end
 	end
 
+	tp = s:taboption("general", ListValue, "txpower", translate("Transmit Power"), "dBm")
+        tp:value("", translate("auto"))
+        tp:value("17", "17 dBm (50 mW)")
+        tp:value("18", "18 dBm (63 mW)")
+        tp:value("19", "19 dBm (79 mW)")
+        tp:value("20", "20 dBm (100 mW)")
+        tp:value("21", "21 dBm (125 mW)")
+        tp:value("22", "22 dBm (158 mW)")
+        tp:value("23", "23 dBm (199 mW)")
+        tp:value("24", "24 dBm (251 mW)")
+        tp:value("25", "25 dBm (316 mW)")
+        tp:value("26", "26 dBm (398 mW)")
+        tp:value("27", "27 dBm (501 mW)")
+        tp:value("28", "28 dBm (630 mW)")
+        tp:value("29", "29 dBm (794 mW)")
+        tp:value("30", "30 dBm (1000 mW)")
+
+	local cl = iw and iw.countrylist
+	if cl and #cl > 0 then
+		cc = s:taboption("general", ListValue, "country", translate("Country Code"), translate("Use ISO/IEC 3166 alpha2 country codes."))
+		cc.default = tostring(iw and iw.country or "00")
+		for _, c in ipairs(cl) do
+			cc:value(c.alpha2, "%s - %s" %{ c.alpha2, c.name })
+		end
+	else
+		s:taboption("general", Value, "country", translate("Country Code"), translate("Use ISO/IEC 3166 alpha2 country codes."))
+	end
+
+        s:taboption("advanced",Value,"maxassoc",translate("Connection Limit"))
 	s:taboption("advanced", Value, "txantenna", translate("Tx Antenna bitmask"))
 	s:taboption("advanced", Value, "rxantenna", translate("Rx Antenna bitmask"))
-	s:taboption("advanced", Value, "regdomain", translate("Regulatory Domain"))
-	s:taboption("advanced", Value, "country", translate("Country Code"))
+
+end
+
+------------------- qcawificfg80211 ------------------
+
+if hwtype == "qcawificfg80211" then
+
+	mode = s:taboption("general", ListValue, "hwmode", translate("Hwmode"))
+	htmode = s:taboption("general", ListValue, "htmode", translate("Band"))
+	
+	if hw_modes.n then
+		if hw_modes.g then
+			mode:value("11axg", "2.4GHz (11AXG)")		
+	                htmode:depends("hwmode", "11axg")
+	                htmode:value("HT20", "20MHz")
+	                htmode:value("HT40", "40MHz")
+                end
+	end
+
+	if hw_modes.ac then	
+		if hw_modes.ac then
+			mode:value("11axa", "5GHz (11AXA)")
+	                htmode:depends("hwmode", "11axa")
+	                htmode:value("HT20", "20MHz")
+	                htmode:value("HT40", "40MHz")
+	                htmode:value("HT80", "80MHz")
+	                htmode:value("HT160", "160MHz")
+                        htmode:value("HT80_80", "80_80MHz")
+                end
+	end
+
+	ch = s:taboption("general", Value, "channel", translate("Channel"))
+	ch:value("auto", translate("auto"))
+	for _, f in ipairs(iw and iw.freqlist or { }) do
+		if not f.restricted then
+			ch:value(f.channel, "%i (%.3f GHz)" %{ f.channel, f.mhz / 1000 })
+		end
+	end
+
+	tp = s:taboption("general", ListValue, "txpower", translate("Transmit Power"), "dBm")
+        tp:value("", translate("auto"))
+        tp:value("17", "17 dBm (50 mW)")
+        tp:value("18", "18 dBm (63 mW)")
+        tp:value("19", "19 dBm (79 mW)")
+        tp:value("20", "20 dBm (100 mW)")
+        tp:value("21", "21 dBm (125 mW)")
+        tp:value("22", "22 dBm (158 mW)")
+        tp:value("23", "23 dBm (199 mW)")
+        tp:value("24", "24 dBm (251 mW)")
+        tp:value("25", "25 dBm (316 mW)")
+        tp:value("26", "26 dBm (398 mW)")
+        tp:value("27", "27 dBm (501 mW)")
+        tp:value("28", "28 dBm (630 mW)")
+        tp:value("29", "29 dBm (794 mW)")
+        tp:value("30", "30 dBm (1000 mW)")
+
+	local cl = iw and iw.countrylist
+	if cl and #cl > 0 then
+		cc = s:taboption("general", ListValue, "country", translate("Country Code"), translate("Use ISO/IEC 3166 alpha2 country codes."))
+		cc.default = tostring(iw and iw.country or "00")
+		for _, c in ipairs(cl) do
+			cc:value(c.alpha2, "%s - %s" %{ c.alpha2, c.name })
+		end
+	else
+		s:taboption("general", Value, "country", translate("Country Code"), translate("Use ISO/IEC 3166 alpha2 country codes."))
+	end
+
+        s:taboption("advanced",Value,"maxassoc",translate("Connection Limit"))
+	s:taboption("advanced", Value, "txantenna", translate("Tx Antenna bitmask"))
+	s:taboption("advanced", Value, "rxantenna", translate("Rx Antenna bitmask"))
 
 end
 
@@ -571,6 +654,64 @@ if hwtype == "qcawifi" then
 
 end
 
+ -------------------- qcawificfg80211 Interface ----------------------
+if hwtype == "qcawificfg80211" then
+	mode:value("ap-wds", "%s (%s)" % {translate("Access Point"), translate("WDS")})
+	mode:value("sta-wds", "%s (%s)" % {translate("Client"), translate("WDS")})
+	mode:value("wds", translate("Static WDS"))
+
+	function mode.write(self, section, value)
+		if value == "ap-wds" then
+			ListValue.write(self, section, "ap")
+			m.uci:set("wireless", section, "wds", 1)
+		elseif value == "sta-wds" then
+			ListValue.write(self, section, "sta")
+			m.uci:set("wireless", section, "wds", 1)
+		else
+			ListValue.write(self, section, value)
+			m.uci:delete("wireless", section, "wds")
+		end
+	end
+
+	function mode.cfgvalue(self, section)
+		local mode = ListValue.cfgvalue(self, section)
+		local wds  = m.uci:get("wireless", section, "wds") == "1"
+
+		if mode == "ap" and wds then
+			return "ap-wds"
+		elseif mode == "sta" and wds then
+			return "sta-wds"
+		else
+			return mode
+		end
+	end
+
+	bssid:depends({mode="wds"})
+
+	s:taboption("advanced", Flag, "doth", "802.11h")
+	hidden = s:taboption("general", Flag, "hidden", translate("Hide <abbr title=\"Extended Service Set Identifier\">ESSID</abbr>"))
+	hidden:depends({mode="ap"})
+	hidden:depends({mode="ap-wds"})
+	hidden:depends({mode="sta-wds"})
+	isolate = s:taboption("advanced", Flag, "isolate", translate("Separate Clients"),
+	translate("Prevents client-to-client communication"))
+	isolate:depends({mode="ap"})
+	s:taboption("advanced", Flag, "uapsd", translate("UAPSD Enable"))
+	s:taboption("advanced", Value, "mcast_rate", translate("Multicast Rate"))
+	s:taboption("advanced", Value, "frag", translate("Fragmentation Threshold"))
+	s:taboption("advanced", Value, "rts", translate("RTS/CTS Threshold"))
+	s:taboption("advanced", Flag, "wmm", translate("WMM Mode"))
+
+	-------------------------------support 11ac------------------------------
+	if hw_modes.ac then
+	s:taboption("advanced", Value, "nss", translate("Number of Spatial Streams"))
+	s:taboption("advanced", Flag, "ldpc",translate("LDPC"))
+	s:taboption("advanced", Flag,"rx_stbc",translate("RX STBC"))
+	s:taboption("advanced", Flag,"tx_stbc",translate("TX STBC"))
+	end
+
+end
+
 -------------------- Madwifi Interface ----------------------
 
 if hwtype == "atheros" then
@@ -785,7 +926,7 @@ encr:value("none", "No Encryption")
 encr:value("wep-open",   translate("WEP Open System"), {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
 encr:value("wep-shared", translate("WEP Shared Key"),  {mode="ap"}, {mode="sta"}, {mode="ap-wds"}, {mode="sta-wds"}, {mode="adhoc"}, {mode="ahdemo"}, {mode="wds"})
 
-if hwtype == "atheros" or hwtype == "qcawifi" or hwtype == "mac80211" or hwtype == "prism2" then
+if hwtype == "atheros" or hwtype == "qcawifi" or hwtype == "qcawificfg80211" or hwtype == "mac80211" or hwtype == "prism2" then
 	local supplicant = fs.access("/usr/sbin/wpa_supplicant")
 	local hostapd = fs.access("/usr/sbin/hostapd")
 	local wapid = fs.access("/usr/sbin/wapid")
@@ -1058,7 +1199,7 @@ c.write = function(self,section,value)
 	return nixio.fs.writefile("/etc/wapid/asu.cer",value)
 end
 
-if hwtype == "atheros" or hwtype == "qcawifi" or hwtype == "mac80211" or hwtype == "prism2" then
+if hwtype == "atheros" or hwtype == "qcawifi" or hwtype == "qcawificfg80211" or hwtype == "mac80211" or hwtype == "prism2" then
 	nasid = s:taboption("encryption", Value, "nasid", translate("NAS ID"))
 	nasid:depends({mode="ap", encryption="wpa"})
 	nasid:depends({mode="ap", encryption="wpa2"})

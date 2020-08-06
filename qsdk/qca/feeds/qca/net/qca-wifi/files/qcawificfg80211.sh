@@ -3518,14 +3518,58 @@ detect_qcawificfg80211() {
 
 		hwcaps=$(cat ${dev}/hwcaps)
 		case "${hwcaps}" in
-			*11an) mode_11=na;;
-			*11an/ac) mode_11=ac;;
-			*11an/ac/ax) mode_11=axa;;
-			*11abgn/ac) mode_11=ac;;
-			*11abgn/ac/ax) mode_11=axa;;
-			*11abgn) mode_11=ng;;
-			*11bgn) mode_11=ng;;
-			*11bgn/ax) mode_11=axg;;
+			*11bgn)
+				mode_11=ng
+				mode_ht=HT40
+				def_channel=13
+				ssid_pad="_2.4G"
+                                disablecoext=1
+			;;
+			*11an/ac |\
+			*11abgn/ac)
+				mode_11=ac
+				def_channel=40
+				if grep -q HT80_80 ${dev}/hwmodes
+				then
+					mode_ht=HT160
+				else
+					mode_ht=HT80
+				fi
+
+				wifi_5g_count=$(($wifi_5g_count + 1))
+				if [ "$wifi_5g_count" -gt 1 ]
+				then
+					ssid_pad="_5G$wifi_5g_count"
+				else
+					ssid_pad="_5G"
+				fi
+			;;
+			*11bgn/ax) 
+                                mode_11=axg
+				mode_ht=HT40
+				def_channel=13
+				ssid_pad="_2.4G"
+                                disablecoext=1
+                        ;;
+                        *11abgn/ac/ax |\
+			*11an/ac/ax) 
+                                mode_11=axa
+				def_channel=40
+				if grep -q HT80_80 ${dev}/hwmodes
+				then
+					mode_ht=HT160
+				else
+					mode_ht=HT80
+				fi
+
+				wifi_5g_count=$(($wifi_5g_count + 1))
+				if [ "$wifi_5g_count" -gt 1 ]
+				then
+					ssid_pad="_5G$wifi_5g_count"
+				else
+					ssid_pad="_5G"
+				fi
+                        ;;
 		esac
 		if [ -f /sys/class/net/${dev}/nssoffload ] && [ $(cat /sys/class/net/${dev}/nssoffload) == "capable" ]; then
 			case "${mode_11}" in
@@ -3564,17 +3608,22 @@ detect_qcawificfg80211() {
 		cat <<EOF
 config wifi-device  wifi$devidx
 	option type	qcawificfg80211
-	option channel	auto
-	option macaddr	$(cat /sys/class/net/${dev}/address)
-	option hwmode	11${mode_11}
+	option channel  ${def_channel}
+	option macaddr  $wifi_mac
+	option hwmode   11${mode_11}
+	option htmode   ${mode_ht}
+	option txpower  23
+	option country  CN
 	# REMOVE THIS LINE TO ENABLE WIFI:
-	option disabled 1
+	option disabled 0
 
 config wifi-iface
-	option device	wifi$devidx
-	option network	lan
-	option mode	ap
-	option ssid	OpenWrt
+	option device	    wifi$devidx
+	option network	    lan
+	option mode	    ap
+	option ssid	    OpenWrt${ssid_pad}
+	option wmm          1
+
 	option encryption none
 
 EOF

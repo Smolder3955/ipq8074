@@ -1,8 +1,6 @@
-diff --git a/interface.c b/interface.c
-index 297a98c..4a11665 100644
 --- a/interface.c
 +++ b/interface.c
-@@ -567,23 +567,43 @@ static int handle_interface_noack_map(struct nl80211_state *state,
+@@ -579,23 +579,43 @@ static int handle_interface_noack_map(st
  				      enum id_input id)
  {
  	uint16_t noack_map;
@@ -16,11 +14,12 @@ index 297a98c..4a11665 100644
 -	noack_map = strtoul(argv[0], &end, 16);
 -	if (*end)
 -		return 1;
+-
+-	NLA_PUT_U16(msg, NL80211_ATTR_NOACK_MAP, noack_map);
 +	if (strcmp(argv[0], "peer") == 0) {
 +		if (argc < 2)
 +			return 1;
- 
--	NLA_PUT_U16(msg, NL80211_ATTR_NOACK_MAP, noack_map);
++
 +		if (mac_addr_a2n(mac_addr, argv[1])) {
 +			fprintf(stderr, "Invalid MAC address\n");
 +			return 2;

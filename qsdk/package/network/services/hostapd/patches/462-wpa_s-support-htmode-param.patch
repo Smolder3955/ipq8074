@@ -16,7 +16,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
 
 --- a/src/drivers/driver.h
 +++ b/src/drivers/driver.h
-@@ -765,6 +765,8 @@ struct wpa_driver_associate_params {
+@@ -852,6 +852,8 @@ struct wpa_driver_associate_params {
  
  	unsigned char rates[NL80211_MAX_SUPP_RATES];
  	int mcast_rate;
@@ -27,7 +27,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
  	 * bssid_hint - BSSID of a proposed AP
 --- a/src/drivers/driver_nl80211.c
 +++ b/src/drivers/driver_nl80211.c
-@@ -5151,6 +5151,22 @@ retry:
+@@ -5435,6 +5435,22 @@ retry:
  		nla_put_u32(msg, NL80211_ATTR_MCAST_RATE, params->mcast_rate);
  	}
  
@@ -52,7 +52,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
  		goto fail;
 --- a/wpa_supplicant/config.c
 +++ b/wpa_supplicant/config.c
-@@ -1780,6 +1780,71 @@ static char * wpa_config_write_mcast_rat
+@@ -1939,6 +1939,71 @@ static char * wpa_config_write_mcast_rat
  }
  #endif /* NO_CONFIG_WRITE */
  
@@ -124,7 +124,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
  static int wpa_config_parse_rates(const struct parse_data *data,
  				struct wpa_ssid *ssid, int line,
  				const char *value)
-@@ -2390,6 +2455,7 @@ static const struct parse_data ssid_fiel
+@@ -2634,6 +2699,7 @@ static const struct parse_data ssid_fiel
  	{ INT_RANGE(fixed_freq, 0, 1) },
  	{ FUNC(rates) },
  	{ FUNC(mcast_rate) },
@@ -134,7 +134,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
  	{ INT_RANGE(macsec_integ_only, 0, 1) },
 --- a/wpa_supplicant/config_ssid.h
 +++ b/wpa_supplicant/config_ssid.h
-@@ -753,6 +753,8 @@ struct wpa_ssid {
+@@ -804,6 +804,8 @@ struct wpa_ssid {
  
  	unsigned char rates[NL80211_MAX_SUPP_RATES];
  	double mcast_rate;
@@ -145,7 +145,7 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
  	/**
 --- a/wpa_supplicant/wpa_supplicant.c
 +++ b/wpa_supplicant/wpa_supplicant.c
-@@ -3063,6 +3063,8 @@ static void wpas_start_assoc_cb(struct w
+@@ -3420,6 +3420,8 @@ static void wpas_start_assoc_cb(struct w
  			i++;
  		}
  		params.mcast_rate = ssid->mcast_rate;
@@ -153,4 +153,4 @@ Signed-off-by: Antonio Quartulli <ordex@autistici.org>
 +		params.htmode = ssid->htmode;
  	}
  
- 	params.pairwise_suite = cipher_pairwise;
+ 	if (bss && ssid->enable_edmg)

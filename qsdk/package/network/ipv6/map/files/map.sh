@@ -210,7 +210,7 @@ proto_map_setup() {
 
 proto_map_teardown() {
 	local cfg="$1"
-	ifdown "${cfg}"
+
 	echo 0 > /sys/module/nf_nat_ftp/parameters/psid
 	echo 0 > /sys/module/nf_nat_ftp/parameters/psid_len
 	echo 0 > /sys/module/nf_nat_ftp/parameters/offset

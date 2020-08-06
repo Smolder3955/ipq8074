@@ -8,7 +8,7 @@
  #include "crypto/random.h"
  #include "crypto/tls.h"
  #include "common/version.h"
-@@ -681,7 +682,7 @@ int main(int argc, char *argv[])
+@@ -686,7 +687,7 @@ int main(int argc, char *argv[])
  #endif /* CONFIG_DPP */
  
  	for (;;) {
@@ -17,7 +17,7 @@
  		if (c < 0)
  			break;
  		switch (c) {
-@@ -718,6 +719,8 @@ int main(int argc, char *argv[])
+@@ -723,6 +724,8 @@ int main(int argc, char *argv[])
  			break;
  #endif /* CONFIG_DEBUG_LINUX_TRACING */
  		case 'v':
@@ -56,9 +56,9 @@
  #include "fst/fst.h"
  #include "wpa_supplicant_i.h"
  #include "driver_i.h"
-@@ -305,8 +306,12 @@ int main(int argc, char *argv[])
+@@ -301,8 +302,12 @@ int main(int argc, char *argv[])
  			break;
- #endif /* CONFIG_DBUS */
+ #endif /* CONFIG_CTRL_IFACE_DBUS_NEW */
  		case 'v':
 -			printf("%s\n", wpa_supplicant_version);
 -			exitcode = 0;

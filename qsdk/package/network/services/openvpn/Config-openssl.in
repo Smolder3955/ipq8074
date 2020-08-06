@@ -4,6 +4,10 @@ config OPENVPN_openssl_ENABLE_LZO
 	bool "Enable LZO compression support"
 	default y
 
+config OPENVPN_openssl_ENABLE_LZ4
+	bool "Enable LZ4 compression support"
+	default y
+
 config OPENVPN_openssl_ENABLE_X509_ALT_USERNAME
 	bool "Enable the --x509-username-field feature"
 	default n
@@ -23,14 +27,6 @@ config OPENVPN_openssl_ENABLE_MANAGEMENT
 #config OPENVPN_openssl_ENABLE_PKCS11
 #	bool "Enable pkcs11 support"
 #	default n
-
-config OPENVPN_openssl_ENABLE_HTTP
-	bool "Enable HTTP proxy support"
-	default y
-
-config OPENVPN_openssl_ENABLE_SOCKS
-	bool "Enable SOCKS proxy support"
-	default y
 
 config OPENVPN_openssl_ENABLE_FRAGMENT
 	bool "Enable internal fragmentation support (--fragment)"
@@ -65,8 +61,8 @@ config OPENVPN_openssl_ENABLE_SMALL
 
 config OPENVPN_openssl_ENABLE_DCA
 	bool "Enable Data Channel Acceleration"
-	depends on TARGET_ipq_ipq807x_64_QSDK_Premium || TARGET_ipq_ipq807x_QSDK_Premium || TARGET_ipq_ipq807x_64_QSDK_512
-	default y
+	depends on TARGET_ipq_ipq807x_64_QSDK_Premium || TARGET_ipq_ipq807x_QSDK_Premium || TARGET_ipq_ipq807x_64_QSDK_512 || TARGET_ipq_ipq807x_QSDK_512 || TARGET_ipq_ipq60xx_64_QSDK_Premium || TARGET_ipq_ipq60xx_QSDK_Premium || TARGET_ipq_ipq60xx_64_QSDK_512 || TARGET_ipq_ipq60xx_QSDK_512
+	default n
 	help
 	  enable support for data channel acceleration (Dependent on
 	  QCA platforms.)

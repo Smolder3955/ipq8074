@@ -71,11 +71,15 @@ hostapd_prepare_device_config() {
 	json_get_vars country country_ie beacon_int doth require_mode \
 		pwr_constraint spectrum_mgmt
 
+	airtime_mode=
+	json_get_vars airtime_mode airtime_update_interval
+
 	hostapd_set_log_options base_cfg
 
 	set_default country_ie 1
 	set_default doth 1
 
+	set_default airtime_update_interval 200
 	[ -n "$country" ] && {
 		append base_cfg "country_code=$country" "$N"
 
@@ -106,6 +110,16 @@ hostapd_prepare_device_config() {
 	[ -n "$rlist" ] && append base_cfg "supported_rates=$rlist" "$N"
 	[ -n "$brlist" ] && append base_cfg "basic_rates=$brlist" "$N"
 	[ -n "$beacon_int" ] && append base_cfg "beacon_int=$beacon_int" "$N"
+
+	case "$airtime_mode" in
+		static)  append base_cfg "airtime_mode=1" "$N" ;;
+		dynamic) append base_cfg "airtime_mode=2" "$N" ;;
+		limited) append base_cfg "airtime_mode=3" "$N" ;;
+	esac
+
+	if [ -n "$airtime_mode" ]; then
+		append base_cfg "airtime_update_interval=$airtime_update_interval" "$N"
+	fi
 
 	cat > "$config" <<EOF
 driver=$driver
@@ -179,6 +193,10 @@ hostapd_common_add_bss_config() {
 	config_add_int bss_load_update_period
 	config_add_boolean rrm wnm wnm_sleep
 	config_add_int chan_util_avg_period
+
+	config_add_int airtime_bss_weight
+	config_add_boolean airtime_bss_limit
+	config_add_array airtime_sta_weight
 }
 
 hostapd_set_bss_options() {
@@ -202,8 +220,11 @@ hostapd_set_bss_options() {
 		iapp_interface obss_interval vendor_elements \
 		bss_load_update_period rrm wnm wnm_sleep chan_util_avg_period
 
+	json_get_vars airtime_bss_weight airtime_bss_limit
+	json_get_values airtime_sta_weight_list airtime_sta_weight
+
 	set_default isolate 0
-	set_default maxassoc 64
+	set_default maxassoc 128
 	set_default max_inactivity 0
 	set_default short_preamble 1
 	set_default disassoc_low_ack 0
@@ -211,6 +232,8 @@ hostapd_set_bss_options() {
 	set_default wmm 1
 	set_default uapsd 1
 	set_default obss_interval 0
+	set_default airtime_bss_weight 0
+	set_default airtime_bss_limit 0
 
 	append bss_conf "ctrl_interface=/var/run/hostapd"
 	if [ "$isolate" -gt 0 ]; then
@@ -245,8 +268,9 @@ hostapd_set_bss_options() {
 			# with WPS enabled, we got to be in unconfigured state.
 			wps_not_configured=1
 		;;
-		psk)
+		psk|sae*)
 			json_get_vars key wpa_psk_file
+			json_get_var ieee80211w ieee80211w
 			if [ ${#key} -lt 8 ]; then
 				wireless_setup_vif_failed INVALID_WPA_PSK
 				return 1
@@ -260,7 +284,13 @@ hostapd_set_bss_options() {
 				append bss_conf "wpa_psk_file=$wpa_psk_file" "$N"
 			}
 			wps_possible=1
-			append wpa_key_mgmt "WPA-PSK"
+			if [ $ieee80211w -eq 2 ]; then
+				append wpa_key_mgmt "WPA-PSK-SHA256"
+			elif [ $ieee80211w -eq 1 ]; then
+				append wpa_key_mgmt "WPA-PSK WPA-PSK-SHA256"
+			else
+				append wpa_key_mgmt "WPA-PSK"
+			fi
 		;;
 		eap)
 			json_get_vars \
@@ -272,6 +302,7 @@ hostapd_set_bss_options() {
 				vlan_naming vlan_tagged_interface \
 				vlan_bridge
 
+			json_get_var ieee80211w ieee80211w
 			# legacy compatibility
 			[ -n "$auth_server" ] || json_get_var auth_server server
 			[ -n "$auth_port" ] || json_get_var auth_port port
@@ -304,7 +335,13 @@ hostapd_set_bss_options() {
 			[ -n "$ownip" ] && append bss_conf "own_ip_addr=$ownip" "$N"
 			append bss_conf "eapol_key_index_workaround=1" "$N"
 			append bss_conf "ieee8021x=1" "$N"
-			append wpa_key_mgmt "WPA-EAP"
+			if [ $ieee80211w -eq 2 ]; then
+				append wpa_key_mgmt "WPA-EAP-SHA256"
+			elif [ $ieee80211w -eq 1 ]; then
+				append wpa_key_mgmt "WPA-EAP WPA-EAP-SHA256"
+			else
+				append wpa_key_mgmt "WPA-EAP"
+			fi
 
 			[ -n "$dynamic_vlan" ] && {
 				append bss_conf "dynamic_vlan=$dynamic_vlan" "$N"
@@ -321,6 +358,18 @@ hostapd_set_bss_options() {
 			hostapd_append_wep_key bss_conf
 			append bss_conf "wep_default_key=$wep_keyidx" "$N"
 			[ -n "$wep_rekey" ] && append bss_conf "wep_rekey_period=$wep_rekey" "$N"
+		;;
+	esac
+
+	case "$auth_type" in
+		sae)
+			append bss_conf "ieee80211w=2" "$N"
+			 wpa_key_mgmt="SAE"
+		;;
+		sae-mixed)
+			append bss_conf "ieee80211w=1" "$N"
+			append bss_conf "sae_require_mfp=1" "$N"
+			append wpa_key_mgmt "SAE"
 		;;
 	esac
 
@@ -420,7 +469,6 @@ hostapd_set_bss_options() {
 		fi
 
 		append bss_conf "okc=$auth_cache" "$N"
-		[ "$auth_cache" = 0 ] && append bss_conf "disable_pmksa_caching=1" "$N"
 
 		# RSN -> allow management frame protection
 		json_get_var ieee80211w ieee80211w
@@ -475,6 +523,31 @@ hostapd_set_bss_options() {
 		append bss_conf "rrm_beacon_report=1" "$N"
 		append bss_conf "rrm_neighbor_report=1" "$N"
 	}
+
+	case "$airtime_mode" in
+		static)
+			[ -n "$airtime_sta_weight_list" ] && {
+				for _airtime_sta_weight in $airtime_sta_weight_list
+				do
+					# replace "-" to space between mac addr and airtime weight
+					append bss_conf "airtime_sta_weight=${_airtime_sta_weight/-/ }" "$N"
+				done
+			}
+		;;
+		dynamic)
+			if [ $airtime_bss_weight -gt 0 ]; then
+				append bss_conf "airtime_bss_weight=$airtime_bss_weight" "$N"
+			fi
+		;;
+		limited)
+			if [ $airtime_bss_weight -gt 0 ]; then
+				append bss_conf "airtime_bss_weight=$airtime_bss_weight" "$N"
+			fi
+			if [ $airtime_bss_limit -ge 0 ]; then
+				append bss_conf "airtime_bss_limit=$airtime_bss_limit" "$N"
+			fi
+		;;
+	esac
 
 	append "$var" "$bss_conf" "$N"
 	return 0
